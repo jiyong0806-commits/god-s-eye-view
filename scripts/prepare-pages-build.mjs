@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const client = path.join(root, 'dist/client');
 const output = path.join(root, 'dist/pages');
-for (const name of ['index.html', 'app-icon.png', 'fonts/PretendardVariable.woff2', 'media/earth-horizon.webp']) {
+for (const name of ['index.html', 'app-icon.png', 'fonts/PretendardVariable.woff2',
+  'media/earth-horizon.webp', '_headers']) {
   if (!existsSync(path.join(client, name))) throw new Error(`Missing built asset: ${name}`);
 }
 if (/src=["']\/(?:src\/|apps\/web\/)/.test(readFileSync(path.join(client, 'index.html'), 'utf8'))) {

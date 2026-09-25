@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-25T02:59:58.515Z",
+  "generatedAt": "2026-09-25T03:06:38.452Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -518,8 +518,8 @@
     },
     {
       "file": "PERFORMANCE-SECURITY-2026-09-25.md",
-      "sha256": "4f27ee7ce4b6424f94839b5e4eccdda1b633e9d75f8b775fe1554c8174ff779c",
-      "bytes": 2834
+      "sha256": "44f5add400bcbec57a60247d84b97604e09f34619ce579328640f584eee16045",
+      "bytes": 3023
     },
     {
       "file": "pinokio/_ENVIRONMENT",
@@ -555,6 +555,11 @@
       "file": "pinokio/update.js",
       "sha256": "0f951e46b6e4161c9f5466f761de323e1911dbe2cbaf9b987f954772a20ae2d4",
       "bytes": 1076
+    },
+    {
+      "file": "public/_headers",
+      "sha256": "728129fb3ccd51923a246e703b528cc18b7983f840eeb6e5cd5ddfe38c67a2a7",
+      "bytes": 189
     },
     {
       "file": "public/app-icon.png",
@@ -883,8 +888,8 @@
     },
     {
       "file": "scripts/prepare-pages-build.mjs",
-      "sha256": "06ab799b0dae9519296c9b1ba88ea4385cf85ff68f034c7a7469ccc373e01be8",
-      "bytes": 2053
+      "sha256": "5a423d0cabaaa4d9ea8334f102b2ea5b7e5ffd0722af7ea684a0a3cd65e16220",
+      "bytes": 2067
     },
     {
       "file": "scripts/prepare-sites-build.mjs",
