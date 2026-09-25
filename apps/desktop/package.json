@@ -1,0 +1,41 @@
+{
+  "name": "gods-eye-view-desktop",
+  "version": "0.2.0",
+  "private": true,
+  "description": "GOD'S EYE VIEW desktop map by PLASMA",
+  "author": "PLASMA",
+  "license": "MIT",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test policy.test.cjs",
+    "build:win": "electron-builder --win portable --x64 --publish never",
+    "build:mac": "electron-builder --mac dmg --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.4.5",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.plasma.godseyeview",
+    "productName": "GODS EYE VIEW",
+    "asar": true,
+    "directories": { "output": "../../output/desktop" },
+    "files": ["main.cjs", "policy.cjs", "package.json"],
+    "extraResources": [{ "from": "../../dist/client", "to": "web" }],
+    "win": {
+      "target": ["portable"],
+      "icon": "../../public/app-icon.png",
+      "signAndEditExecutable": false,
+      "artifactName": "GODS-EYE-VIEW-${version}-Windows-${arch}.${ext}"
+    },
+    "portable": { "requestExecutionLevel": "user" },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.reference",
+      "icon": "../../public/app-icon.png",
+      "hardenedRuntime": true,
+      "artifactName": "GODS-EYE-VIEW-${version}-macOS-${arch}.${ext}"
+    }
+  }
+}

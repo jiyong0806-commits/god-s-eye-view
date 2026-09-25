@@ -1,0 +1,6 @@
+interface:
+  display_name: "PLASMA Source Delivery"
+  short_description: "Ship source, GitHub and Cloudflare integration files"
+  default_prompt: "Use $plasma-source-delivery to deliver this code change with editable source, GitHub-ready files, Cloudflare configuration and project-owned plugin integrations."
+policy:
+  allow_implicit_invocation: true

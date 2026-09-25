@@ -1,0 +1,12 @@
+{
+  "name": "godseyeview",
+  "pages_build_output_dir": "dist/pages",
+  "compatibility_date": "2026-09-24",
+  "d1_databases": [{ "binding": "PROVIDER_DB", "database_name": "gev-provider-usage", "database_id": "aef536b9-662c-47c8-ad53-e6aa31acaa1f", "migrations_dir": "migrations" }],
+  "vars": {
+    "GEV_RAINVIEWER_PERMITTED": "0",
+    "GEV_TTS_ENABLED": "0",
+    "TOMTOM_DAILY_BUDGET": "500",
+    "ELEVENLABS_DAILY_BUDGET": "50"
+  }
+}

@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GOD'S EYE VIEW</title>
+  <meta name="theme-color" content="#020712" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="GOD'S EYE VIEW" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="/app-icon.png" />
+  <link rel="apple-touch-icon" href="/app-icon.png" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <div id="world-overlay-root" aria-hidden="true">
+    <canvas id="world-overlay-canvas"></canvas>
+  </div>
+  <div id="world-overlay-actions" class="world-overlay-accessibility" role="region" aria-label="Visible map targets">
+    <div id="world-overlay-action-list"></div>
+    <div id="world-overlay-status" role="status" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <!-- Title -->
+  <div id="title-bar">
+    <div class="title-glow"></div>
+    <h1><span class="title-logo brand-logo" data-logo-gaze data-logo-src="/logo.svg" aria-hidden="true"><img src="/logo.svg" alt="" /></span> <span>GOD'S EYE <span class="title-accent">VIEW</span></span></h1>
+    <p id="map-source-subtitle" class="subtitle">지도 소스 확인 중</p>
+  </div>
+
+  <!-- Style indicator -->
+  <div id="style-indicator">
+    <span class="indicator-label">현재 스타일</span>
+    <span class="indicator-value" id="active-style-name">일반</span>
+  </div>
+
+  <!-- Top-center camera and share actions -->
+  <nav id="top-center-actions" aria-label="지도 동작">
+    <a href="/home/" title="God Flow 홈" aria-label="God Flow 홈" style="display:flex;align-items:center;padding:8px;color:inherit">God Flow</a>
+    <button id="refresh-map-data" type="button" aria-label="지도와 활성 레이어 업데이트" title="지도와 활성 레이어 업데이트">
+      <span class="material-symbols-outlined" aria-hidden="true">refresh</span>
+    </button>
+    <button id="clear-selected-layers" type="button" aria-label="선택한 데이터 레이어 끄기" title="선택한 데이터 레이어 끄기">
+      <span class="material-symbols-outlined" aria-hidden="true">layers_clear</span>
+    </button>
+    <button id="share-btn" type="button" aria-label="공유 링크 복사" title="공유 링크 복사">
+      <span class="share-icon" aria-hidden="true">&#x1F517;</span>
+    </button>
+    <button id="reset-globe-view" type="button" aria-label="전체 지구 보기로 초기화" title="전체 지구 보기로 초기화">
+      <span class="material-symbols-outlined" aria-hidden="true">public</span>
+    </button>
+  </nav>
+  <div id="global-loading-status" role="status" aria-live="polite" aria-atomic="true" hidden>
+    <span id="global-loading-label">실시간 데이터 로딩 중</span>
+    <span id="global-loading-detail"></span>
+  </div>
+  <div id="traffic-sync-chip" aria-live="polite">
+    <span id="traffic-sync-label">도로망 동기화 중</span>
+    <span id="traffic-sync-progress">0%</span>
+  </div>
+  <div id="cctv-sync-chip" aria-live="polite">
+    <span id="cctv-sync-label">프레임 로딩 중</span>
+    <span id="cctv-sync-progress">0/0</span>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Safe frame guides for recording composition -->
+  <div id="safe-frame-overlay">
+    <div id="safe-frame-box"></div>
+  </div>
+
+  <!-- Aircraft first-person view. It can be entered from the visible view switcher. -->
+  <section id="cockpit-hud" aria-label="Aircraft cockpit view" hidden>
+    <div class="cockpit-visor-shell" aria-hidden="true">
+      <div class="cockpit-roll-arc">
+        <span style="--slot:-3;--depth:3">−30</span>
+        <span style="--slot:-2;--depth:2">−20</span>
+        <span style="--slot:-1;--depth:1">−10</span>
+        <span class="active" style="--slot:0;--depth:0">0</span>
+        <span style="--slot:1;--depth:1">+10</span>
+        <span style="--slot:2;--depth:2">+20</span>
+        <span style="--slot:3;--depth:3">+30</span>
+      </div>
+      <div class="cockpit-pitch-rail cockpit-pitch-rail-left">
+        <span>+20</span><span>+10</span><span class="active">00</span><span>−10</span><span>−20</span>
+      </div>
+      <div class="cockpit-pitch-rail cockpit-pitch-rail-right">
+        <span>+20</span><span>+10</span><span class="active">00</span><span>−10</span><span>−20</span>
+      </div>
+      <div class="cockpit-horizon-guide">
+        <span></span><small>LEVEL</small><span></span>
+      </div>
+      <div id="cockpit-route-direction" class="cockpit-route-direction" hidden aria-label="Estimated destination direction">
+        <svg class="cockpit-route-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 2 4.58 19.93c-.34.83.51 1.63 1.31 1.27L12 18.47l6.11 2.73c.8.36 1.65-.44 1.31-1.27L12 2Z" />
+        </svg>
+        <small id="cockpit-route-direction-label">DEST ---°</small>
+      </div>
+      <div class="cockpit-visor-status cockpit-visor-status-left">광학 평면 · 01</div>
+      <div class="cockpit-visor-status cockpit-visor-status-right">바이저 잠금 · 활성</div>
+    </div>
+    <div id="cockpit-speed-rim" class="cockpit-altitude-rim cockpit-speed-rim">
+      <span class="cockpit-altitude-rim-label">GROUND SPEED · KTS</span>
+      <div class="cockpit-altitude-rim-rail"></div>
+      <div class="cockpit-altitude-rim-scale">
+        <span data-speed-rim-tick><b></b><i></i></span>
+        <span data-speed-rim-tick><b></b><i></i></span>
+        <span data-speed-rim-tick><b></b><i></i></span>
+        <span data-speed-rim-tick><b></b><i></i></span>
+        <span data-speed-rim-tick><b></b><i></i></span>
+        <span data-speed-rim-tick><b></b><i></i></span>
+        <span data-speed-rim-tick><b></b><i></i></span>
+        <span data-speed-rim-tick><b></b><i></i></span>
+        <span data-speed-rim-tick><b></b><i></i></span>
+      </div>
+      <div class="cockpit-altitude-rim-pointer">
+        <span class="material-symbols-outlined">arrow_right</span>
+        <strong id="cockpit-speed-rim-value">---</strong>
+      </div>
+    </div>
+    <div id="cockpit-altitude-rim" class="cockpit-altitude-rim">
+      <span class="cockpit-altitude-rim-label">ALTITUDE · FT</span>
+      <div class="cockpit-altitude-rim-rail"></div>
+      <div class="cockpit-altitude-rim-scale">
+        <span data-altitude-rim-tick><b></b><i></i></span>
+        <span data-altitude-rim-tick><b></b><i></i></span>
+        <span data-altitude-rim-tick><b></b><i></i></span>
+        <span data-altitude-rim-tick><b></b><i></i></span>
+        <span data-altitude-rim-tick><b></b><i></i></span>
+        <span data-altitude-rim-tick><b></b><i></i></span>
+        <span data-altitude-rim-tick><b></b><i></i></span>
+        <span data-altitude-rim-tick><b></b><i></i></span>
+        <span data-altitude-rim-tick><b></b><i></i></span>
+      </div>
+      <div class="cockpit-altitude-rim-pointer">
+        <strong id="cockpit-altitude-rim-value">-----</strong>
+        <span class="material-symbols-outlined">arrow_left</span>
+      </div>
+    </div>
+    <div class="cockpit-topline">
+      <div>
+        <span class="cockpit-kicker">1인칭</span>
+        <strong id="cockpit-callsign">항공기</strong>
+        <span id="cockpit-aircraft-meta" class="cockpit-aircraft-meta">실시간 추적 · 항로 정렬</span>
+      </div>
+      <div class="cockpit-vision-controls" role="group" aria-label="Cockpit vision style">
+        <button id="cockpit-vision-previous" class="cockpit-vision-nav" type="button" aria-label="Previous cockpit vision style" title="Previous vision style">
+          <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+          <small>이전</small>
+        </button>
+        <button id="cockpit-vision-current" class="cockpit-vision-current" type="button" data-cockpit-vision="optical" aria-label="Current cockpit vision style: NORMAL. Activate for next style." title="Current style: NORMAL — click for next">
+          <small>현재</small>
+          <strong id="cockpit-vision-current-label" aria-live="polite">일반</strong>
+        </button>
+        <button id="cockpit-vision-next" class="cockpit-vision-nav" type="button" aria-label="Next cockpit vision style" title="Next vision style">
+          <small>다음</small>
+          <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+        </button>
+      </div>
+    </div>
+    <div class="cockpit-reticle material-symbols-outlined" aria-hidden="true">my_location</div>
+    <div class="cockpit-compass" aria-label="Current aircraft heading">
+      <div class="cockpit-instrument-row">
+        <div class="cockpit-readout cockpit-speed">
+          <span class="cockpit-readout-label">GROUND SPEED</span>
+          <strong id="cockpit-speed-value">---</strong>
+          <span class="cockpit-readout-unit">KTS</span>
+        </div>
+        <div class="cockpit-heading-value"><span id="cockpit-heading-value">---</span><small>°</small></div>
+        <div class="cockpit-readout cockpit-altitude">
+          <span class="cockpit-readout-label">ALTITUDE</span>
+          <strong id="cockpit-altitude-value">-----</strong>
+          <span class="cockpit-readout-unit">FT</span>
+        </div>
+      </div>
+      <span class="cockpit-heading-caret material-symbols-outlined" aria-hidden="true">arrow_drop_down</span>
+      <div class="cockpit-compass-tape" id="cockpit-compass-tape" aria-hidden="true"></div>
+    </div>
+    <div class="cockpit-position-readout">
+      <span id="cockpit-clock">--:--:--Z</span>
+      <span id="cockpit-position">--° · --°</span>
+    </div>
+    <aside id="cockpit-context" class="cockpit-context-window" aria-label="Contact cockpit summary" hidden>
+      <header class="cockpit-context-header">
+        <div>
+        <span class="cockpit-context-kicker">접촉</span>
+        <strong id="cockpit-context-subject">접촉 · 250 KM</strong>
+        </div>
+        <nav class="cockpit-context-actions" aria-label="Contact navigation">
+          <button id="cockpit-context-previous" type="button" aria-label="Previous — prior visited contact in the 250 km window" title="Previous — prior visited contact in the 250 km window">
+            <span class="material-symbols-outlined" aria-hidden="true">skip_previous</span>
+          </button>
+          <button id="cockpit-context-next" type="button" aria-label="Next — nearest unvisited contact in the 250 km window" title="Next — nearest unvisited contact in the 250 km window">
+            <span class="material-symbols-outlined" aria-hidden="true">skip_next</span>
+          </button>
+          <button id="cockpit-context-toggle" type="button" aria-label="Collapse Contact panel" aria-expanded="true" title="Collapse contact panel">
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+          </button>
+        </nav>
+        <span class="cockpit-context-qualifier">상황 전용</span>
+      </header>
+      <div class="cockpit-context-cohorts" role="list" aria-label="Nearby cohort counts">
+        <div role="listitem" data-context-cohort="flights"><span>FLT</span><strong>—</strong><small>OpenSky</small></div>
+        <div role="listitem" data-context-cohort="military"><span>MIL</span><strong>—</strong><small>adsb.lol</small></div>
+        <div role="listitem" data-context-cohort="ais-live-vessels"><span>AIS</span><strong>—</strong><small>AISStream</small></div>
+        <div role="listitem" data-context-cohort="military-installations"><span>SITE</span><strong>—</strong><small>OpenStreetMap</small></div>
+      </div>
+      <div class="cockpit-context-nearest">
+        <span id="cockpit-context-direction" class="material-symbols-outlined" aria-hidden="true">navigation</span>
+        <div>
+          <small>가장 가까운 관측/지도 데이터</small>
+          <strong id="cockpit-context-nearest-label">표시할 예시 없음</strong>
+        </div>
+        <span id="cockpit-context-bearing">—</span>
+        <span id="cockpit-context-distance">—</span>
+      </div>
+      <footer class="cockpit-context-footer">
+        <span id="cockpit-context-uncertainty">사용 가능한 공개 입력만 표시 · 안전 보장 아님</span>
+        <button
+          id="cockpit-weather-toggle"
+          class="cockpit-context-weather"
+          type="button"
+          aria-label="Enable cockpit weather effects"
+          aria-pressed="false"
+          title="Enable cockpit weather effects"
+        >
+          <span>WX</span>
+          <strong id="cockpit-weather-state">꺼짐</strong>
+        </button>
+        <time id="cockpit-context-updated">--:--:--Z</time>
+      </footer>
+    </aside>
+    <aside id="cockpit-signal-stream" class="cockpit-signal-window" aria-label="Cockpit briefing carousel" hidden>
+      <section id="cockpit-route" class="cockpit-route-card" aria-label="Estimated flight plan" hidden>
+        <div class="cockpit-route-heading">
+          <span class="cockpit-route-kicker">추정 비행 계획</span>
+          <small id="cockpit-route-status">경로 데이터 없음</small>
+        </div>
+        <div class="cockpit-route-endpoints">
+          <div class="cockpit-route-airport">
+            <span>출발</span>
+            <strong id="cockpit-route-from">알 수 없음</strong>
+          </div>
+          <span class="cockpit-route-arrow material-symbols-outlined" aria-hidden="true">east</span>
+          <div class="cockpit-route-airport">
+            <span>도착</span>
+            <strong id="cockpit-route-to">알 수 없음</strong>
+          </div>
+        </div>
+      </section>
+      <header class="cockpit-signal-header">
+        <div class="cockpit-brief-heading">
+          <span id="cockpit-brief-kicker" class="cockpit-signal-kicker"><i aria-hidden="true"></i> LIVE SIGNALS</span>
+          <strong id="cockpit-brief-subtitle">관측/지도 신호</strong>
+        </div>
+        <nav class="cockpit-brief-actions" aria-label="Cockpit briefing controls">
+          <button id="cockpit-brief-previous" type="button" aria-label="Previous briefing page" title="Previous briefing page">
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+          </button>
+          <span id="cockpit-brief-position" aria-live="polite">1 / 3</span>
+          <button id="cockpit-brief-next" type="button" aria-label="Next briefing page" title="Next briefing page">
+            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+          </button>
+          <button
+            id="cockpit-brief-auto"
+            type="button"
+            aria-label="CYCLE OFF"
+            aria-pressed="false"
+            title="Cycle briefing pages automatically every 9 seconds (Signals → News → Local). Pauses while you hover or focus the panel. Live signal data refreshes continuously either way."
+          >순환 꺼짐</button>
+          <button id="cockpit-signal-toggle" type="button" aria-label="Collapse cockpit briefing panel" aria-expanded="true" title="Collapse briefing panel">
+            <span class="material-symbols-outlined" aria-hidden="true">right_panel_close</span>
+          </button>
+        </nav>
+      </header>
+      <div class="cockpit-brief-stage">
+        <section data-cockpit-brief-page="signals" aria-label="Live signals">
+          <ol id="cockpit-signal-list" class="cockpit-signal-list" aria-live="polite"></ol>
+        </section>
+        <section data-cockpit-brief-page="news" aria-label="Latest regional news" hidden>
+          <div id="cockpit-news-status" class="cockpit-brief-status">지역 뉴스 불러오는 중</div>
+          <ol id="cockpit-news-list" class="cockpit-news-list" aria-live="polite"></ol>
+        </section>
+        <section data-cockpit-brief-page="local" aria-label="Location-based information" hidden>
+          <div class="cockpit-local-place">
+            <strong id="cockpit-local-place">지역 확인 중</strong>
+            <small id="cockpit-local-coordinates">--</small>
+          </div>
+          <div class="cockpit-local-grid">
+            <div><span>기온</span><strong id="cockpit-local-temperature">—</strong><small>OPEN-METEO</small></div>
+            <div><span>바람</span><strong id="cockpit-local-wind">—</strong><small id="cockpit-local-wind-direction">—</small></div>
+            <div><span>하늘</span><strong id="cockpit-local-condition">알 수 없음</strong><small id="cockpit-local-cloud">—</small></div>
+            <div><span>강수</span><strong id="cockpit-local-precipitation">—</strong><small>MM</small></div>
+          </div>
+          <a class="cockpit-weather-credit" href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo.com</a>
+        </section>
+      </div>
+      <footer class="cockpit-signal-footer">
+        <span id="cockpit-brief-source">출처 기반 이벤트 · 합성 뉴스 없음</span>
+        <nav class="cockpit-brief-tabs" aria-label="Cockpit briefing pages">
+          <button type="button" data-cockpit-brief-index="0" aria-label="실시간 신호 보기" aria-current="true">신호</button>
+          <button type="button" data-cockpit-brief-index="1" aria-label="지역 뉴스 보기">뉴스</button>
+          <button type="button" data-cockpit-brief-index="2" aria-label="지역 정보 보기">지역</button>
+        </nav>
+      </footer>
+    </aside>
+    <aside id="cockpit-utility-controls" class="cockpit-utility-controls" aria-label="Cockpit display and Radio controls">
+      <div class="cockpit-utility-control">
+        <div class="cockpit-utility-launcher" data-cockpit-launcher="display">
+          <span>화면</span>
+          <span class="cockpit-utility-divider" aria-hidden="true"></span>
+          <button id="cockpit-display-toggle-btn" class="cockpit-utility-glyph" type="button" aria-expanded="false" aria-controls="cockpit-display-panel" aria-label="콕핏 화면 옵션 펼치기" title="콕핏 화면 옵션 펼치기">◀</button>
+        </div>
+        <div id="cockpit-display-panel" class="cockpit-utility-popover" role="group" aria-label="Cockpit display options" hidden>
+          <div class="cockpit-display-slot" data-cockpit-display-slot="hud"></div>
+          <div class="cockpit-display-slot" data-cockpit-display-slot="detection"></div>
+          <div class="cockpit-display-slot" data-cockpit-display-slot="parameters"></div>
+          <div class="cockpit-display-slot" data-cockpit-display-slot="models3d"></div>
+        </div>
+      </div>
+      <div class="cockpit-utility-control">
+        <div class="cockpit-utility-launcher" data-cockpit-launcher="radio">
+          <span>RADIO</span>
+          <span class="cockpit-utility-divider" aria-hidden="true"></span>
+          <button id="cockpit-radio-toggle-btn" class="cockpit-utility-glyph" type="button" aria-expanded="false" aria-controls="cockpit-radio-panel" aria-label="Expand Cockpit Radio controls" title="Expand Cockpit Radio controls">◀</button>
+        </div>
+        <div id="cockpit-radio-panel" class="cockpit-utility-popover cockpit-radio-compact" role="group" aria-label="Cockpit compact Radio controls" hidden>
+          <strong id="cockpit-radio-station" class="cockpit-radio-station">준비됨</strong>
+          <button id="cockpit-radio-enable-btn" class="panel-layer-toggle" type="button" aria-pressed="false">켜기</button>
+          <div class="cockpit-radio-transport">
+            <button id="cockpit-radio-prev-btn" type="button" aria-label="Previous filtered radio station" disabled>◀◀</button>
+            <button id="cockpit-radio-play-btn" type="button" aria-label="Play selected radio station" disabled>▶</button>
+            <button id="cockpit-radio-next-btn" type="button" aria-label="Next filtered radio station" disabled>▶▶</button>
+          </div>
+          <label class="cockpit-radio-volume" for="cockpit-radio-volume">
+            <span>볼륨</span>
+            <input id="cockpit-radio-volume" class="gev-quantitative-slider" type="range" min="0" max="100" value="80" aria-label="Cockpit Radio volume" disabled />
+            <output id="cockpit-radio-volume-value" class="gev-slider-value" for="cockpit-radio-volume">80%</output>
+          </label>
+        </div>
+      </div>
+    </aside>
+    <div class="cockpit-help">ESC 종료 <span>·</span> C 전환</div>
+  </section>
+
+  <nav id="view-switcher" aria-label="View switcher">
+    <button id="cockpit-reset-globe" type="button" aria-label="Reset cockpit to full globe view" title="Exit cockpit and return to full globe view" hidden>
+      <span class="material-symbols-outlined" aria-hidden="true">public</span>
+      <span>초기화</span>
+    </button>
+    <button id="map-view-switch" type="button" aria-label="Exit cockpit view" aria-keyshortcuts="Escape C" title="Exit cockpit view" hidden>
+      <span class="material-symbols-outlined" aria-hidden="true">close_fullscreen</span>
+      <span>조종석 종료</span>
+    </button>
+  </nav>
+
+  <!-- Post-processing toggles (top-right) -->
+  <div id="pp-toggles" class="panel-collapsible collapsed" data-panel-id="pp-toggles">
+    <div class="compact pp-header-row">
+      <span class="pp-header-label">화면</span>
+      <span class="panel-divider" aria-hidden="true"></span>
+      <button class="panel-collapse-btn pp-collapse-btn" data-collapse-target="pp-toggles" title="Collapse panel">&#x25C0;</button>
+    </div>
+    <div class="pp-toggle-group">
+      <button class="pp-toggle-btn" id="hud-toggle" title="Intelligence HUD (H)">
+        <span class="pp-icon">&#x25CE;</span>
+        <span class="pp-label">HUD</span>
+      </button>
+      <div class="pp-slider-row" id="hud-layout-row">
+        <span class="pp-slider-mini-label">배치</span>
+        <select id="hud-layout-select" class="pp-select" aria-label="HUD layout">
+          <option value="tactical">전술</option>
+          <option value="operator">오퍼레이터</option>
+          <option value="minimal">최소</option>
+        </select>
+      </div>
+    </div>
+    <div class="pp-toggle-group">
+      <button class="pp-toggle-btn" id="detection-toggle" title="Detection Overlay (D)" aria-label="Detection overlay" aria-pressed="false">
+        <span class="pp-icon">&#x25A3;</span>
+        <span class="pp-label">DETECT</span>
+      </button>
+      <div class="pp-slider-row detection-slider-row" id="detection-slider-row">
+        <label class="pp-slider-mini-label" for="detection-density-slider">밀도</label>
+        <input type="range" class="pp-slider" id="detection-density-slider" min="0" max="100" step="25" value="50" aria-label="Detection label density" />
+        <span class="pp-slider-value" id="detection-density-value">50%</span>
+      </div>
+      <div class="pp-slider-row detection-allocation-row" id="detection-allocation-row">
+        <span class="pp-slider-mini-label">배치</span>
+        <div class="pp-mode-seg detection-allocation-seg" role="radiogroup" aria-label="Detection label allocation">
+          <button class="pp-mode-btn active" id="detection-allocation-elastic" data-allocation="ELASTIC" role="radio" aria-checked="true">탄력</button>
+          <button class="pp-mode-btn" id="detection-allocation-weighted" data-allocation="WEIGHTED" role="radio" aria-checked="false">가중</button>
+        </div>
+      </div>
+      <div class="pp-slider-row detection-fade-row" id="detection-fade-row">
+        <label class="pp-slider-mini-label" for="detection-fade-slider">Fade</label>
+        <input type="range" class="pp-slider" id="detection-fade-slider" min="0" max="40" step="1" value="7" aria-label="Detection fade distance" title="World-overlay fade distance outside the keyhole as a percentage of its radius" />
+        <span class="pp-slider-value" id="detection-fade-value">7%</span>
+      </div>
+      <div class="pp-slider-row detection-opacity-row" id="detection-opacity-row">
+        <label class="pp-slider-mini-label" for="detection-opacity-slider">Outside</label>
+        <input type="range" class="pp-slider" id="detection-opacity-slider" min="0" max="100" step="1" value="1" aria-label="Detection opacity outside the keyhole" title="World-overlay label and card opacity beyond the fade distance" />
+        <span class="pp-slider-value" id="detection-opacity-value">1%</span>
+      </div>
+    </div>
+    <!-- The one shared preset-parameter surface is inserted here at runtime. -->
+    <div id="param-slider-panel">
+      <div class="param-panel-header">
+        <span class="param-panel-title">PARAMETERS</span>
+        <span class="param-panel-divider"></span>
+        <button class="panel-collapse-btn" id="param-panel-collapse-btn" data-collapse-target="param-slider-panel" title="Collapse panel">−</button>
+      </div>
+      <div id="param-sliders"></div>
+    </div>
+    <div class="pp-toggle-group">
+      <!-- 3D aircraft is DEFAULT-ON in Proximity (owner directive 2026-08-22), so the
+           button ships lit and the mode row ships open — the same markup-carries-the-default
+           convention as #scope-toggle. ui.js re-syncs both from durable layer state, which
+           is what flips them back for a share link or a stored session carrying 3D off. -->
+      <button class="pp-toggle-btn active" id="models3d-toggle" aria-pressed="true" title="3D aircraft — flat icons zoomed out, 3D models up close">
+        <span class="pp-icon">&#x2708;</span>
+        <span class="pp-label">3D</span>
+      </button>
+      <div class="pp-slider-row visible" id="models3d-mode-row">
+        <span class="pp-slider-mini-label">모델</span>
+        <div class="pp-mode-seg" role="radiogroup" aria-label="3D model coverage">
+          <button class="pp-mode-btn active" id="models3d-mode-proximity" data-mode="proximity" role="radio" aria-checked="true">근접</button>
+          <button class="pp-mode-btn" id="models3d-mode-all" data-mode="all" role="radio" aria-checked="false">전체</button>
+        </div>
+      </div>
+    </div>
+    <div class="pp-toggle-group">
+      <button class="pp-toggle-btn" id="open-buildings-toggle" aria-pressed="false" title="무료 3D 건물 레이어를 켭니다. 검은 블록이 보이면 다시 끄세요.">
+        <span class="pp-icon material-symbols-outlined" aria-hidden="true">apartment</span>
+        <span class="pp-label">건물</span>
+      </button>
+    </div>
+    <div class="pp-toggle-group">
+      <button class="pp-toggle-btn active" id="scope-toggle" title="Scope — the circular viewport mask" aria-pressed="true">
+        <span class="pp-icon material-symbols-outlined" aria-hidden="true">adjust</span>
+        <span class="pp-label">Scope</span>
+      </button>
+      <div class="pp-slider-row visible" id="scope-slider-row">
+        <span class="pp-slider-mini-label">Feather</span>
+        <!-- Feather starts at an 11% soft scope-mask edge (owner final lock
+             2026-08-24, superseding the 08-22 hard-crop and 08-23 8% rulings);
+             mirrors SCOPE_FEATHER_RATIO_DEFAULT in src/scopeMask.js. Feather
+             softens the black mask edge; label fading is the separate Fade
+             slider. -->
+        <input type="range" class="pp-slider" id="scope-feather-slider" min="0" max="100" value="11" title="Scope edge feather as a percentage of the keyhole radius" />
+        <span class="pp-slider-value" id="scope-feather-value">11%</span>
+      </div>
+    </div>
+    <div class="pp-toggle-group">
+      <button class="pp-toggle-btn" id="celestial-toggle" title="Celestial ring — reveal the full globe" aria-pressed="false">
+        <span class="pp-icon material-symbols-outlined" aria-hidden="true">flare</span>
+        <span class="pp-label">Celestial</span>
+      </button>
+    </div>
+    <button class="pp-toggle-btn" id="clean-view-toggle" title="Hide UI chrome">
+      <span class="pp-icon">&#x25A1;</span>
+      <span class="pp-label">Clean UI</span>
+    </button>
+    <div class="pp-toggle-group">
+      <button class="pp-toggle-btn" id="bloom-toggle" title="Bloom / Glow">
+        <span class="pp-icon">&#x2728;</span>
+        <span class="pp-label">Bloom</span>
+      </button>
+      <div class="pp-slider-row" id="bloom-slider-row">
+        <input type="range" class="pp-slider" id="bloom-intensity-slider" min="0" max="200" value="0" />
+        <span class="pp-slider-value" id="bloom-intensity-value">0%</span>
+      </div>
+    </div>
+    <div class="pp-toggle-group">
+      <button class="pp-toggle-btn" id="sharpen-toggle" title="Sharpening">
+        <span class="pp-icon">&#x1F50D;</span>
+        <span class="pp-label">Sharpen</span>
+      </button>
+      <div class="pp-slider-row" id="sharpen-slider-row">
+        <input type="range" class="pp-slider" id="sharpen-intensity-slider" min="0" max="100" value="49" />
+        <span class="pp-slider-value" id="sharpen-intensity-value">49%</span>
+      </div>
+    </div>
+  </div>
+      <button id="clean-view-exit" title="UI 컨트롤로 돌아가기">클린 뷰 종료</button>
+
+  <!-- Unified bottom command dock: locations, voice (injected at runtime), visual presets -->
+  <div id="command-dock" aria-label="Navigation, voice, and visual preset controls">
+  <!-- Control panel -->
+  <div id="control-panel" class="panel-collapsible collapsed">
+    <div class="panel-glow"></div>
+    <div class="panel-inner">
+      <button id="control-panel-toggle" class="panel-header dock-tray-toggle" type="button"
+        data-dock-toggle-target="control-panel" aria-expanded="false"
+        aria-controls="control-panel-popover" aria-label="화면 프리셋 펼치기">
+        <span class="panel-title"><span class="dock-label-icon dock-label-icon-presets" aria-hidden="true"></span>화면 프리셋</span>
+        <span class="panel-divider"></span>
+      </button>
+      <div id="control-panel-popover" class="dock-popover-content">
+      <button class="dock-pin-btn" data-pin-target="control-panel" type="button" aria-label="화면 프리셋 고정" aria-pressed="false" title="화면 프리셋을 계속 열어두기"><img src="/pin.svg" alt="" /></button>
+      <div id="style-buttons" class="button-grid">
+        <button class="style-btn active" data-style="normal" title="필터 없이 지구를 표시합니다.">
+          <span class="btn-icon">◯</span>
+          <span class="btn-label">일반</span>
+          <span class="btn-key">1</span>
+        </button>
+        <button class="style-btn" data-style="retro" title="초록 CRT 스캔라인과 화면 곡률을 적용합니다.">
+          <span class="btn-icon">▦</span>
+          <span class="btn-label">CRT</span>
+          <span class="btn-key">2</span>
+        </button>
+        <button class="style-btn" data-style="surveillance" title="야간투시경처럼 초록 증폭과 원형 비네트를 적용합니다.">
+          <span class="btn-icon">🌙</span>
+          <span class="btn-label">NVG</span>
+          <span class="btn-key">3</span>
+        </button>
+        <button class="style-btn" data-style="thermal" title="FLTR/FLIR 열화상 대비를 적용합니다. Ironbow를 올리면 컬러 열화상처럼 보입니다.">
+          <span class="btn-icon">🌡️</span>
+          <span class="btn-label">FLTR</span>
+          <span class="btn-key">4</span>
+        </button>
+        <button class="style-btn" data-style="anime" title="밝은 셀 셰이딩 색감과 외곽선을 적용합니다.">
+          <span class="btn-icon">✦</span>
+          <span class="btn-label">애니</span>
+          <span class="btn-key">5</span>
+        </button>
+        <button class="style-btn" data-style="noir" title="고대비 흑백 필름 톤을 적용합니다.">
+          <span class="btn-icon">◐</span>
+          <span class="btn-label">흑백</span>
+          <span class="btn-key">6</span>
+        </button>
+        <button class="style-btn" data-style="snow" title="차갑고 눈 덮인 화이트아웃 효과를 적용합니다.">
+          <span class="btn-icon">❄</span>
+          <span class="btn-label">눈</span>
+          <span class="btn-key">7</span>
+        </button>
+      </div>
+      <section class="map-source-section" aria-labelledby="map-source-label">
+        <div class="map-source-heading">
+          <span id="map-source-label">지도 소스</span>
+          <span id="map-stack-status" class="pp-stack-status" aria-live="polite">3D</span>
+        </div>
+        <div id="map-stack-chips" class="map-stack-chip-row" role="group" aria-label="지도 소스"></div>
+      </section>
+      </div>
+      <div id="style-mini-status" class="panel-mini-status" aria-live="polite">
+        <span class="panel-mini-label">화면</span>
+        <span id="style-mini-value" class="panel-mini-value">NORMAL</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="plasma-grok-avatar" data-state="idle" aria-label="Plasma 음성 상태" aria-live="polite">
+    <div id="plasma-voice-avatar" title="Plasma 음성 상태">
+      <span class="plasma-avatar-face" aria-hidden="true"><i></i><i></i></span>
+      <span class="plasma-avatar-state">대기</span>
+    </div>
+    <div id="plasma-voice-caption" hidden><small>한국어 자막</small><p></p></div>
+  </div>
+
+  <!-- Location bar -->
+  <div id="location-bar" class="panel-collapsible collapsed">
+    <div class="panel-glow"></div>
+    <div class="location-inner">
+      <div class="location-toolbar">
+        <span class="location-toolbar-label"><span class="dock-label-icon dock-label-icon-location" aria-hidden="true"></span>위치</span>
+        <button class="panel-collapse-btn" data-collapse-target="location-bar" title="패널 접기">+</button>
+      </div>
+      <div id="location-mini-status" class="location-mini-status" aria-live="polite">
+        <div id="location-mini-city" class="location-mini-city">📍 위치: --</div>
+        <div id="location-mini-poi" class="location-mini-poi">랜드마크: --</div>
+      </div>
+      <div class="dock-popover-content">
+        <button class="dock-pin-btn" data-pin-target="location-bar" type="button" aria-label="위치 패널 고정" aria-pressed="false" title="위치 패널을 계속 열어두기"><img src="/pin.svg" alt="" /></button>
+        <div id="poi-row" class="poi-row-container"></div>
+        <div class="location-bar-divider" id="location-bar-divider"></div>
+        <div class="location-city-row">
+          <div id="location-pills" class="location-pills"></div>
+          <div class="location-search-wrap">
+            <button id="search-toggle" class="search-toggle-btn" title="전세계 위치 검색">
+              <span>&#x1F50E;</span>
+            </button>
+            <input type="text" id="location-search" placeholder="전세계 위치 검색..." autocomplete="off" spellcheck="false" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div id="left-panel-stack">
+  <!-- Data Layer Toggle Panel -->
+  <div id="data-panel" class="panel-collapsible collapsed active" data-panel-id="data-panel">
+    <div class="panel-glow"></div>
+    <div class="data-panel-inner">
+      <div class="panel-header">
+        <span class="panel-title">데이터 레이어</span>
+        <span class="panel-divider"></span>
+        <button class="panel-collapse-btn" data-collapse-target="data-panel" title="패널 접기">+</button>
+      </div>
+      <div id="data-toggles" class="data-toggle-list"></div>
+    </div>
+  </div>
+
+  <!-- CCTV Coverage Panel -->
+  <div id="cctv-panel" class="panel-collapsible collapsed" data-panel-id="cctv-panel">
+    <div class="panel-glow"></div>
+    <div class="cctv-panel-inner">
+      <div class="panel-header">
+        <span class="panel-title">CCTV</span>
+        <span class="panel-divider"></span>
+        <button class="panel-collapse-btn" data-collapse-target="cctv-panel" title="패널 접기">+</button>
+      </div>
+      <div id="cctv-frame-wrap" class="cctv-frame-wrap">
+        <img id="cctv-frame" alt="CCTV 피드 프레임" />
+      </div>
+      <div id="cctv-source-badge" role="status" aria-live="polite">소스 · 알 수 없음</div>
+      <div id="cctv-meta">CCTV를 켜면 주변 카메라 교차로를 불러옵니다</div>
+      <div class="cctv-controls">
+        <button id="cctv-enable-btn" class="scene-btn">CCTV 꺼짐</button>
+        <button id="cctv-nearest-btn" class="scene-btn">가까운 곳</button>
+      </div>
+      <div class="cctv-controls">
+        <button id="cctv-prev-btn" class="scene-btn">이전</button>
+        <select id="cctv-camera-select" aria-label="CCTV 카메라"></select>
+        <button id="cctv-next-btn" class="scene-btn">다음</button>
+      </div>
+      <div class="cctv-controls">
+        <button id="cctv-focus-btn" class="scene-btn">초점</button>
+        <button id="cctv-coverage-btn" class="scene-btn">커버리지 꺼짐</button>
+        <button id="cctv-auto-hop-btn" class="scene-btn">자동 이동 꺼짐</button>
+      </div>
+      <div class="cctv-controls">
+        <button id="cctv-projection-btn" class="scene-btn">투영 켜짐</button>
+        <span id="cctv-quality-chip">CAL · --</span>
+      </div>
+      <div class="cctv-calibration-block">
+        <div class="cctv-calibration-header">
+          <div class="cctv-summary-label">보정</div>
+          <button id="cctv-adjust-btn" class="scene-btn" title="월드에서 카메라를 드래그해 방향, 거리, 시야각을 조정">조정</button>
+        </div>
+        <div id="cctv-cal-readout" class="cctv-cal-readout" aria-label="Camera pose — click a value to type">
+          <button class="cctv-cal-value" data-cal-field="heading" title="방위각(나침반 °) - 클릭해서 입력">방위 --</button>
+          <button class="cctv-cal-value" data-cal-field="pitch" title="상하 각도(°) - 클릭해서 입력">피치 --</button>
+          <button class="cctv-cal-value" data-cal-field="fov" title="수평 시야각(°) - 클릭해서 입력">시야 --</button>
+          <button class="cctv-cal-value" data-cal-field="range" title="거리 / 모니터 평면 거리(m) - 클릭해서 입력">거리 --</button>
+          <button class="cctv-cal-value" data-cal-field="height" title="지면 기준 설치 높이(m) - 클릭해서 입력">높이 --</button>
+          <button class="cctv-cal-value" data-cal-field="north" title="카탈로그 위치 기준 북쪽 보정(m) - 클릭해서 입력">ΔN --</button>
+          <button class="cctv-cal-value" data-cal-field="east" title="카탈로그 위치 기준 동쪽 보정(m) - 클릭해서 입력">ΔE --</button>
+        </div>
+        <div class="cctv-controls cctv-calibration-actions">
+          <button id="cctv-calib-save-btn" class="scene-btn">보정 저장</button>
+          <button id="cctv-calib-reset-btn" class="scene-btn">보정 초기화</button>
+        </div>
+      </div>
+      <div class="cctv-summary-label">장면 요약</div>
+      <div id="cctv-summary">CCTV를 켜면 카메라 기반 장면 요약을 시작합니다.</div>
+    </div>
+  </div>
+
+  <!-- Scene Director Panel -->
+  <div id="scene-panel" class="panel-collapsible collapsed" data-panel-id="scene-panel">
+    <div class="panel-glow"></div>
+    <div class="scene-panel-inner">
+      <div class="panel-header">
+        <span class="panel-title">장면</span>
+        <span class="panel-divider"></span>
+        <button class="panel-collapse-btn" data-collapse-target="scene-panel" title="Collapse panel">+</button>
+      </div>
+      <div class="scene-controls">
+        <select id="scene-select" aria-label="Scene recipe"></select>
+        <button id="scene-new-btn" class="scene-btn">새 장면</button>
+        <button id="scene-delete-btn" class="scene-btn scene-btn-danger">삭제</button>
+      </div>
+      <div class="scene-controls">
+        <button id="scene-capture-btn" class="scene-btn">샷 캡처</button>
+        <button id="scene-update-shot-btn" class="scene-btn">샷 갱신</button>
+      </div>
+      <div id="scene-shot-list" class="scene-shot-list"></div>
+      <div class="scene-controls">
+        <button id="scene-start-btn" class="scene-btn">시작</button>
+        <button id="scene-stop-btn" class="scene-btn scene-btn-danger">정지</button>
+        <button id="scene-next-btn" class="scene-btn">다음</button>
+      </div>
+      <div class="scene-controls">
+        <button id="scene-export-btn" class="scene-btn">프리셋 내보내기</button>
+        <button id="scene-import-btn" class="scene-btn">가져오기</button>
+        <button id="scene-download-btn" class="scene-btn">실행 로그</button>
+        <input type="file" id="scene-import-file" accept="application/json,.json" hidden />
+      </div>
+      <div class="scene-progress">
+        <div id="scene-progress-fill">0%</div>
+      </div>
+      <div id="scene-status">준비됨</div>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- Global Context is deliberately independent from the left layer accordion. -->
+  <aside id="right-context-rail">
+    <div id="global-context-panel" class="panel-collapsible collapsed" data-panel-id="global-context-panel">
+      <div class="panel-glow"></div>
+      <div class="global-context-panel-inner">
+        <div class="panel-header">
+          <span class="panel-title">상황</span>
+          <span class="panel-divider"></span>
+          <div id="context-radio-dock" class="context-radio-dock">
+            <button id="context-radio-toggle-btn" class="context-radio-toggle" type="button" aria-expanded="false" aria-controls="context-radio-mini" aria-label="Open compact Radio controls" title="Open compact Radio controls">
+              <span class="material-symbols-outlined" aria-hidden="true">radio</span>
+            </button>
+            <div id="context-radio-mini" class="context-radio-mini" role="group" aria-label="Compact Radio controls" hidden>
+              <div class="context-radio-mini-heading">
+                <span>RADIO</span>
+                <strong id="context-radio-mini-station">라디오 준비됨</strong>
+                <span class="context-radio-mini-actions">
+                  <button id="context-radio-details-btn" type="button" aria-label="Open detailed Radio controls" aria-expanded="false" aria-controls="radio-panel" title="Open detailed Radio controls">
+                    <span class="material-symbols-outlined" aria-hidden="true">open_in_full</span>
+                  </button>
+                  <button id="context-radio-mini-close-btn" type="button" aria-label="Close compact Radio controls" title="Close compact Radio controls">
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                  </button>
+                </span>
+              </div>
+              <button id="context-radio-mini-enable-btn" class="panel-layer-toggle" type="button" aria-pressed="false">켜기</button>
+              <div class="context-radio-mini-transport">
+                <button id="context-radio-mini-prev-btn" type="button" aria-label="Previous filtered radio station" title="Previous station" disabled>◀◀</button>
+                <button id="context-radio-mini-play-btn" type="button" aria-label="Play selected radio station" title="Play" disabled>▶</button>
+                <button id="context-radio-mini-next-btn" type="button" aria-label="Next filtered radio station" title="Next station" disabled>▶▶</button>
+              </div>
+              <label class="context-radio-mini-volume" for="context-radio-mini-volume">
+                <span>음량</span>
+                <input id="context-radio-mini-volume" class="gev-quantitative-slider" type="range" min="0" max="100" value="80" aria-label="Compact Radio volume" disabled />
+                <output id="context-radio-mini-volume-value" class="gev-slider-value" for="context-radio-mini-volume">80%</output>
+              </label>
+            </div>
+          </div>
+          <button class="panel-collapse-btn" data-collapse-target="global-context-panel" title="Expand panel">▶</button>
+        </div>
+        <div class="global-context-modes" role="tablist" aria-label="Context mode">
+          <button id="global-context-flights-btn" class="context-mode-button" type="button" role="tab" tabindex="0" aria-selected="false" aria-controls="context-flights-view" aria-label="CONTACTS" title="Cycles the nearest contacts of whatever type you select — planes, vessels, installations. Satellites track independently.">
+            <span class="material-symbols-outlined" aria-hidden="true">radar</span>
+            <span>접촉</span>
+          </button>
+          <button id="global-context-missions-btn" class="context-mode-button" type="button" role="tab" tabindex="-1" aria-selected="false" aria-controls="context-missions-view">
+            <span class="material-symbols-outlined" aria-hidden="true">rocket_launch</span>
+            <span>우주 임무</span>
+          </button>
+        </div>
+        <div id="context-mode-standby" class="context-mode-standby">
+          <strong>상황 선택</strong>
+          <span>접촉 — 가까운 항공기 · 선박 · 시설<br>우주 임무 — 발사체와 궤도 자산</span>
+        </div>
+        <section id="context-flights-view" class="context-mode-view" role="tabpanel" aria-labelledby="global-context-flights-btn" hidden>
+          <div class="global-context-actions" aria-label="Contact Context actions">
+            <button id="cockpit-entry" type="button" hidden>
+              <span class="material-symbols-outlined" aria-hidden="true">flight</span>
+              <span>조종석</span>
+            </button>
+            <button id="installations-search-btn" class="panel-layer-toggle" type="button">주변 시설 검색</button>
+            <button id="tr3b-toggle" class="tr3b-toggle" type="button" aria-pressed="false" hidden aria-label="Reclassify tracked contact as TR-3B" title="Reclassify as TR-3B">🛸</button>
+          </div>
+          <aside id="military-awareness-panel">
+            <div class="military-awareness-standby">
+              <strong>접촉 상황 꺼짐</strong>
+              <span>접촉 대상을 선택하면 관측/지도 기반 근접 정보를 불러옵니다</span>
+            </div>
+          </aside>
+        </section>
+        <section id="context-missions-view" class="context-mode-view" role="tabpanel" aria-labelledby="global-context-missions-btn" hidden>
+          <div id="space-mission-panel-host">
+            <div id="space-mission-roster" class="space-mission-roster" aria-label="Available Space Missions">
+              <div class="space-mission-roster-header">
+                <div>
+                  <strong>사용 가능한 임무</strong>
+                  <span>확인할 임무를 선택하세요</span>
+                </div>
+                <output data-mission-roster-count>—</output>
+              </div>
+              <div class="space-mission-roster-list" data-mission-roster-list>
+                <div class="space-mission-roster-empty">30일 우주 임무 목록 로딩 중</div>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="radio-panel" class="panel-collapsible collapsed" data-panel-id="radio-panel" aria-label="Internet radio companion">
+          <div class="radio-panel-inner">
+            <div class="panel-header">
+              <span class="panel-title">라디오</span>
+              <span id="radio-layer-state" class="radio-layer-state">꺼짐</span>
+              <span class="panel-divider"></span>
+              <button class="panel-collapse-btn" data-collapse-target="radio-panel" title="Expand Radio" aria-label="Expand Radio section">+</button>
+            </div>
+            <div class="radio-directory-row">
+              <button id="radio-enable-btn" class="panel-layer-toggle" type="button" aria-pressed="false">켜기</button>
+              <label class="radio-filter-label" for="radio-filter">방송 태그</label>
+              <select id="radio-filter" aria-label="Filter stations by station tag" disabled>
+                <option value="all">All</option>
+              </select>
+            </div>
+            <div id="radio-station-card" class="radio-station-card" aria-live="polite">
+              <strong id="radio-station-name">선택한 방송 없음</strong>
+              <span id="radio-station-meta">라디오를 켠 뒤 지구본 마커를 고르거나 다음을 누르세요.</span>
+              <span id="radio-station-tags"></span>
+            </div>
+            <div id="radio-tuner" class="radio-tuner" hidden>
+              <div class="radio-tuner-header">
+                <span id="radio-tuner-band-label">방송 디렉터리</span>
+                <output id="radio-tuner-value" for="radio-tuner-slider">드래그해서 튜닝</output>
+              </div>
+              <div class="radio-tuner-dial">
+                <div class="radio-tuner-scale" aria-hidden="true"></div>
+                <div id="radio-tuner-needle" class="radio-tuner-needle" aria-hidden="true"></div>
+                <input id="radio-tuner-slider" type="range" min="0" max="0" step="1" value="0"
+                  aria-label="Tune available internet radio stations" aria-valuetext="No station available" disabled />
+              </div>
+              <div class="radio-tuner-readout">
+                <span id="radio-tuner-station">전체 · 바늘을 드래그</span>
+                <span>사용 가능한 방송에 맞춰집니다</span>
+              </div>
+            </div>
+            <div class="radio-transport" role="group" aria-label="Radio playback">
+              <button id="radio-prev-btn" type="button" aria-label="이전 방송" disabled>이전</button>
+              <button id="radio-play-btn" type="button" aria-label="선택한 방송 재생" disabled>재생</button>
+              <button id="radio-next-btn" type="button" aria-label="다음 방송" disabled>다음</button>
+              <button id="radio-stop-btn" type="button" aria-label="라디오 정지" disabled>정지</button>
+            </div>
+            <label class="radio-volume-row" for="radio-volume">
+              <span>음량</span>
+              <input id="radio-volume" class="gev-quantitative-slider" type="range" min="0" max="100" value="80" aria-label="Radio volume" />
+              <output id="radio-volume-value" class="gev-slider-value" for="radio-volume">80%</output>
+            </label>
+            <div id="radio-playback-state" class="radio-playback-state" role="status" aria-live="polite">라디오 꺼짐</div>
+            <div class="radio-links">
+              <a id="radio-station-homepage" href="#" target="_blank" rel="noopener noreferrer" hidden>방송국 사이트</a>
+              <a href="https://www.radio-browser.info/" target="_blank" rel="noopener noreferrer">디렉터리: RADIO BROWSER</a>
+            </div>
+            <p class="radio-privacy">Audio connects directly to the broadcaster after you press play. Your IP is visible to that broadcaster.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </aside>
+
+  <div id="scene-runtime"></div>
+
+  <!-- Explicit mission choice on a fresh session. Live feeds are not auto-enabled
+       until the visitor asks; shared links skip this surface entirely. It returns
+       every session until "Don't show this again" is ticked — see
+       src/firstRunExperience.js for the full show policy. -->
+  <aside id="first-run-launcher" role="dialog" aria-labelledby="first-run-title" aria-describedby="first-run-description" hidden>
+    <div class="first-run-scanline" aria-hidden="true"></div>
+    <header class="first-run-header">
+      <span class="first-run-kicker">미션 컨트롤 · 첫 실행</span>
+    </header>
+    <h2 id="first-run-title">첫 화면을 선택하세요</h2>
+    <!-- The card's one persuasive line, owner-authored and VERBATIM (2026-08-23)
+         — including the unspaced em dash. The arc it has to carry: this looks
+         like something you should not have access to → the sources are all
+         public → the data is real. Tile subcopy stays purely functional. -->
+    <p id="first-run-description">비밀 작전 화면처럼 보이지만, 공개 데이터와 실제 지도 소스를 안전하게 조합한 뷰입니다.</p>
+    <div class="first-run-choices">
+      <button type="button" data-first-run-choice="contacts">
+        <span class="material-symbols-outlined" aria-hidden="true">radar</span>
+        <span><strong>실시간 대상</strong><small>항공기, 선박, 주변 정보</small></span>
+        <span class="material-symbols-outlined first-run-arrow" aria-hidden="true">arrow_forward</span>
+      </button>
+      <button type="button" data-first-run-choice="space-missions">
+        <span class="material-symbols-outlined" aria-hidden="true">rocket_launch</span>
+        <span><strong>우주 임무</strong><small>발사, 위성, 궤도 정보</small></span>
+        <span class="material-symbols-outlined first-run-arrow" aria-hidden="true">arrow_forward</span>
+      </button>
+      <button type="button" data-first-run-choice="environmental">
+        <span class="material-symbols-outlined" aria-hidden="true">local_fire_department</span>
+        <!-- Title text is painted from ENVIRONMENTAL_LABEL_CHOICE at init. -->
+        <!-- Subcopy names BOTH feeds this tile turns on, because the launcher
+             optimizes for the fully configured experience (owner ruling,
+             2026-08-23) — see the mission table in src/firstRunExperience.js. -->
+        <span><strong data-first-run-environmental-title>재난·환경</strong><small>USGS 지진과 NASA 산불/화염 정보</small></span>
+        <span class="material-symbols-outlined first-run-arrow" aria-hidden="true">arrow_forward</span>
+      </button>
+      <button type="button" class="first-run-explore" data-first-run-choice="explore">
+        <span class="material-symbols-outlined" aria-hidden="true">public</span>
+        <span><strong>직접 탐색</strong><small>깨끗한 지구 화면에서 시작</small></span>
+        <span class="material-symbols-outlined first-run-arrow" aria-hidden="true">arrow_forward</span>
+      </button>
+    </div>
+    <div class="first-run-footer">
+      <label class="first-run-suppress">
+        <input type="checkbox" data-first-run-suppress />
+        <span>다시 보지 않기</span>
+      </label>
+      <span>ESC로 닫기</span>
+    </div>
+    <!-- Kept out of the footer row: it swaps to mission progress and errors, and
+         a live region that also holds layout makes the row jump as it speaks. -->
+    <p class="first-run-note" data-first-run-status role="status" aria-live="polite">팁: 아래 마이크 버튼으로 한국어 음성 명령을 사용할 수 있습니다.</p>
+  </aside>
+
+  <!-- POWER UP — in-app key setup. Dev-server only: src/keySetup.js removes
+       both the chip and this dialog outright when /api/setup/status is not
+       there to answer (prod builds, LAN visitors). Rows are rendered from
+       that payload, so the key registry lives in src/keySetupCore.mjs alone. -->
+  <button id="key-setup-chip" type="button" hidden aria-haspopup="dialog" aria-controls="key-setup">
+    <span class="material-symbols-outlined" aria-hidden="true">bolt</span>
+    <span data-key-setup-chip-label>키 설정</span>
+  </button>
+  <aside id="key-setup" role="dialog" aria-labelledby="key-setup-title" aria-describedby="key-setup-description" hidden>
+    <div class="key-setup-scanline" aria-hidden="true"></div>
+    <header class="key-setup-header">
+      <span class="key-setup-kicker">지도 제공자 설정</span>
+      <button type="button" class="key-setup-close" data-key-setup-close aria-label="키 설정 닫기">
+        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+      </button>
+    </header>
+    <h2 id="key-setup-title">지도 키 설정</h2>
+    <p id="key-setup-description">키 없이도 무료 지도 소스로 먼저 실행됩니다. Google 포토리얼 3D는 결제/한도/리퍼러 제한이 맞는 유효한 Map Tiles API 키가 있어야 영상 같은 3D 건물이 뜹니다.</p>
+    <div class="key-setup-rows" data-key-setup-rows></div>
+    <div class="key-setup-footer">
+      <button type="button" class="key-setup-apply" data-key-setup-apply>키 저장</button>
+      <span class="key-setup-hint">ESC로 닫기</span>
+    </div>
+    <p class="key-setup-note" data-key-setup-status role="status" aria-live="polite">Google 키는 브라우저에 노출됩니다. Cloud Console에서 HTTP 리퍼러, Map Tiles API 제한, 일일 한도와 예산 알림을 꼭 걸어야 합니다.</p>
+  </aside>
+
+  <!-- Intelligence HUD Overlay -->
+  <div id="intel-hud"></div>
+
+  <!-- Loading screen -->
+  <div id="loading-screen">
+    <div class="loader-content">
+      <span class="loader-logo" aria-hidden="true"><img src="/app-icon.png" alt="" /></span>
+      <h2>GOD'S EYE <span class="title-accent">VIEW</span></h2>
+    <p class="loader-status">무료 NASA 지구 이미지로 시작 중...</p>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

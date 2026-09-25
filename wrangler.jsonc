@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "gods-eye-view",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-09-23",
+  "assets": {
+    "directory": "dist/client",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/", "/home", "/home/*", "/map", "/map/*"]
+  },
+  "vars": {
+    "GEV_RAINVIEWER_PERMITTED": "0",
+    "GEV_TTS_ENABLED": "0",
+    "TOMTOM_DAILY_BUDGET": "500",
+    "ELEVENLABS_DAILY_BUDGET": "50"
+  }
+}

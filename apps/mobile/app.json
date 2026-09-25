@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "GOD'S EYE VIEW",
+    "slug": "gods-eye-view",
+    "version": "0.2.0",
+    "platforms": ["ios", "android"],
+    "orientation": "default",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "bundleIdentifier": "com.plasma.godseyeview",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "한국어 지도 음성 명령에 마이크를 사용합니다.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.plasma.godseyeview",
+      "permissions": ["INTERNET", "RECORD_AUDIO"]
+    }
+  }
+}

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">GOD'S EYE VIEW</title>
+  <desc id="desc">A cyan radar eye around planet Earth.</desc>
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="72%">
+      <stop offset="0" stop-color="#093140"/>
+      <stop offset="0.55" stop-color="#04131f"/>
+      <stop offset="1" stop-color="#01050b"/>
+    </radialGradient>
+    <linearGradient id="land" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#9effd0"/>
+      <stop offset="1" stop-color="#1bb3ff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="104" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="174" fill="none" stroke="#00e5ff" stroke-width="10" opacity="0.48"/>
+  <circle cx="256" cy="256" r="124" fill="#bfefff" opacity="0.92"/>
+  <path d="M160 244c24-54 85-88 143-68 36 12 54 42 80 72-26 49-77 82-135 75-42-5-74-34-88-79z" fill="#06121c" opacity="0.85"/>
+  <path d="M194 231c18-25 54-43 86-32 19 7 30 21 47 39-18 24-48 38-82 34-24-3-42-17-51-41z" fill="url(#land)"/>
+  <circle cx="256" cy="240" r="38" fill="#02101b" stroke="#00e5ff" stroke-width="8"/>
+  <circle cx="256" cy="240" r="12" fill="#00e5ff" filter="url(#glow)"/>
+  <path d="M256 68v62M256 382v62M68 256h62M382 256h62" stroke="#00e5ff" stroke-width="12" stroke-linecap="round" opacity="0.8"/>
+  <path d="M112 400 400 112" stroke="#ffcf4a" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+  <circle cx="400" cy="112" r="14" fill="#ffcf4a" filter="url(#glow)"/>
+</svg>

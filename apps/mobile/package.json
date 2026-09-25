@@ -1,0 +1,20 @@
+{
+  "name": "gods-eye-view-mobile",
+  "version": "0.2.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild",
+    "export": "expo export --platform all"
+  },
+  "dependencies": {
+    "expo": "57.0.24",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-webview": "13.16.1",
+    "react-native-safe-area-context": "5.7.0"
+  }
+}
