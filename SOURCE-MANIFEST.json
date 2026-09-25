@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-25T02:44:08.131Z",
+  "generatedAt": "2026-09-25T02:59:58.515Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -50,61 +50,6 @@
       "file": "AGENTS.md",
       "sha256": "0952d28b0ae583dc7d2a01adb9c95128ac679ca0b8c058102fb9ef8facc8f992",
       "bytes": 1063
-    },
-    {
-      "file": "CHANGELOG.md",
-      "sha256": "fb4bbc3f07ae64714a5ed16e6d4221a1949b94a9b4bafb5f8f3813cde95a0cef",
-      "bytes": 11902
-    },
-    {
-      "file": "CLOUDFLARE-RECOVERY-2026-09-24.md",
-      "sha256": "5ddd3b9688fae98d11f529f6c953454f78bbf8edb19052c3d328a01200b02f8d",
-      "bytes": 4004
-    },
-    {
-      "file": "CLOUDFLARE.md",
-      "sha256": "667f3849c88471361ef8db30bd2ec287ce42a9fad96bcf87caadec2512e96f1b",
-      "bytes": 2840
-    },
-    {
-      "file": "CONTRIBUTING.md",
-      "sha256": "194342a298b6e742f8256a155d69bb559d45d6f227a7ada3f04a0c4c768ced46",
-      "bytes": 4462
-    },
-    {
-      "file": "DATA_SOURCES.md",
-      "sha256": "bb6301ea68f6eac89f26a095d674c6b8f4059b5890905304f23f623b6203b7d1",
-      "bytes": 21720
-    },
-    {
-      "file": "DELIVERY.md",
-      "sha256": "94832824406f0d7e8f5290721ae40e7d69a50b9a662a75b4f735b13f3c92f7ec",
-      "bytes": 4344
-    },
-    {
-      "file": "LICENSE",
-      "sha256": "ffebc8bb68c9a25c164d4182837b32f25ab4d05db866c149a7358f0521523171",
-      "bytes": 2713
-    },
-    {
-      "file": "README.md",
-      "sha256": "4b40159cb3fa6d35fd82141c5a2f444523a1e41acd4108bf44be6e86a1b480ca",
-      "bytes": 36710
-    },
-    {
-      "file": "SECURITY.md",
-      "sha256": "0f5bf43867872b4705e1b3ab02affced8939fd3bd8c0834c463dc30c5efe3eee",
-      "bytes": 7937
-    },
-    {
-      "file": "SOURCE-STATUS.md",
-      "sha256": "d0df425db606cf5aa411fa20ec997cf0528be0f4722a84729f3b979b22f9cc1d",
-      "bytes": 2507
-    },
-    {
-      "file": "TESTING.md",
-      "sha256": "d4945245e3630e58a83975e2145c1b0fc8479d4fc7832ec430d0505fa55dd5cf",
-      "bytes": 11591
     },
     {
       "file": "api/_utils.js",
@@ -182,14 +127,14 @@
       "bytes": 824
     },
     {
-      "file": "apps/mobile/App.jsx",
-      "sha256": "bfb7b5431dd2f5aabe282f998f9632596d1ed930bf540888c731ed27938c96c6",
-      "bytes": 2541
-    },
-    {
       "file": "apps/mobile/app.json",
       "sha256": "2207c1ee7b94a25178984718c83f2ea5536133b95dd904390a49ff4ee30a7cb8",
       "bytes": 605
+    },
+    {
+      "file": "apps/mobile/App.jsx",
+      "sha256": "bfb7b5431dd2f5aabe282f998f9632596d1ed930bf540888c731ed27938c96c6",
+      "bytes": 2541
     },
     {
       "file": "apps/mobile/eas.json",
@@ -217,6 +162,11 @@
       "bytes": 12979
     },
     {
+      "file": "apps/web/devPlugin.js",
+      "sha256": "187e74a0f6baf33e3efb3c191a038008419e04868c4c4ca7b4756bc3ae31ad1e",
+      "bytes": 1219
+    },
+    {
       "file": "apps/web/FlowNode.jsx",
       "sha256": "76f9bc7cc24da9610f466b35d37899346ae7e48eb8d44335275f3b8cb63eb3d8",
       "bytes": 2669
@@ -227,16 +177,6 @@
       "bytes": 1405
     },
     {
-      "file": "apps/web/SoundControl.jsx",
-      "sha256": "e03b5ac3d7579c6eb52571d64e448ca85007f6adae819c2d9220b9a6b6424533",
-      "bytes": 1617
-    },
-    {
-      "file": "apps/web/devPlugin.js",
-      "sha256": "187e74a0f6baf33e3efb3c191a038008419e04868c4c4ca7b4756bc3ae31ad1e",
-      "bytes": 1219
-    },
-    {
       "file": "apps/web/main.jsx",
       "sha256": "38e96316324b2c3622742d6011cccc439a2dde503ca29013125e65f21b8179cf",
       "bytes": 330
@@ -245,6 +185,11 @@
       "file": "apps/web/persistence.js",
       "sha256": "623c333587eae6d50f6bd90c78d5fdb8d7a4b6ccef732b5d39166905743c9847",
       "bytes": 615
+    },
+    {
+      "file": "apps/web/SoundControl.jsx",
+      "sha256": "e03b5ac3d7579c6eb52571d64e448ca85007f6adae819c2d9220b9a6b6424533",
+      "bytes": 1617
     },
     {
       "file": "apps/web/soundPreview.js",
@@ -262,6 +207,21 @@
       "bytes": 1437
     },
     {
+      "file": "CHANGELOG.md",
+      "sha256": "fb4bbc3f07ae64714a5ed16e6d4221a1949b94a9b4bafb5f8f3813cde95a0cef",
+      "bytes": 11902
+    },
+    {
+      "file": "CLOUDFLARE-RECOVERY-2026-09-24.md",
+      "sha256": "5ddd3b9688fae98d11f529f6c953454f78bbf8edb19052c3d328a01200b02f8d",
+      "bytes": 4004
+    },
+    {
+      "file": "CLOUDFLARE.md",
+      "sha256": "667f3849c88471361ef8db30bd2ec287ce42a9fad96bcf87caadec2512e96f1b",
+      "bytes": 2840
+    },
+    {
       "file": "config/cctv_sources.austin.json",
       "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
       "bytes": 3
@@ -272,19 +232,24 @@
       "bytes": 1658
     },
     {
+      "file": "CONTRIBUTING.md",
+      "sha256": "194342a298b6e742f8256a155d69bb559d45d6f227a7ada3f04a0c4c768ced46",
+      "bytes": 4462
+    },
+    {
+      "file": "DATA_SOURCES.md",
+      "sha256": "bb6301ea68f6eac89f26a095d674c6b8f4059b5890905304f23f623b6203b7d1",
+      "bytes": 21720
+    },
+    {
+      "file": "DELIVERY.md",
+      "sha256": "94832824406f0d7e8f5290721ae40e7d69a50b9a662a75b4f735b13f3c92f7ec",
+      "bytes": 4344
+    },
+    {
       "file": "docs/CURRENT-STATE.md",
       "sha256": "1a44738fd311488f63d4ec662f8432935a446fb2394bfa9c8645acee4d9e4ded",
       "bytes": 275672
-    },
-    {
-      "file": "docs/KNOWN-ISSUES.md",
-      "sha256": "3df1ceaf1a973d70544b805ff75c924c727b62e298f5129d48ebc22179837f06",
-      "bytes": 4073
-    },
-    {
-      "file": "docs/PERFORMANCE.md",
-      "sha256": "5b464a78ca49376d1e327ab99619736a23b536e55b5c7c35de5adfa02653f512",
-      "bytes": 6341
     },
     {
       "file": "docs/google-3d-commercial-setup-ko.md",
@@ -295,6 +260,11 @@
       "file": "docs/imported-assets-report-ko.md",
       "sha256": "19423aa35177dbbf5297230b525ba37be11698e4377e8a70cfaafde18c113428",
       "bytes": 960
+    },
+    {
+      "file": "docs/KNOWN-ISSUES.md",
+      "sha256": "3df1ceaf1a973d70544b805ff75c924c727b62e298f5129d48ebc22179837f06",
+      "bytes": 4073
     },
     {
       "file": "docs/media/01-style-sweep.gif",
@@ -367,11 +337,6 @@
       "bytes": 2776244
     },
     {
-      "file": "docs/media/README.md",
-      "sha256": "86f9c9551dedabedd1346c39e2847b233c396c3044f86de35e4ee2e431b4d7d6",
-      "bytes": 2905
-    },
-    {
       "file": "docs/media/hero-open-source-reveal.gif",
       "sha256": "8da6943138231c130a62cba938c7508bcd77857f554ce59fd2805cd81adfda8a",
       "bytes": 6487951
@@ -380,6 +345,11 @@
       "file": "docs/media/open-source-survey.png",
       "sha256": "d1eee944eaf04d9063d0251d21e1c8eb3b30471dc576044bab58917e35995924",
       "bytes": 130925
+    },
+    {
+      "file": "docs/media/README.md",
+      "sha256": "86f9c9551dedabedd1346c39e2847b233c396c3044f86de35e4ee2e431b4d7d6",
+      "bytes": 2905
     },
     {
       "file": "docs/media/start-here/airport-ground-traffic-google-3d.gif",
@@ -402,6 +372,11 @@
       "bytes": 1656
     },
     {
+      "file": "docs/PERFORMANCE.md",
+      "sha256": "5b464a78ca49376d1e327ab99619736a23b536e55b5c7c35de5adfa02653f512",
+      "bytes": 6341
+    },
+    {
       "file": "docs/plasma-directive-implementation-report-ko.md",
       "sha256": "f5de29be590317dee4ee73537d255872f0aa158c74dba4685e7f8e0e66d7a41c",
       "bytes": 4151
@@ -422,11 +397,6 @@
       "bytes": 4691
     },
     {
-      "file": "event/README.md",
-      "sha256": "af779ee945a7d331f819978c06ec154d32f70ba6895ef991da63882119d698c6",
-      "bytes": 1004
-    },
-    {
       "file": "event/event.css",
       "sha256": "ab7892f4e6d6a6c8a529d236321593e774f687b84a5c9f0913781f26a49dcbf6",
       "bytes": 7642
@@ -440,6 +410,11 @@
       "file": "event/index.html",
       "sha256": "f423299022448d4dd6225cc9f31b8169b1f04b69f9eb200d3ca036190208bd18",
       "bytes": 5847
+    },
+    {
+      "file": "event/README.md",
+      "sha256": "af779ee945a7d331f819978c06ec154d32f70ba6895ef991da63882119d698c6",
+      "bytes": 1004
     },
     {
       "file": "home/index.html",
@@ -465,6 +440,11 @@
       "file": "infra/supabase/god-flow-schema.sql",
       "sha256": "4cdb9567a5c68b3ad6b3b914e8de7c03591075386adda9762895933b5a8955dd",
       "bytes": 2058
+    },
+    {
+      "file": "LICENSE",
+      "sha256": "ffebc8bb68c9a25c164d4182837b32f25ab4d05db866c149a7358f0521523171",
+      "bytes": 2713
     },
     {
       "file": "migrations/0001_provider_usage.sql",
@@ -535,6 +515,11 @@
       "file": "packages/god-ui/sounds.js",
       "sha256": "74c174337d8749ce4b5e4acb2fadbb27490dbf4902325980eecd58730c626688",
       "bytes": 5577
+    },
+    {
+      "file": "PERFORMANCE-SECURITY-2026-09-25.md",
+      "sha256": "4f27ee7ce4b6424f94839b5e4eccdda1b633e9d75f8b775fe1554c8174ff779c",
+      "bytes": 2834
     },
     {
       "file": "pinokio/_ENVIRONMENT",
@@ -627,11 +612,6 @@
       "bytes": 50447
     },
     {
-      "file": "public/fonts/PretendardVariable.woff2",
-      "sha256": "9599f12fd42fc0bce1cd50b47a0c022e108d7aa64dd0d1bb0ed44f3282d900b4",
-      "bytes": 2057688
-    },
-    {
       "file": "public/fonts/fontshare/Array-Semibold.woff2",
       "sha256": "ada6b0507bd63dc19ef391a96983ac9f0087c1be1e593df03c1fd50a8b50098e",
       "bytes": 21980
@@ -650,6 +630,11 @@
       "file": "public/fonts/fontshare/Satoshi-Variable.woff2",
       "sha256": "e739aff9b4d02c264341d6d4872edcda28e79373aeda936f659566a1cd3eb47f",
       "bytes": 42588
+    },
+    {
+      "file": "public/fonts/PretendardVariable.woff2",
+      "sha256": "9599f12fd42fc0bce1cd50b47a0c022e108d7aa64dd0d1bb0ed44f3282d900b4",
+      "bytes": 2057688
     },
     {
       "file": "public/location.svg",
@@ -702,11 +687,6 @@
       "bytes": 498
     },
     {
-      "file": "public/models/README.md",
-      "sha256": "0e773b75019c0c39f8689d8cc1ce6d4e4a8ab3f995d413413d775c27827612f9",
-      "bytes": 4929
-    },
-    {
       "file": "public/models/airplane.glb",
       "sha256": "6780e81a4ce48c04e4c36404bf8bdd2e647933b2995f8cc62a81f9b9d9caf91f",
       "bytes": 88144
@@ -747,6 +727,11 @@
       "bytes": 542880
     },
     {
+      "file": "public/models/README.md",
+      "sha256": "0e773b75019c0c39f8689d8cc1ce6d4e4a8ab3f995d413413d775c27827612f9",
+      "bytes": 4929
+    },
+    {
       "file": "public/models/ship.glb",
       "sha256": "48665716be710479635171b3169f3f056e4785ca1e979089e3d47a83bf480d9a",
       "bytes": 230024
@@ -765,6 +750,11 @@
       "file": "public/visual-presets.svg",
       "sha256": "bcab34a5a2b20c958a1c2bfbafe6344feb2595da9d338431036cf002009d5177",
       "bytes": 351
+    },
+    {
+      "file": "README.md",
+      "sha256": "4b40159cb3fa6d35fd82141c5a2f444523a1e41acd4108bf44be6e86a1b480ca",
+      "bytes": 36710
     },
     {
       "file": "scripts/audit-cloudflare.mjs",
@@ -822,14 +812,14 @@
       "bytes": 5092
     },
     {
-      "file": "scripts/fixtures/voice/README.md",
-      "sha256": "b54c9589db0f39d6629f13522e5b9f852bdfafd4e63f54edc52996fac2805500",
-      "bytes": 604
-    },
-    {
       "file": "scripts/fixtures/voice/full-globe-turn-on-radio.wav",
       "sha256": "b57af70db1922b72fec2c6c58348ccd3309e10aa1e8edec2890277dff26cc7bb",
       "bytes": 884274
+    },
+    {
+      "file": "scripts/fixtures/voice/README.md",
+      "sha256": "b54c9589db0f39d6629f13522e5b9f852bdfafd4e63f54edc52996fac2805500",
+      "bytes": 604
     },
     {
       "file": "scripts/focus-allocation-check.mjs",
@@ -1148,8 +1138,18 @@
     },
     {
       "file": "scripts/verify-public-performance.mjs",
-      "sha256": "6f5ead486ed5502c35627ceb2fc21f70c69b199c20070a5ef94a171b3432e579",
-      "bytes": 3458
+      "sha256": "dfeeac3fb91decaea9816070799d1364b115ec646ab51a168227d4fbf6232adb",
+      "bytes": 4400
+    },
+    {
+      "file": "SECURITY.md",
+      "sha256": "0f5bf43867872b4705e1b3ab02affced8939fd3bd8c0834c463dc30c5efe3eee",
+      "bytes": 7937
+    },
+    {
+      "file": "skills/plasma-source-delivery/agents/openai.yaml",
+      "sha256": "3ec4ddccc18be74c82f6b9d53c14390c7f7149fde5afb0f6eef42a500a2e9c8a",
+      "bytes": 352
     },
     {
       "file": "skills/plasma-source-delivery/SKILL.md",
@@ -1157,9 +1157,9 @@
       "bytes": 4287
     },
     {
-      "file": "skills/plasma-source-delivery/agents/openai.yaml",
-      "sha256": "3ec4ddccc18be74c82f6b9d53c14390c7f7149fde5afb0f6eef42a500a2e9c8a",
-      "bytes": 352
+      "file": "SOURCE-STATUS.md",
+      "sha256": "d0df425db606cf5aa411fa20ec997cf0528be0f4722a84729f3b979b22f9cc1d",
+      "bytes": 2507
     },
     {
       "file": "src/adaptiveMapStack.js",
@@ -1742,14 +1742,14 @@
       "bytes": 1442
     },
     {
-      "file": "src/data/fixtures/README.md",
-      "sha256": "d08a7845e2ae732cb60561dac2058678284d916780355728bc6c4ac2113cf693",
-      "bytes": 494
-    },
-    {
       "file": "src/data/fixtures/firms-viirs-noaa20-sample.csv",
       "sha256": "a8ce4c656efe39b34959e3f2e4ff10ca39c7a4caaacd1a77c3c432227cf11d15",
       "bytes": 3962
+    },
+    {
+      "file": "src/data/fixtures/README.md",
+      "sha256": "d08a7845e2ae732cb60561dac2058678284d916780355728bc6c4ac2113cf693",
+      "bytes": 494
     },
     {
       "file": "src/data/fixtures/tomtom-flow-austin-12-935-1686.pbf",
@@ -1892,6 +1892,76 @@
       "bytes": 68362
     },
     {
+      "file": "src/data/local_data/dams/dams.geojson",
+      "sha256": "034f57cd88bbfc53e78b92328a044365dee7571b1f66e6e13278d54691244efa",
+      "bytes": 730321
+    },
+    {
+      "file": "src/data/local_data/dams/dams.geojsonl",
+      "sha256": "f2b6f3166bee6dba4f0b569553a14c84faeb0048eb522bacd4d9c78e93d30d30",
+      "bytes": 730280
+    },
+    {
+      "file": "src/data/local_data/dams/README.md",
+      "sha256": "38fd328c121aa798bd9e3d770acb8bf9602058b18e4e8806dc2de5a9f58ab401",
+      "bytes": 621
+    },
+    {
+      "file": "src/data/local_data/datacenters/datacenters.geojsonl",
+      "sha256": "089144857a5ca001b0238c8f9316a3cc229b6c79a73558ac2660e206e0e59968",
+      "bytes": 2561978
+    },
+    {
+      "file": "src/data/local_data/datacenters/README.md",
+      "sha256": "f132b903c041a15e6d898e379e86004382dfac9bc86b506c9f30647630682089",
+      "bytes": 760
+    },
+    {
+      "file": "src/data/local_data/natural_earth/marine.json",
+      "sha256": "3fd509366f15ab086755a62a99150f65da407572e48ad4c602172fea716fa74f",
+      "bytes": 633342
+    },
+    {
+      "file": "src/data/local_data/natural_earth/README.md",
+      "sha256": "5c8d4073e7490fbcbb0943b722df0b5a3f54fa8a8eca0498577161c425f9cf51",
+      "bytes": 2000
+    },
+    {
+      "file": "src/data/local_data/natural_earth/regions.json",
+      "sha256": "0c7652965095db0365a9bdf3170994b48e0138a781ab4110af533f42fe9f48c7",
+      "bytes": 1987099
+    },
+    {
+      "file": "src/data/local_data/neighborhoods/san-francisco.json",
+      "sha256": "55c538680628b1ed5afa6627ec3abd83c3ba70b5dd4912a46d3d0f6892f807e5",
+      "bytes": 222167
+    },
+    {
+      "file": "src/data/local_data/neighborhoods/SOURCE.md",
+      "sha256": "083f5ce50d27aa6eaca3a82fd7571c23c1369bb9339f33b21d4d9ff943ca2c38",
+      "bytes": 2867
+    },
+    {
+      "file": "src/data/local_data/telegeography_submarine_cables/cable-geo.json",
+      "sha256": "3d28db104e57982e7ae67fabe66f2ff8dc01e137458454e0de0032a8878c6bad",
+      "bytes": 728308
+    },
+    {
+      "file": "src/data/local_data/telegeography_submarine_cables/landing-point-geo.json",
+      "sha256": "11fc154189db51237099ffe1da2183984d666a906e5ed0e89b86421192eb622b",
+      "bytes": 359269
+    },
+    {
+      "file": "src/data/local_data/telegeography_submarine_cables/README.md",
+      "sha256": "512bfe853af9bacaf29cc09a55082ede42ebea303decb1cb51c20e5304ca25aa",
+      "bytes": 1460
+    },
+    {
+      "file": "src/data/local_data/telegeography_submarine_cables/source.json",
+      "sha256": "16d7ea86bf43ab286a07612b5ae23bd9bac7d21f28d598bf41754b3a1a94dc31",
+      "bytes": 1113
+    },
+    {
       "file": "src/data/localGeojson.js",
       "sha256": "aff034f199547aa00859d1910670d8f23782edb6167963a70b15833b58c5d1d2",
       "bytes": 34957
@@ -1905,76 +1975,6 @@
       "file": "src/data/localLayers.js",
       "sha256": "920a2f2e5f5399c3626a8e16d6a18ed1b0802e35704453d9c3cea074cde94850",
       "bytes": 1508
-    },
-    {
-      "file": "src/data/local_data/dams/README.md",
-      "sha256": "38fd328c121aa798bd9e3d770acb8bf9602058b18e4e8806dc2de5a9f58ab401",
-      "bytes": 621
-    },
-    {
-      "file": "src/data/local_data/dams/dams.geojson",
-      "sha256": "034f57cd88bbfc53e78b92328a044365dee7571b1f66e6e13278d54691244efa",
-      "bytes": 730321
-    },
-    {
-      "file": "src/data/local_data/dams/dams.geojsonl",
-      "sha256": "f2b6f3166bee6dba4f0b569553a14c84faeb0048eb522bacd4d9c78e93d30d30",
-      "bytes": 730280
-    },
-    {
-      "file": "src/data/local_data/datacenters/README.md",
-      "sha256": "f132b903c041a15e6d898e379e86004382dfac9bc86b506c9f30647630682089",
-      "bytes": 760
-    },
-    {
-      "file": "src/data/local_data/datacenters/datacenters.geojsonl",
-      "sha256": "089144857a5ca001b0238c8f9316a3cc229b6c79a73558ac2660e206e0e59968",
-      "bytes": 2561978
-    },
-    {
-      "file": "src/data/local_data/natural_earth/README.md",
-      "sha256": "5c8d4073e7490fbcbb0943b722df0b5a3f54fa8a8eca0498577161c425f9cf51",
-      "bytes": 2000
-    },
-    {
-      "file": "src/data/local_data/natural_earth/marine.json",
-      "sha256": "3fd509366f15ab086755a62a99150f65da407572e48ad4c602172fea716fa74f",
-      "bytes": 633342
-    },
-    {
-      "file": "src/data/local_data/natural_earth/regions.json",
-      "sha256": "0c7652965095db0365a9bdf3170994b48e0138a781ab4110af533f42fe9f48c7",
-      "bytes": 1987099
-    },
-    {
-      "file": "src/data/local_data/neighborhoods/SOURCE.md",
-      "sha256": "083f5ce50d27aa6eaca3a82fd7571c23c1369bb9339f33b21d4d9ff943ca2c38",
-      "bytes": 2867
-    },
-    {
-      "file": "src/data/local_data/neighborhoods/san-francisco.json",
-      "sha256": "55c538680628b1ed5afa6627ec3abd83c3ba70b5dd4912a46d3d0f6892f807e5",
-      "bytes": 222167
-    },
-    {
-      "file": "src/data/local_data/telegeography_submarine_cables/README.md",
-      "sha256": "512bfe853af9bacaf29cc09a55082ede42ebea303decb1cb51c20e5304ca25aa",
-      "bytes": 1460
-    },
-    {
-      "file": "src/data/local_data/telegeography_submarine_cables/cable-geo.json",
-      "sha256": "3d28db104e57982e7ae67fabe66f2ff8dc01e137458454e0de0032a8878c6bad",
-      "bytes": 728308
-    },
-    {
-      "file": "src/data/local_data/telegeography_submarine_cables/landing-point-geo.json",
-      "sha256": "11fc154189db51237099ffe1da2183984d666a906e5ed0e89b86421192eb622b",
-      "bytes": 359269
-    },
-    {
-      "file": "src/data/local_data/telegeography_submarine_cables/source.json",
-      "sha256": "16d7ea86bf43ab286a07612b5ae23bd9bac7d21f28d598bf41754b3a1a94dc31",
-      "bytes": 1113
     },
     {
       "file": "src/data/manager.js",
@@ -2527,16 +2527,6 @@
       "bytes": 6049
     },
     {
-      "file": "src/locationStatus.js",
-      "sha256": "11b2a1e534443207b16a123cb012d7f32114accf6787ca144f075829063721a7",
-      "bytes": 2346
-    },
-    {
-      "file": "src/locationStatus.test.mjs",
-      "sha256": "97cc673b328a77b3e71d444e5192406c36a6c6a4c7777dd2e3ea489ec7ecf071",
-      "bytes": 2634
-    },
-    {
       "file": "src/locations.js",
       "sha256": "669ca98fe25caaa561c19fd21fb5be117dd17debf3249c99fcdccdaff1da09a1",
       "bytes": 42236
@@ -2545,6 +2535,16 @@
       "file": "src/locations.test.mjs",
       "sha256": "f736e932565b25e658906018029e2291506f9cbd925f16fc00519c1efe012e9b",
       "bytes": 27851
+    },
+    {
+      "file": "src/locationStatus.js",
+      "sha256": "11b2a1e534443207b16a123cb012d7f32114accf6787ca144f075829063721a7",
+      "bytes": 2346
+    },
+    {
+      "file": "src/locationStatus.test.mjs",
+      "sha256": "97cc673b328a77b3e71d444e5192406c36a6c6a4c7777dd2e3ea489ec7ecf071",
+      "bytes": 2634
     },
     {
       "file": "src/logoGaze.js",
@@ -2932,9 +2932,9 @@
       "bytes": 267749
     },
     {
-      "file": "tools/README.md",
-      "sha256": "0fa6940a0d04ceea6b49e38e57636fe967b49f517b2bded78f7d05e0ca96ba2d",
-      "bytes": 7048
+      "file": "TESTING.md",
+      "sha256": "d4945245e3630e58a83975e2145c1b0fc8479d4fc7832ec430d0505fa55dd5cf",
+      "bytes": 11591
     },
     {
       "file": "tools/browser/README.md",
@@ -2965,6 +2965,11 @@
       "file": "tools/pano-pinhole.mjs",
       "sha256": "58b6cae44e7ff2d157dfecbc947b8e364af36ede44564fa3f5dd6880e2ca2e55",
       "bytes": 13639
+    },
+    {
+      "file": "tools/README.md",
+      "sha256": "0fa6940a0d04ceea6b49e38e57636fe967b49f517b2bded78f7d05e0ca96ba2d",
+      "bytes": 7048
     },
     {
       "file": "tools/sat-ortho.mjs",

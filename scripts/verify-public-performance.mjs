@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import puppeteer from 'puppeteer';
 import sharp from 'sharp';
 
@@ -9,14 +9,28 @@ const profiles = [
   { name: 'mobile', viewport: { width: 393, height: 852, deviceScaleFactor: 3, isMobile: true, hasTouch: true }, expectedFps: 30 },
 ];
 mkdirSync('output', { recursive: true });
-const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--enable-webgl', '--use-gl=angle', '--use-angle=swiftshader'] });
+const windowsChrome = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const browser = await puppeteer.launch({ headless: 'new',
+  executablePath: process.env.CHROME_EXECUTABLE || (existsSync(windowsChrome) ? windowsChrome : undefined),
+  timeout: 60000, args: ['--no-sandbox', '--enable-webgl', '--use-gl=angle', '--use-angle=swiftshader'] });
 const results = [];
 try {
   for (const profile of profiles) {
     const page = await browser.newPage();
     await page.setViewport(profile.viewport);
     const errors = [];
+    const mapRequests = { ok: 0, httpErrors: {}, failed: [] };
     page.on('pageerror', error => errors.push(error.message.slice(0, 240)));
+    page.on('response', response => {
+      if (!/arcgisonline\.com|tile\.openstreetmap\.org|gibs\.earthdata\.nasa\.gov/.test(response.url())) return;
+      if (response.ok()) mapRequests.ok += 1;
+      else mapRequests.httpErrors[response.status()] = (mapRequests.httpErrors[response.status()] || 0) + 1;
+    });
+    page.on('requestfailed', request => {
+      if (/arcgisonline\.com|tile\.openstreetmap\.org|gibs\.earthdata\.nasa\.gov/.test(request.url()) && mapRequests.failed.length < 5) {
+        mapRequests.failed.push(request.failure()?.errorText || 'unknown');
+      }
+    });
     const start = performance.now();
     await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(() => Boolean(window.__godsEyeView?.viewer), { timeout: 60000 });
@@ -36,6 +50,7 @@ try {
         canvasWidth: viewer.scene.canvas.width, canvasHeight: viewer.scene.canvas.height,
         overlayWidth: overlay?.width || 0, overlayCssWidth: overlay?.clientWidth || 0,
         globeVisible: viewer.scene.globe.show, imageryLayers: viewer.imageryLayers.length,
+        globeTilesLoaded: viewer.scene.globe.tilesLoaded,
         firstRunOpen: !document.getElementById('first-run-launcher')?.hidden,
         contextLost: viewer.scene.context?._gl?.isContextLost?.() || false };
     });
@@ -45,7 +60,7 @@ try {
     const metrics = await page.metrics();
     const record = { name: profile.name, url: page.url(), loadAndSettleMs: Math.round(performance.now() - start),
       ...state, screenshot, imageStdev: image.channels.slice(0, 3).map(channel => Math.round(channel.stdev)),
-      jsHeapMb: Math.round(metrics.JSHeapUsedSize / 1048576), errors };
+      jsHeapMb: Math.round(metrics.JSHeapUsedSize / 1048576), mapRequests, errors };
     record.pass = record.fpsCap === profile.expectedFps && !record.contextLost
       && record.canvasWidth > 0 && record.canvasHeight > 0
       && record.imageStdev.some(value => value > 15) && errors.length === 0;
