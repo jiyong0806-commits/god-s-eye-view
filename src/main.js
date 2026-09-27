@@ -52,21 +52,11 @@ initPlasmaControls();
 
 if ('serviceWorker' in navigator && !import.meta.env.DEV) {
   window.addEventListener('load', () => {
-    const reloadOnceAfterControl = () => {
-      const key = 'gev-sw-controlled-reload-v4';
-      if (navigator.serviceWorker.controller || sessionStorage.getItem(key) === '1') return;
-      sessionStorage.setItem(key, '1');
-      window.location.reload();
-    };
-
+    // Network-first assets and clients.claim do not require interrupting the map.
     navigator.serviceWorker.register('/sw.js')
-      .then(() => navigator.serviceWorker.ready)
-      .then(() => reloadOnceAfterControl())
       .catch((error) => {
         console.warn('[PWA] service worker registration failed:', error?.message || error);
       });
-
-    navigator.serviceWorker.addEventListener('controllerchange', reloadOnceAfterControl);
   });
 }
 

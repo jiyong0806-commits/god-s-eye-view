@@ -348,14 +348,16 @@ async function handleGeocode(url, env = {}) {
   const query = String(url.searchParams.get('q') || url.searchParams.get('address') || '').trim();
   if (!query || query.length > 160) return json({ status: 'INVALID_REQUEST', results: [] }, 400);
   if (env.TOMTOM_API_KEY && env.PROVIDER_DB?.prepare) {
-    const fromTomTom = await cachedProvider(`search:${query}`, 'TomTom search', 3600000, async () => {
+    const fromTomTom = await cachedProvider(`search-v2:${query}`, 'TomTom search', 3600000, async () => {
       if (!await reserveBudget(env, 'tomtom')) return failure('TomTom', 429, '하루 500회 통합 한도', 3600);
       const target = new URL(`https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json`);
       target.search = new URLSearchParams({ key: env.TOMTOM_API_KEY, language: 'ko-KR', limit: '5' });
       const response = await fetchWithTimeout(target, { headers: { accept: 'application/json' } });
       if (!response.ok) return failure('TomTom', response.status, `검색 공급자 HTTP ${response.status}`);
       const data = await response.json();
-      const results = (data.results || []).filter(row => Number.isFinite(row.position?.lat) && Number.isFinite(row.position?.lon))
+      const results = (data.results || []).filter(row => Number.isFinite(row.position?.lat) && Number.isFinite(row.position?.lon)
+        && Math.abs(row.position.lat) <= 90 && Math.abs(row.position.lon) <= 180
+        && (!/[가-힣]/.test(query) || compactPlaceName(`${row.poi?.name || ''} ${row.address?.freeformAddress || ''}`).includes(compactPlaceName(query))))
         .map(row => ({ formatted_address: row.poi?.name ? `${row.poi.name} · ${row.address?.freeformAddress || ''}` : row.address?.freeformAddress || query,
           types: row.type === 'Geography' ? ['locality', 'political'] : ['point_of_interest', 'establishment'],
           geometry: { location: { lat: row.position.lat, lng: row.position.lon }, viewport: null, bounds: null }, source: 'TomTom' }));

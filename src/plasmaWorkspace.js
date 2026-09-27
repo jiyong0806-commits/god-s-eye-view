@@ -1,7 +1,7 @@
 import * as Cesium from 'cesium';
 import { createRoot } from 'react-dom/client';
 import { createElement } from 'react';
-import { Search, UserRound, Bookmark, RefreshCw, Map, CloudRain, Bell, X, Trash2, ArrowUpRight, CircleHelp, Volume2 } from 'lucide-react';
+import { Search, UserRound, Bookmark, RefreshCw, Map as MapIcon, CloudRain, Bell, X, Trash2, ArrowUpRight, CircleHelp, Volume2 } from 'lucide-react';
 import { searchAndFlyTo } from './locations.js';
 import { accountClient, accountUser, accountProfile, saveProfile } from './plasmaAccount.js';
 import { initPlasmaAlerts } from './plasmaAlerts.js';
@@ -110,7 +110,7 @@ export function initPlasmaWorkspace(app) {
     try { const result = await searchAndFlyTo(app.viewer, input.value.trim(), { duration: .6 }); if (!result) throw new Error('검색 결과가 없습니다. 지역명과 함께 검색하세요.'); sfx.play('navigate'); }
     catch (error) { notify(error.message); } finally { go.disabled = false; } };
   tools.append(button('지도·활성 레이어 업데이트', RefreshCw, () => document.getElementById('refresh-map-data')?.click()), button('찜한 위치', Bookmark, showBookmarks), button('PLASMA 계정 설정', UserRound, () => showAccount()));
-  const map = button('OSM 2D / 3D 지도', Map, async () => { if (map.disabled) return; map.disabled = true;
+  const map = button('OSM 2D / 3D 지도', MapIcon, async () => { if (map.disabled) return; map.disabled = true;
     try { const two = app.viewer.scene.mode !== Cesium.SceneMode.SCENE2D; await app.mapStackController.setStack(two ? 'osm' : 'esri-imagery');
       if (app.mapStackController.getState().activeId !== (two ? 'osm' : 'esri-imagery')) throw new Error('지도 공급원 전환 실패');
       if (two) app.viewer.scene.morphTo2D(0); else app.viewer.scene.morphTo3D(0); map.setAttribute('aria-pressed', String(two)); app.requestRender('map-mode'); sfx.play('navigate');

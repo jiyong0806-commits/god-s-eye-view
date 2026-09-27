@@ -466,6 +466,30 @@ export function initFreeVoice({
   let listening = false;
   let voice = null;
   let remoteAudio = null;
+  let remoteAudioUrl = null;
+  let processing = false;
+  let outputActive = false;
+  let outputEpoch = 0;
+  let outputRequest = null;
+  let resumeTimer = 0;
+  function pauseInput() {
+    clearTimeout(resumeTimer);
+    try { recognition?.abort(); } catch { /* already stopped */ }
+  }
+  function resumeInput() {
+    clearTimeout(resumeTimer);
+    if (!listening || processing || outputActive || !recognition) return;
+    resumeTimer = setTimeout(() => {
+      if (!listening || processing || outputActive || !recognition) return;
+      try { recognition.start(); } catch { /* already starting */ }
+    }, 350);
+  }
+  function releaseAudio() {
+    remoteAudio?.pause();
+    remoteAudio = null;
+    if (remoteAudioUrl) URL.revokeObjectURL(remoteAudioUrl);
+    remoteAudioUrl = null;
+  }
   /** @type {(state: string, text?: string) => void} */
   let onState = (state, text = '') => {
     const status = {
@@ -499,33 +523,50 @@ export function initFreeVoice({
    */
   async function speak(text) {
     if (!text) return;
+    const epoch = ++outputEpoch;
+    outputActive = true;
+    pauseInput();
+    outputRequest?.abort();
     window.speechSynthesis?.cancel?.();
-    if (remoteAudio) {
-      remoteAudio.pause();
-      remoteAudio = null;
-    }
+    releaseAudio();
+    const finish = () => {
+      if (epoch !== outputEpoch) return;
+      releaseAudio();
+      outputActive = false;
+      resumeInput();
+    };
+    outputRequest = new AbortController();
     try {
       const response = await fetch(ELEVENLABS_TTS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: String(text), language: 'ko' }),
+        signal: AbortSignal.any([outputRequest.signal, AbortSignal.timeout(10000)]),
       });
+      if (epoch !== outputEpoch) return;
       if (response.ok && response.headers.get('content-type')?.startsWith('audio/')) {
         const url = URL.createObjectURL(await response.blob());
+        if (epoch !== outputEpoch) { URL.revokeObjectURL(url); return; }
+        remoteAudioUrl = url;
         remoteAudio = new Audio(url);
-        remoteAudio.addEventListener('ended', () => { URL.revokeObjectURL(url); remoteAudio = null; }, { once: true });
+        remoteAudio.addEventListener('ended', finish, { once: true });
+        remoteAudio.addEventListener('error', finish, { once: true });
         await remoteAudio.play();
         return;
       }
     } catch {
       // Static/offline builds intentionally fall through to local speech.
     }
-    if (!window.speechSynthesis) return;
+    if (epoch !== outputEpoch) return;
+    releaseAudio();
+    if (!window.speechSynthesis) { finish(); return; }
     const utterance = new SpeechSynthesisUtterance(String(text));
     if (voice) utterance.voice = voice;
     utterance.lang = voice?.lang || 'ko-KR';
     utterance.rate = 1.05;
-    speechSynthesis.speak(utterance);
+    utterance.onend = finish;
+    utterance.onerror = finish;
+    try { speechSynthesis.speak(utterance); } catch { finish(); }
   }
 
 
@@ -645,7 +686,7 @@ export function initFreeVoice({
    * @param {string} rawTranscript
    * @returns {Promise<void>}
    */
-  async function handle(rawTranscript) {
+  async function handleUtterance(rawTranscript) {
     onState('heard', rawTranscript);
     const transcript = stripWakeWords(rawTranscript);
     if (!transcript) return;
@@ -710,6 +751,15 @@ export function initFreeVoice({
     }
   }
 
+  async function handle(rawTranscript) {
+    if (processing || outputActive) return;
+    processing = true;
+    pauseInput();
+    try { await handleUtterance(rawTranscript); }
+    catch (error) { onState('error', `명령 처리 실패: ${error?.message || error}`); }
+    finally { processing = false; resumeInput(); }
+  }
+
   return {
     /**
      * Tell the layer whether the intent parser is reachable.
@@ -755,15 +805,17 @@ export function initFreeVoice({
       recognition.maxAlternatives = 1;
 
       recognition.onresult = (event) => {
+        if (!listening || processing || outputActive) return;
         for (let i = event.resultIndex; i < event.results.length; i += 1) {
           const result = event.results[i];
           const text = String(result[0]?.transcript || '').trim();
           if (!text) continue;
-          if (result.isFinal) void handle(text);
+          if (result.isFinal) { void handle(text); break; }
           else onState('listening', text);
         }
       };
       recognition.onerror = (event) => {
+        if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(event.error)) listening = false;
         // 'no-speech' fires constantly during a pause and is not an error worth
         // reporting; anything else is.
         if (event.error !== 'no-speech' && event.error !== 'aborted') {
@@ -773,9 +825,7 @@ export function initFreeVoice({
       recognition.onend = () => {
         // Chrome stops recognition on its own after a silence. Restart while
         // the user still believes it is listening.
-        if (listening) {
-          try { recognition.start(); } catch { /* already starting */ }
-        }
+        resumeInput();
       };
 
       listening = true;
@@ -801,6 +851,11 @@ export function initFreeVoice({
     /** @returns {void} */
     stop() {
       listening = false;
+      clearTimeout(resumeTimer);
+      outputEpoch += 1;
+      outputRequest?.abort();
+      releaseAudio();
+      outputActive = false;
       try { recognition?.stop(); } catch { /* not started */ }
       recognition = null;
       speechSynthesis?.cancel();

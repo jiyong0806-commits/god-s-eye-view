@@ -13,6 +13,7 @@
 .wc-content::-webkit-scrollbar { width: 6px; }
 .wc-content::-webkit-scrollbar-thumb { background: #54b6c080; border-radius: 3px; }
 .wc-state { display: block; color: #84e5ba; font-size: 11px; margin-top: 14px; }
+@media (max-width: 760px) { #world-connect-toggle { top: 196px; } #world-connect-panel { top: 246px; bottom: 90px; } }
 .wc-muted { color: #b9c4ca; }
 .wc-center { padding: 8px 0; border-bottom: 1px solid #00f0ff80; font-size: 13px; }
 .wc-relation { padding: 12px 0 12px 12px; border-left: 1px solid #00f0ff50; border-bottom: 1px solid #ffffff16; }

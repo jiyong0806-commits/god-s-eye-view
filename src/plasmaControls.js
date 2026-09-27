@@ -52,7 +52,9 @@ export function initPlasmaControls() {
       const activeIds = manager
         ? [...manager.layers.entries()].filter(([, entry]) => entry.enabled).map(([id]) => id)
         : [];
-      await Promise.allSettled(activeIds.map((id) => manager.refreshLayer(id)));
+      for (let i = 0; i < activeIds.length; i += 2) {
+        await Promise.allSettled(activeIds.slice(i, i + 2).map((id) => manager.refreshLayer(id)));
+      }
       app?.viewer?.scene?.imageryLayers?.raiseToTop?.(app.viewer.imageryLayers.get(app.viewer.imageryLayers.length - 1));
       governorRequestRender('manual-map-refresh');
       window.dispatchEvent(new CustomEvent('gev:map-refreshed', { detail: { activeIds } }));

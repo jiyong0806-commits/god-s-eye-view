@@ -17,18 +17,21 @@ export function createVoiceRoutes({ chat = localModelChat } = {}) {
     for (;;) { const chunk = await reader.read(); if (chunk.done) break; size += chunk.value.length;
       if (size > 24000) { await reader.cancel(); return reply({ error: 'body-too-large' }, 413); }
       text += decoder.decode(chunk.value, { stream: true }); }
+    let acquired = false;
     try {
       const input = JSON.parse(text + decoder.decode());
-      if (typeof input.system !== 'string' || input.system.length > 14000 || !Array.isArray(input.messages)
-        || input.messages.length > 10 || input.messages.some(m => !['user', 'assistant'].includes(m.role) || typeof m.content !== 'string'))
+      if (!input || typeof input.system !== 'string' || input.system.length > 14000 || !Array.isArray(input.messages)
+        || input.messages.length === 0 || input.messages.length > 10 || input.messages.some(m => !m || !['user', 'assistant'].includes(m.role) || typeof m.content !== 'string'))
         return reply({ error: 'invalid-command-context' }, 400);
+      if (busy) return reply({ error: '모델 응답 대기 중' }, 429, { 'retry-after': '10' });
       busy = true;
+      acquired = true;
       const result = await chat({ text: JSON.stringify(input.messages), instruction: input.system },
         { url: 'http://127.0.0.1:11434', model: env.OLLAMA_MODEL, maxTokens: 500, jsonFormat: true,
           signal: AbortSignal.any([request.signal, AbortSignal.timeout(85000)]) });
       return reply(result);
     } catch (error) { return reply({ error: error instanceof SyntaxError ? 'invalid-json' : 'Ollama 명령 해석 실패' }, error instanceof SyntaxError ? 400 : 502); }
-    finally { busy = false; }
+    finally { if (acquired) busy = false; }
   };
 }
 export const voiceRoutes = createVoiceRoutes();

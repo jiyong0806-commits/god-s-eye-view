@@ -13,6 +13,7 @@ import {
 import { queuePlatoons, locateAlongRoad } from './trafficQueue.js';
 import { registerDynamicCredit, TOMTOM_CREDIT } from './dataCredits.js';
 import { holdContinuousRender, releaseContinuousRender } from '../renderGovernor.js';
+const TRAFFIC_DOT_COLOR = Cesium.Color.fromCssColorString('#ff5263').withAlpha(0.85);
 
 /**
  * @file Street Traffic — animated dots along OSM road polylines, colored by
@@ -839,7 +840,7 @@ function spawnDotsForRoad(road, altitude, budgetCount = null) {
       position: Cesium.Cartesian3.clone(_scratchLerp),
       pixelSize,
       // No flow data → today's exact simulated white.
-      color: Cesium.Color.fromCssColorString('#ff5263').withAlpha(0.85),
+      color: TRAFFIC_DOT_COLOR,
       scaleByDistance: new Cesium.NearFarScalar(100, 1.5, _fadeScaleFar, jamProminent ? JAM_DOT_FAR_SCALE : 0.3),
       translucencyByDistance: new Cesium.NearFarScalar(100, 1.0, _fadeTransFar, 0.0),
       // visible through tiles only when very close (jam: city-scale punch)
@@ -1443,7 +1444,7 @@ function recolorDotsInPlace(label) {
     }
     const bucket = flow ? flowBucket(flow.level) : null;
     dot.bucket = bucket;
-    dot.point.color = Cesium.Color.fromCssColorString('#ff5263').withAlpha(0.85);
+    dot.point.color = TRAFFIC_DOT_COLOR;
     if (bucket === 'jam') {
       dot.point.pixelSize = baseDotSize(dot.road?.type, bucket) + 1 + activeSizeDelta('jam');
     } else if (bucket && presetProfileActive()) {

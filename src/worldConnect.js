@@ -27,7 +27,8 @@ export function initWorldConnect(viewer) {
   const content = document.createElement('div'); content.className = 'wc-content'; panel.append(header, content); document.body.append(toggle, panel);
   let controller = null, current = null, version = 0, activeTab = 'economy', profile = null;
   accountProfile().then(value => { profile = value; }).catch(() => {});
-  window.addEventListener('plasma:profile', event => { profile = event.detail; if (!panel.hidden && activeTab === 'economy') showFeed('economy'); });
+  const profileHandler = event => { profile = event.detail; if (!panel.hidden && activeTab === 'economy') showFeed('economy'); };
+  window.addEventListener('plasma:profile', profileHandler);
   const cancel = () => { controller?.abort(); controller = new AbortController(); return ++version; };
   close.onclick = () => { panel.hidden = true; cancel(); };
   async function get(path, options) {
@@ -99,7 +100,7 @@ export function initWorldConnect(viewer) {
       content.replaceChildren(tabs(), text('h3', '최근 24시간 · USGS'), text('p', '단일 출처 보고 · 독립 검증 전', 'wc-state'));
       for (const event of data.events) { const button = text('button', event.title, 'wc-event'); button.onclick = () => { navigate(event); open(event); }; content.append(button); }
       if (!data.events.length) content.append(text('p', '규모 2.5 이상 사건 없음'));
-    } catch (error) { if (generation === version) content.replaceChildren(text('p', error.message)); }
+    } catch (error) { if (generation === version) content.replaceChildren(tabs(), text('p', error.message)); }
   }
   toggle.onclick = () => { if (!panel.hidden) close.click(); else showFeed(); };
   const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -110,5 +111,5 @@ export function initWorldConnect(viewer) {
     open({ id: p.usgsId, title: `M${Number(p.mag).toFixed(1)} ${p.place}`, magnitude: p.mag, place: p.place,
       source: { title: 'USGS 사건 기록', url: `https://earthquake.usgs.gov/earthquakes/eventpage/${encodeURIComponent(p.usgsId)}` } });
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-  return { open, destroy() { cancel(); handler.destroy(); toggle.remove(); panel.remove(); cleanupIcons(); } };
+  return { open, destroy() { cancel(); window.removeEventListener('plasma:profile', profileHandler); handler.destroy(); toggle.remove(); panel.remove(); cleanupIcons(); } };
 }

@@ -32,20 +32,11 @@ test('normalizeVesselType preserves text and degrades unknown codes', () => {
   assert.equal(normalizeVesselType(undefined), '');
 });
 
-test('vessel type CSS and card accents stay paired', () => {
-  assert.equal(vesselTypeCss('Crude Oil Tanker'), '#ffb347');
-  assert.equal(vesselTypeCss('Container Ship'), '#39d5ff');
-  assert.equal(vesselTypeCss('Passenger/Ferry'), '#ff7adf');
-  assert.equal(vesselTypeCss('Fishing'), '#7cff9b');
-  assert.equal(vesselTypeCss('Tug'), '#f7f0a3');
-  assert.equal(accentForVesselType('Tanker'), '255, 179, 71');
-  assert.equal(accentForVesselType('Cargo'), '57, 213, 255');
-  assert.equal(accentForVesselType('Passenger'), '255, 122, 223');
-  assert.equal(accentForVesselType('Fishing'), '124, 255, 155');
-  assert.equal(accentForVesselType('Pilot Vessel'), '247, 240, 163');
-  assert.equal(accentForVesselType('Dredger'), '57, 213, 255');
-  assert.equal(accentForVesselType('84'), '255, 179, 71');
-  assert.equal(vesselTypeCss('62'), '#ff7adf');
+test('all vessel families share the requested green layer identity', () => {
+  for (const type of ['Crude Oil Tanker', 'Container Ship', 'Passenger/Ferry', 'Fishing', 'Tug', 'Pilot Vessel', 'Dredger', '84', '62']) {
+    assert.equal(vesselTypeCss(type), '#37df83');
+    assert.equal(accentForVesselType(type), '55, 223, 131');
+  }
 });
 
 test('vessel viewport cohort preserves the shipped 118px grid density', () => {

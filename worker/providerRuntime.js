@@ -3,8 +3,15 @@ const cooldowns = new Map();
 const MAX_CACHE_ENTRIES = 96;
 const MAX_CACHE_BYTES = 16 * 1024 * 1024;
 const MAX_RESPONSE_BYTES = 4 * 1024 * 1024;
+const providerHeader = value => /[^\x20-\x7e]/.test(String(value)) ? encodeURIComponent(String(value)) : String(value);
 
 export function clearProviderCache() { cache.clear(); cooldowns.clear(); }
+
+function responseFromSnapshot(snapshot, expires) {
+  const headers = new Headers(snapshot.headers);
+  if (snapshot.status === 429 && expires) headers.set('retry-after', String(Math.max(1, Math.ceil((expires - Date.now()) / 1000))));
+  return new Response(snapshot.body ? snapshot.body.slice() : null, { status: snapshot.status, headers });
+}
 
 async function readBounded(response) {
   if (!response.body) return null;
@@ -37,7 +44,7 @@ export function retrySeconds(value, fallback = 60, now = Date.now()) {
 export function failure(provider, status, error, retry = 60) {
   return reply({ provider, status: status === 429 || status === 451 ? 'restricted' : 'unavailable',
     httpStatus: status, error, retryInSec: retry, retryAt: Date.now() + retry * 1000 }, status,
-  { 'x-data-source': provider, 'retry-after': String(retry) });
+  { 'x-data-source': providerHeader(provider), 'retry-after': String(retry) });
 }
 
 export async function upstream(url, options = {}, timeoutMs = 12000) {
@@ -54,17 +61,12 @@ export async function upstream(url, options = {}, timeoutMs = 12000) {
 export async function cachedProvider(key, provider, ttlMs, load) {
   const now = Date.now();
   let entry = cache.get(key);
-  if (entry?.response && entry.expires > now) {
-    if (entry.response.status !== 429) return entry.response.clone();
-    const response = entry.response.clone();
-    response.headers.set('retry-after', String(Math.max(1, Math.ceil((entry.expires - now) / 1000))));
-    return response;
-  }
+  if (entry?.snapshot && entry.expires > now) return responseFromSnapshot(entry.snapshot, entry.expires);
   const retryAt = cooldowns.get(provider) || 0;
   if (retryAt > now) return failure(provider, 429, '공급자 요청 제한', Math.ceil((retryAt - now) / 1000));
-  if (entry?.pending) return (await entry.pending).clone();
+  if (entry?.pending) return responseFromSnapshot(await entry.pending, entry.expires);
   if (cache.size >= MAX_CACHE_ENTRIES && ![...cache.values()].some(value => !value.pending)) return failure(provider, 503, '서버 요청 처리 중', 15);
-  entry = { response: null, expires: 0, pending: null };
+  entry = { snapshot: null, expires: 0, pending: null };
   cache.set(key, entry);
   while (cache.size > MAX_CACHE_ENTRIES) {
     const evict = [...cache].find(([candidate, value]) => candidate !== key && !value.pending);
@@ -79,9 +81,10 @@ export async function cachedProvider(key, provider, ttlMs, load) {
       }
       const body = await readBounded(response);
       const headers = new Headers(response.headers);
-      headers.set('x-data-source', provider);
+      headers.set('x-data-source', providerHeader(provider));
       headers.set('x-observed-at', new Date().toISOString());
-      entry.response = new Response(body, { status: response.status, headers });
+      // Workers streams belong to one request. Only detached bytes may survive it.
+      entry.snapshot = { body, status: response.status, headers: [...headers] };
       entry.bytes = body?.byteLength || 0;
       let bytes = [...cache.values()].reduce((sum, value) => sum + (value.bytes || 0), 0);
       for (const [candidate, value] of cache) {
@@ -91,14 +94,16 @@ export async function cachedProvider(key, provider, ttlMs, load) {
       for (const [name, until] of cooldowns) if (until <= Date.now()) cooldowns.delete(name);
       entry.expires = Date.now() + (response.ok ? ttlMs : response.status === 429
         ? retrySeconds(response.headers.get('retry-after')) * 1000 : 15000);
-      return entry.response;
+      return entry.snapshot;
     } catch (error) {
-      entry.response = failure(provider, 502, error?.name === 'AbortError' ? '공급자 응답 시간 초과' : '공급자 연결 실패');
+      const response = failure(provider, 502, error?.name === 'AbortError' ? '공급자 응답 시간 초과' : '공급자 연결 실패');
+      entry.snapshot = { body: await readBounded(response), status: response.status, headers: [...response.headers] };
+      entry.bytes = entry.snapshot.body?.byteLength || 0;
       entry.expires = Date.now() + 15000;
-      return entry.response;
+      return entry.snapshot;
     } finally { entry.pending = null; }
   })();
-  return (await entry.pending).clone();
+  return responseFromSnapshot(await entry.pending, entry.expires);
 }
 
 export async function jsonFeed(url, provider, ttl = 300, validate = () => true) {

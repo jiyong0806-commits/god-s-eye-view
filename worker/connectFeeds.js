@@ -38,8 +38,12 @@ export function currentEarthquakes(feed, now = Date.now()) {
 export async function connectFeeds(request, env, url) {
   if (!['/api/world-connect/news', '/api/alerts', '/api/account/config'].includes(url.pathname)) return null;
   if (request.method !== 'GET') return reply({ error: 'method-not-allowed' }, 405);
-  if (url.pathname === '/api/account/config') return reply({ configured: Boolean(env.SUPABASE_URL && env.SUPABASE_PUBLISHABLE_KEY),
-    url: env.SUPABASE_URL || null, publishableKey: env.SUPABASE_PUBLISHABLE_KEY || null });
+  if (url.pathname === '/api/account/config') {
+    const valid = /^https:\/\/[a-z0-9]+\.supabase\.co\/?$/.test(env.SUPABASE_URL || '')
+      && /^sb_publishable_[A-Za-z0-9_-]+$/.test(env.SUPABASE_PUBLISHABLE_KEY || '');
+    return reply({ configured: valid, url: valid ? env.SUPABASE_URL : null,
+      publishableKey: valid ? env.SUPABASE_PUBLISHABLE_KEY : null });
+  }
   if (url.pathname.endsWith('/news')) return cachedProvider('economy-rss', '한국경제 RSS', 300000, async () => {
     const r = await upstream(NEWS, { headers: { accept: 'application/xml,text/xml', 'user-agent': 'GODsEyeView/1.0' } });
     if (!r.ok) return failure('한국경제 RSS', r.status, `경제 뉴스 HTTP ${r.status}`, 300);

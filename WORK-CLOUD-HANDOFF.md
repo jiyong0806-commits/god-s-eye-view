@@ -6,12 +6,14 @@
 - User repository: https://github.com/jiyong0806-commits/god-s-eye-view
 - Public site: https://godseyeview-c6q.pages.dev
 - Production baseline verified before transfer: `85755a109465e80e18d5c10d7cbc8e78c6cf08a1`.
-- This working snapshot includes unfinished changes. Do not merge or deploy it until verification passes. Preserve unrelated user changes and upstream licenses.
+- This working snapshot includes verified fixes and unfinished backlog items. The receipt below distinguishes them; do not treat the entire specification as complete. Preserve unrelated user changes and upstream licenses.
 - Do not use the original upstream author's repository as the push destination.
 - No local filesystem, local Ollama daemon, user media folders, or local `.env` is automatically available in Work cloud.
 - Real credentials are deliberately excluded. Obtain approved credentials through environment secret settings, never chat, source files, or frontend build variables.
 
 ## Priority Queue
+
+Latest verified fixes and remaining priorities are recorded in `docs/VERIFICATION-2026-09-27.md`. The numbered queue below is the original handoff, not a claim that all items still need implementation.
 
 1. Review current changes and fix voice feedback loops, serialized command execution, and truncated Ollama instructions. Browser recognition must pause while processing and speaking, and resume only after output ends.
 2. Compile and test new account, news, alerts, roads, and radar modules. Finish the loading footer logo and limit manual layer refresh concurrency to two.
@@ -49,6 +51,11 @@
 - `public/brand/plasma-logo.png`: supplied PLASMA logo for account/loading placement.
 
 ## Verification and Deployment
+
+- Public deployment `c65a1687-7609-41ac-b6af-864f10ddcc78` succeeded on 2026-09-27. It fixes Cloudflare cross-request stream reuse by caching detached byte snapshots and creating fresh responses per request.
+- Korean school search rejects unrelated overseas fuzzy results; public search for the requested school returned the Wikidata coordinates in Gimje.
+- Desktop and mobile browser checks passed for account form/logo, bookmark fly-to, 2D/3D switching, tutorial, economic headlines and explicit radar permission failure. Authentication email delivery and microphone hardware are not verified.
+- Public news and alerts each passed four consecutive requests after the cache fix. The broad unit suite is not green; see the receipt for counts and boundaries.
 
 - Install lockfile dependencies, run focused unit tests and `npm run build:pages` before production changes.
 - Use existing Cloudflare project `godseyeview`, AIS service binding, and provider budget storage. Static drag-and-drop does not deploy backend routes.

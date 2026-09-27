@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T07:23:25.193Z",
+  "generatedAt": "2026-09-27T08:23:50.781Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -123,8 +123,8 @@
     },
     {
       "file": "WORK-CLOUD-HANDOFF.md",
-      "sha256": "51385edee3d48ce94fcba6308027f89e2e6bfaf2da5a75bf3e4f54e6222a8469",
-      "bytes": 6677
+      "sha256": "58c2a22b12c78272992f1cfadcfeb86c8ba12513131a8f67bc8dc4ffe4fba03e",
+      "bytes": 7700
     },
     {
       "file": "WORLD-CONNECT-2026-09-27.md",
@@ -312,6 +312,11 @@
       "bytes": 6341
     },
     {
+      "file": "docs/VERIFICATION-2026-09-27.md",
+      "sha256": "2ac9075e28d6e9df1725ecffb4c96d7bb912d4d38e02b3868a83c2ff27eed3d7",
+      "bytes": 5568
+    },
+    {
       "file": "docs/google-3d-commercial-setup-ko.md",
       "sha256": "b4502cd4eba192d6ce33472ef5dd337a70582b80f09493516f4fb3e728c6366d",
       "bytes": 3638
@@ -473,8 +478,8 @@
     },
     {
       "file": "index.html",
-      "sha256": "66fa42406266f0e3324804fe7edc7aa760188fe980cd3334951b8f5e69a7fb14",
-      "bytes": 57421
+      "sha256": "e47d98f56c7bcf22bc8fdf177c35f5e1aee809af2907432a06b36c1c61272997",
+      "bytes": 57527
     },
     {
       "file": "infra/apple/ExportOptions-TestFlight.plist",
@@ -548,8 +553,8 @@
     },
     {
       "file": "packages/god-runtime/ollama.js",
-      "sha256": "b88ca7b2c8170402c8adb55b439d9d3cabd23ac50d864b54efdcccb1bb860177",
-      "bytes": 2533
+      "sha256": "9e09a6e24f6b1437dd66840833c8f30dbefa7e7ee639c9488cb6958f192e303d",
+      "bytes": 2534
     },
     {
       "file": "packages/god-runtime/router.js",
@@ -1187,6 +1192,11 @@
       "bytes": 1180
     },
     {
+      "file": "scripts/verify-plasma-workspace.mjs",
+      "sha256": "769a534b54c6280b6dbe4246b27517812becf2afc78d7f5f70dc37088ff30791",
+      "bytes": 5591
+    },
+    {
       "file": "scripts/verify-public-ais.mjs",
       "sha256": "ad724fc58ee5adec26111a9007b16e32ccb57312022e3e84f898942d9d68e280",
       "bytes": 3416
@@ -1195,6 +1205,11 @@
       "file": "scripts/verify-public-performance.mjs",
       "sha256": "dfeeac3fb91decaea9816070799d1364b115ec646ab51a168227d4fbf6232adb",
       "bytes": 4400
+    },
+    {
+      "file": "scripts/verify-public-soak.mjs",
+      "sha256": "95919edb90310badf41e4fb709cba1c4be92797875cb1a992c26480cc534e022",
+      "bytes": 3120
     },
     {
       "file": "scripts/verify-world-connect.mjs",
@@ -1808,8 +1823,8 @@
     },
     {
       "file": "src/data/flights.js",
-      "sha256": "b82e22599e3e488f9ce373cd0c50d868d6b3d1b0c6d59c4e9647193fafffd78a",
-      "bytes": 263449
+      "sha256": "da4303695f50d22e2b68d40ee9be99d2ccce69025bdc4432175523cd2caa7d07",
+      "bytes": 263448
     },
     {
       "file": "src/data/flights.test.mjs",
@@ -2408,8 +2423,8 @@
     },
     {
       "file": "src/data/traffic.js",
-      "sha256": "cc5c7ba6507692d0393e0265ef61b4ffda4d7e5286a8ada3595f29c642356cfe",
-      "bytes": 103340
+      "sha256": "432cbb1b0a6b4a136988e70aff05c5f4cf6baeb940812b3f4b82d6a1f6a66647",
+      "bytes": 103344
     },
     {
       "file": "src/data/traffic.test.mjs",
@@ -2478,8 +2493,8 @@
     },
     {
       "file": "src/data/vesselLabels.test.mjs",
-      "sha256": "29c721b0dfe241c3510dc5b7ebcb48196204e4162d3a6904ae9a5afdf7b27885",
-      "bytes": 4163
+      "sha256": "002f2ce7a91c694352d24c0fb119f7bf37d183f16354da24b3e20bedd7cfd48f",
+      "bytes": 3650
     },
     {
       "file": "src/data/weatherRadar.js",
@@ -2618,8 +2633,8 @@
     },
     {
       "file": "src/main.js",
-      "sha256": "77191b2eec6e477164ec88caec549e96fe0e084edeaa46c3ba32d3411446d886",
-      "bytes": 20636
+      "sha256": "6501220041930a8e37ae5dd64cbb1e484f118722d4a9fda9af5f976ab16a16bf",
+      "bytes": 20270
     },
     {
       "file": "src/mapImageryCap.test.mjs",
@@ -2778,8 +2793,8 @@
     },
     {
       "file": "src/plasmaControls.js",
-      "sha256": "e0ee52869d500ff2d14389ca820f87d8fc0ab45326d53ea4ceb2ed05f54ea840",
-      "bytes": 3854
+      "sha256": "0acc6e65c561f2e7f4e832de1475df9deb02b8f8f02345efbabdc2a9526a9bd5",
+      "bytes": 3934
     },
     {
       "file": "src/plasmaWorkspace.css",
@@ -2788,8 +2803,13 @@
     },
     {
       "file": "src/plasmaWorkspace.js",
-      "sha256": "a709a23a108d44c6781f32705d43c6e4412cb6e64b31c5398d2e078162c0084d",
-      "bytes": 15921
+      "sha256": "3ec2dcf0168aef6fe5a92335ae28a19243a03f724b9a3103f3981f4d075505ce",
+      "bytes": 15936
+    },
+    {
+      "file": "src/plasmaWorkspace.test.mjs",
+      "sha256": "cda24155c7f4d51b218a0f7bef0df15371a7fdd48d73a983f9fe6c91e8a68c28",
+      "bytes": 825
     },
     {
       "file": "src/publicApiFallback.js",
@@ -2963,8 +2983,8 @@
     },
     {
       "file": "src/voice/freeVoice.js",
-      "sha256": "d6fe78b2d1d93ea469440a478b9b411fd23c2b30033e30861207847e1b402377",
-      "bytes": 35358
+      "sha256": "ae3fc6d803f62d7029db29befbefa188f5e491b8b9bee3a46bde6c1321af367f",
+      "bytes": 37356
     },
     {
       "file": "src/voice/gevActions.js",
@@ -3008,13 +3028,13 @@
     },
     {
       "file": "src/worldConnect.css",
-      "sha256": "0eb1decea0ac96b4b750cc3d09de10054ff7a6a6cfcbcec41af4bb5f5a295a98",
-      "bytes": 3568
+      "sha256": "ce235467fa5f92be908f7571a89f68b15804758c52cc0912419d6b55826335e6",
+      "bytes": 3687
     },
     {
       "file": "src/worldConnect.js",
-      "sha256": "cbcc102564df96e32cc34871c3c6a4a604f4c4629b8e1215ec7287738b0947b1",
-      "bytes": 9331
+      "sha256": "fc72b4101c78c33d9bfbfee8e08cd4d7baee0d8fcdbe1ec869616b8d6a70a391",
+      "bytes": 9442
     },
     {
       "file": "src/worldFocus.js",
@@ -3133,8 +3153,13 @@
     },
     {
       "file": "worker/connectFeeds.js",
-      "sha256": "1dadee51edce93fdc616f54f86e7b28a81a42792007294cd82c9ddaf706cac2e",
-      "bytes": 4963
+      "sha256": "84ae0db31db113a3358432ed4a0865f7b9139de26f8491352f5778b047956baa",
+      "bytes": 5110
+    },
+    {
+      "file": "worker/connectFeeds.test.mjs",
+      "sha256": "acdd117a14451b6d861dbcfdcdc2c180723f80ca3e34bfe357eb841f45ded5ed",
+      "bytes": 1966
     },
     {
       "file": "worker/extraRoutes.js",
@@ -3158,8 +3183,8 @@
     },
     {
       "file": "worker/index.js",
-      "sha256": "2b65b611f4e2fdf494c4977e71f522effa05b806414d1af92f0f0561884a2c87",
-      "bytes": 28871
+      "sha256": "d4786b92124d10defc36b867d9f190c582839dfd12b538f6db8aa8ebf5251136",
+      "bytes": 29111
     },
     {
       "file": "worker/index.test.mjs",
@@ -3188,8 +3213,13 @@
     },
     {
       "file": "worker/providerRuntime.js",
-      "sha256": "311a27f44792fe7e7507804f71c8dbad28d863e4284dfda36727550abb08c59b",
-      "bytes": 6274
+      "sha256": "2abb5906284949b30894141cfe2e08a0ce30ef858baaa35eb3d5571cdf5090c8",
+      "bytes": 6899
+    },
+    {
+      "file": "worker/providerRuntime.test.mjs",
+      "sha256": "e987e2e2e9675f4b2aee8153a9b48e961ae9ec28f3e4ce1499b81cfa96557a20",
+      "bytes": 1761
     },
     {
       "file": "worker/roadRoutes.js",
@@ -3208,8 +3238,13 @@
     },
     {
       "file": "worker/voiceRoutes.js",
-      "sha256": "95aa2fa2dc467a5b531e0424ddc6d18a9bfdd70af0c8fd94a62d2b3adc892add",
-      "bytes": 2475
+      "sha256": "5ea15b6150fc76e02b59a67ee2bdac189dc66a548e1d1da410380ed5889c32dc",
+      "bytes": 2684
+    },
+    {
+      "file": "worker/voiceRoutes.test.mjs",
+      "sha256": "61ac4b2f2525c37e3a86ee014b89875530447d6e965de6cc261af3b32f8208db",
+      "bytes": 1652
     },
     {
       "file": "worker/worldConnectAI.js",
