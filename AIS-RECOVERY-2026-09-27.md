@@ -23,6 +23,9 @@
   retry of rejected credentials. Provider raw error text is never exposed.
 - Only valid position messages with finite coordinates and 9-digit MMSIs create
   rows. Handshakes and malformed frames never establish live status.
+- The socket explicitly selects ArrayBuffer delivery before accept. With recent
+  Cloudflare compatibility dates the default is Blob, which a synchronous byte
+  decoder cannot read. The regression mock checks the selection at accept.
 - Maximum 5000 in-memory vessels, 30-minute position TTL. A warm-restart checkpoint
   retains at most 200 recent rows; this is not a historical tracking database.
 - Checkpoint once per minute, not per message. No-viewer idle timeout: 3 minutes.
@@ -36,7 +39,22 @@
   Longer provider waits cannot be shortened by another isolate. This does not
   bypass limits, grant OpenSky licensing or guarantee aircraft availability.
 
-## Build and Deploy
+## Public Verification
+
+- Pages deployment f2d29042-08c6-4e0d-8225-02fdc7572d3e succeeded.
+  The separately deployed AIS Worker was subsequently corrected for binary frames.
+- At 2026-09-27T03:39:50Z, the public desktop map had 446 accepted AIS vessels,
+  matching 446 API rows with HTTP 200 and feed status live. The inspected vessel's
+  coordinates exactly matched its provider row. WebGL was not lost, the map canvas
+  was nonblank, and no page errors were recorded during this check.
+- Aircraft and military requests still returned HTTP 429 and Retry-After 60.
+  Shared cooldown is active; aircraft availability is NOT restored.
+- Focused Worker tests: 36 passed. Existing AIS frontend tests: 74 passed.
+  Public security smoke: 16 checks passed. Pages build succeeded.
+- This is a short desktop check, not a 10-minute soak, mobile thermal benchmark,
+  comprehensive penetration test, global coverage guarantee or history service.
+
+## Deployment Commands
 
 1. Apply `migrations/0002_provider_cooldown.sql` to existing PROVIDER_DB.
 2. `npx wrangler deploy --config wrangler.ais.jsonc`

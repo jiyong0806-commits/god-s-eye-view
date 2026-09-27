@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T03:27:48.352Z",
+  "generatedAt": "2026-09-27T03:41:05.004Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -53,8 +53,8 @@
     },
     {
       "file": "AIS-RECOVERY-2026-09-27.md",
-      "sha256": "edf214c4af747bc8fadeb6686198b473d29d5dc8934676329f7134967f869419",
-      "bytes": 2982
+      "sha256": "e7a3f41cec5f34af49a901cc1a7def5d3ce74bf2a45208a46699ace1f84d276f",
+      "bytes": 4155
     },
     {
       "file": "CHANGELOG.md",
@@ -1175,6 +1175,11 @@
       "file": "scripts/upload-pages-assets.mjs",
       "sha256": "7b3873ac9749e92fd61421c21b75409c8a301ab9810db30ff4a5181b853dbc09",
       "bytes": 1180
+    },
+    {
+      "file": "scripts/verify-public-ais.mjs",
+      "sha256": "cdc9aeaf10d100a05796c58cd601c3dc66768e39f217cb4ab2b6eb30560a80ae",
+      "bytes": 3310
     },
     {
       "file": "scripts/verify-public-performance.mjs",
@@ -3068,13 +3073,13 @@
     },
     {
       "file": "worker/aisCollector.js",
-      "sha256": "5d3142243e3569aaab64a768e3f0fd0f954ad300e30f0d83b959dd5c86b6b16f",
-      "bytes": 9724
+      "sha256": "85ab7eb2ebda95aa4f79935e724a4b4a30681f17f5ae4bf02e4662b591b94088",
+      "bytes": 9767
     },
     {
       "file": "worker/aisCollector.test.mjs",
-      "sha256": "488ac8e70c474df3f459a9e28c44de54c4ffa12f7e0cc611c5ce16618358736e",
-      "bytes": 4647
+      "sha256": "14dc24d6c726a7946cea3f3f39b47359aa8db12166bd85ccdca91af6b5ddccc6",
+      "bytes": 4694
     },
     {
       "file": "worker/extraRoutes.js",

@@ -12,7 +12,7 @@ function context() {
     storage: { get: async k => values.get(k), put: async (k, v) => values.set(k, v), setAlarm: async () => {} } } };
 }
 class Socket extends EventTarget {
-  accept() {} close() { this.closed = true; } send(value) { this.sent = JSON.parse(value); }
+  accept() { assert.equal(this.binaryType, 'arraybuffer'); } close() { this.closed = true; } send(value) { this.sent = JSON.parse(value); }
   message(value) { this.dispatchEvent(new MessageEvent('message', { data: new TextEncoder().encode(JSON.stringify(value)).buffer })); }
 }
 

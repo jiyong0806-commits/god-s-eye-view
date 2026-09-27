@@ -60,6 +60,7 @@ export class AisCollector {
           this.fail(response.status === 401 || response.status === 403 ? 'auth-failed' : 'down', response.status === 429 ? 900000 : 0); return;
         }
         const socket = response.webSocket;
+        socket.binaryType = 'arraybuffer';
         if (generation !== this.generation) { socket.accept(); socket.close(1000, 'superseded'); return; }
         this.socket = socket; socket.accept();
         socket.addEventListener('message', event => {
