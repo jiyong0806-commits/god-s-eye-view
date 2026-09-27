@@ -54,12 +54,12 @@ export function normalizeVesselType(type) {
 
 /** AIS ship type → CSS hex hue for the billboard chevron. */
 export function vesselTypeCss(type) {
-  return styleForType(type).css;
+  return '#37df83';
 }
 
 /** AIS ship type → "r, g, b" accent string for the host card. */
 export function accentForVesselType(type) {
-  return styleForType(type).accent;
+  return '55, 223, 131';
 }
 
 function styleForType(type) {

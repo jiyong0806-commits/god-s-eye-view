@@ -91,9 +91,9 @@ const POSITION_HISTORY_LIMIT = 5;
 const BILLBOARD_SCALE = 0.7;
 
 /** @constant {Cesium.Color} Default amber tint for untracked military billboards */
-const MIL_ICON_COLOR = Cesium.Color.fromCssColorString('#FFB800');
+const MIL_ICON_COLOR = Cesium.Color.fromCssColorString('#ff913d');
 /** @constant {Cesium.Color} Lighter amber tint applied to the actively tracked aircraft */
-const TRACKED_ICON_COLOR = Cesium.Color.fromCssColorString('#FFD166');
+const TRACKED_ICON_COLOR = Cesium.Color.fromCssColorString('#ffb477');
 
 // --- Ground traffic (owner reversal 2026-07-03; mirror of flights.js) ---------------
 // adsb.lol/readsb flags ground traffic with alt_baro === "ground" (no separate

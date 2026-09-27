@@ -40,7 +40,9 @@ async function cctv(url) {
   const camera = cameras.get(match[2]);
   if (match[1] === 'stream') return reply({ ...camera, frameUrl: `/api/cctv/frame/${camera.id}`, mediaUrl: `/api/cctv/media/${camera.id}` });
   return cachedProvider(`frame:${camera.id}`, 'Caltrans images', 60000, async () => {
-    const res = await upstream(camera.imageUrl, { redirect: 'error' }, 8000);
+    const res = await upstream(camera.imageUrl, { redirect: 'error', headers: {
+      accept: 'image/*', 'user-agent': 'GODsEyeView/1.0 (public traffic camera viewer)',
+    } }, 15000);
     if (!res.ok) return failure('Caltrans', res.status, `카메라 이미지 HTTP ${res.status}`);
     if (!res.headers.get('content-type')?.startsWith('image/')) return failure('Caltrans', 502, '영상 대신 잘못된 형식이 반환되었습니다.');
     return new Response(res.body, { headers: { 'content-type': res.headers.get('content-type'), 'cache-control': 'public, max-age=60' } });

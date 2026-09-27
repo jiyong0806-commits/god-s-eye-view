@@ -839,7 +839,7 @@ function spawnDotsForRoad(road, altitude, budgetCount = null) {
       position: Cesium.Cartesian3.clone(_scratchLerp),
       pixelSize,
       // No flow data → today's exact simulated white.
-      color: flowColor || Cesium.Color.WHITE.withAlpha(0.85),
+      color: Cesium.Color.fromCssColorString('#ff5263').withAlpha(0.85),
       scaleByDistance: new Cesium.NearFarScalar(100, 1.5, _fadeScaleFar, jamProminent ? JAM_DOT_FAR_SCALE : 0.3),
       translucencyByDistance: new Cesium.NearFarScalar(100, 1.0, _fadeTransFar, 0.0),
       // visible through tiles only when very close (jam: city-scale punch)
@@ -1443,7 +1443,7 @@ function recolorDotsInPlace(label) {
     }
     const bucket = flow ? flowBucket(flow.level) : null;
     dot.bucket = bucket;
-    dot.point.color = bucket ? _activeBucketColors[bucket] : Cesium.Color.WHITE.withAlpha(0.85);
+    dot.point.color = Cesium.Color.fromCssColorString('#ff5263').withAlpha(0.85);
     if (bucket === 'jam') {
       dot.point.pixelSize = baseDotSize(dot.road?.type, bucket) + 1 + activeSizeDelta('jam');
     } else if (bucket && presetProfileActive()) {
@@ -2480,6 +2480,8 @@ const trafficLayer = {
       error: feed.error,
       flowCoveragePct: _flowCoveragePct,
       tilesFetched: getFlowSessionStats().tilesFetched,
+      source: 'OSM 도로 · TomTom 교통 흐름 (차량 점은 시뮬레이션)',
+      coverage: '실제 개별 자동차 위치가 아닙니다.',
       ...(TRAFFIC_TIMING_ENABLED ? { trafficTiming: getTrafficTimingDiagnostics() } : {}),
       // Per-bucket rendered-dot counts (sim = white ambient). Drives the
       // qa-traffic color assertions and the sync-chip mode label below.

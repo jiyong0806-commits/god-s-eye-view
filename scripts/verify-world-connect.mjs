@@ -20,6 +20,7 @@ try {
       if (launcher && !launcher.hidden) launcher.querySelector('[data-first-run-choice="explore"]')?.click();
     });
     await page.locator('#world-connect-toggle').click();
+    await page.locator('[data-wc-tab="events"]').click();
     try { await page.waitForSelector('.wc-event', { timeout: 30000 }); }
     catch (error) {
       await page.screenshot({ path: 'output/world-connect-failure.png' });

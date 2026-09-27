@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T03:41:05.004Z",
+  "generatedAt": "2026-09-27T07:23:25.193Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -120,6 +120,11 @@
       "file": "URGENT-RECOVERY-2026-09-27.md",
       "sha256": "27ede05753177f03c4b79311f8bb7c40938d1447a344bd63db7bdac3a5b88c59",
       "bytes": 3031
+    },
+    {
+      "file": "WORK-CLOUD-HANDOFF.md",
+      "sha256": "51385edee3d48ce94fcba6308027f89e2e6bfaf2da5a75bf3e4f54e6222a8469",
+      "bytes": 6677
     },
     {
       "file": "WORLD-CONNECT-2026-09-27.md",
@@ -253,8 +258,8 @@
     },
     {
       "file": "apps/web/devPlugin.js",
-      "sha256": "1e9c18e196df8dd248a2abbaf9ab48ac9345b03216e4a098d9c0f24ddef0dc49",
-      "bytes": 1338
+      "sha256": "2e0443dbca4ab38dc0f379f35a2a71eeda778ce13a9932e08e20931d9673642e",
+      "bytes": 1574
     },
     {
       "file": "apps/web/main.jsx",
@@ -503,13 +508,13 @@
     },
     {
       "file": "package-lock.json",
-      "sha256": "208f92f5d3aa71cc5e5b5d663c26bcc6cd1838400883bb582bf24c77f33dc0aa",
-      "bytes": 108463
+      "sha256": "2c443933393e07294e5dc74c9f1f3626663f8b0e39035a98522b7852f59dcb49",
+      "bytes": 116291
     },
     {
       "file": "package.json",
-      "sha256": "bed924ee55c945b6a8e6dfb06b4e7fbd87ab1afe4a4a6d273366037a23374690",
-      "bytes": 2567
+      "sha256": "5fc908102511cfdc6d6326634c22b34ab4d5b8ae9fd7b406bef73ee5d82a1593",
+      "bytes": 2642
     },
     {
       "file": "packages/god-flow/graph.js",
@@ -630,6 +635,11 @@
       "file": "public/avatars/plasma-grok-bot.avatar.json",
       "sha256": "8aa8df63cba6fa543479c4d8998cdb36a0657152851d72ac3759662fa6cfb597",
       "bytes": 39733
+    },
+    {
+      "file": "public/brand/plasma-logo.png",
+      "sha256": "0bad6c18ec1b1c94f89718c229835f72654acb6b4b419fbd1d4486ed9895eed2",
+      "bytes": 315150
     },
     {
       "file": "public/event/access-loop.webm",
@@ -1188,8 +1198,8 @@
     },
     {
       "file": "scripts/verify-world-connect.mjs",
-      "sha256": "977cca0f452bd3e5d02a34c7d99059ac1ea287ae174c1517f6293650e0dcaace",
-      "bytes": 3971
+      "sha256": "30d40c3ae847adfebeb05b6234105f9c25df8f45956fb2164f91a4a840e03516",
+      "bytes": 4029
     },
     {
       "file": "skills/plasma-source-delivery/SKILL.md",
@@ -1798,8 +1808,8 @@
     },
     {
       "file": "src/data/flights.js",
-      "sha256": "8225bc78ed7639b654ef636ef42496502ec3602c5038dfb59472d3fdbfe0ced7",
-      "bytes": 263401
+      "sha256": "b82e22599e3e488f9ce373cd0c50d868d6b3d1b0c6d59c4e9647193fafffd78a",
+      "bytes": 263449
     },
     {
       "file": "src/data/flights.test.mjs",
@@ -1922,6 +1932,11 @@
       "bytes": 14599
     },
     {
+      "file": "src/data/layerPalette.js",
+      "sha256": "77b8545ef9a8d050b524192d7b6d3c9a9f5678946085472030c6210e2970c640",
+      "bytes": 148
+    },
+    {
       "file": "src/data/layerState.js",
       "sha256": "160a53bfe649a58cc5fe65f6004a924e5579a12043ec7dd4397c866aa16d3c7e",
       "bytes": 48161
@@ -1943,8 +1958,8 @@
     },
     {
       "file": "src/data/localLayers.js",
-      "sha256": "920a2f2e5f5399c3626a8e16d6a18ed1b0802e35704453d9c3cea074cde94850",
-      "bytes": 1508
+      "sha256": "781faa52e2abe3e6b2af3b903b95e8e5b6bb75fbd1f36a43c8f28c17b0a51339",
+      "bytes": 1616
     },
     {
       "file": "src/data/local_data/dams/README.md",
@@ -2058,7 +2073,7 @@
     },
     {
       "file": "src/data/militaryFlights.js",
-      "sha256": "d3c7c4e15cf3faae46a90ed8d0eb3f9042def0ba24465db8ab0488a3a8a9def4",
+      "sha256": "b8ce2df7ea4f2e29c098342afedf5798faa0517c24972ac1ee1a2f59baa92b59",
       "bytes": 185760
     },
     {
@@ -2153,8 +2168,8 @@
     },
     {
       "file": "src/data/peopleActivity.js",
-      "sha256": "25f130b8bb0686eb6b28e82313c0c0433d85ee3f48718a10e42ca55b04dbd085",
-      "bytes": 6571
+      "sha256": "1845c463b7744d4fe920064f8df71a66620421473206a3de3a5273cd8e98d927",
+      "bytes": 6575
     },
     {
       "file": "src/data/pickRegistry.js",
@@ -2393,8 +2408,8 @@
     },
     {
       "file": "src/data/traffic.js",
-      "sha256": "c5fd5537f498c02cda1a196c2804afba2b1889a49883ac58f5f137a696833342",
-      "bytes": 103193
+      "sha256": "cc5c7ba6507692d0393e0265ef61b4ffda4d7e5286a8ada3595f29c642356cfe",
+      "bytes": 103340
     },
     {
       "file": "src/data/traffic.test.mjs",
@@ -2458,13 +2473,18 @@
     },
     {
       "file": "src/data/vesselLabels.js",
-      "sha256": "9ca1300ccc839129002d29aca26145cd49c217f12f6fe8161fe1548dcd951c31",
-      "bytes": 4805
+      "sha256": "0243ee4d27753d5486a4da51d856fd2f1f45d23b4b0ee9de5fae6d17289af664",
+      "bytes": 4781
     },
     {
       "file": "src/data/vesselLabels.test.mjs",
       "sha256": "29c721b0dfe241c3510dc5b7ebcb48196204e4162d3a6904ae9a5afdf7b27885",
       "bytes": 4163
+    },
+    {
+      "file": "src/data/weatherRadar.js",
+      "sha256": "becc8bf733b40cef646a83c9a5c74faf38c057db814a64a6bc4eb37e8c0850d4",
+      "bytes": 2433
     },
     {
       "file": "src/devFreshDotenv.test.mjs",
@@ -2598,8 +2618,8 @@
     },
     {
       "file": "src/main.js",
-      "sha256": "9583d7e644bddde54af531ac71e7632fefd231675311d6141b7150b98f65b988",
-      "bytes": 20496
+      "sha256": "77191b2eec6e477164ec88caec549e96fe0e084edeaa46c3ba32d3411446d886",
+      "bytes": 20636
     },
     {
       "file": "src/mapImageryCap.test.mjs",
@@ -2742,6 +2762,16 @@
       "bytes": 1814
     },
     {
+      "file": "src/plasmaAccount.js",
+      "sha256": "8d4fc93a298c11d72ea1f44f31640a669d00024f42dfcfca36bbe39f18cf1161",
+      "bytes": 3012
+    },
+    {
+      "file": "src/plasmaAlerts.js",
+      "sha256": "0a162d8b009f5cbd284daa1c3b3c66f13ce54c354af20b2eeee869f15f0d696f",
+      "bytes": 2504
+    },
+    {
       "file": "src/plasmaBgm.js",
       "sha256": "0a4955ca785428924e6b95a210a37b62cc6da81c92896e11602a336e5a0dd7f8",
       "bytes": 1388
@@ -2750,6 +2780,16 @@
       "file": "src/plasmaControls.js",
       "sha256": "e0ee52869d500ff2d14389ca820f87d8fc0ab45326d53ea4ceb2ed05f54ea840",
       "bytes": 3854
+    },
+    {
+      "file": "src/plasmaWorkspace.css",
+      "sha256": "57d62059be551e544808c283a933b232b9944ec56a49e3d0a61436dd38530123",
+      "bytes": 3445
+    },
+    {
+      "file": "src/plasmaWorkspace.js",
+      "sha256": "a709a23a108d44c6781f32705d43c6e4412cb6e64b31c5398d2e078162c0084d",
+      "bytes": 15921
     },
     {
       "file": "src/publicApiFallback.js",
@@ -2765,6 +2805,11 @@
       "file": "src/qaVesselCardsHarness.test.mjs",
       "sha256": "83cf16fbae5f821ff297e1ff12039e3c787c00f16a11d7224e6c42d7f99de773",
       "bytes": 3716
+    },
+    {
+      "file": "src/quietSfx.js",
+      "sha256": "8b2292cab83e729d1bf69014c3af2b875f5b8c48eed91f530eb7a74582a30581",
+      "bytes": 1691
     },
     {
       "file": "src/radioMarkup.test.mjs",
@@ -2918,7 +2963,7 @@
     },
     {
       "file": "src/voice/freeVoice.js",
-      "sha256": "a03a54c0b6dfb7ebd7a242d27e44a04f7ab8054d117aaa41b67e30e9669c1a44",
+      "sha256": "d6fe78b2d1d93ea469440a478b9b411fd23c2b30033e30861207847e1b402377",
       "bytes": 35358
     },
     {
@@ -2963,13 +3008,13 @@
     },
     {
       "file": "src/worldConnect.css",
-      "sha256": "68ae179141d52ddb5924f239f77b5f0ff89d185f8c8b95de5d3a6c458bbce58d",
-      "bytes": 3060
+      "sha256": "0eb1decea0ac96b4b750cc3d09de10054ff7a6a6cfcbcec41af4bb5f5a295a98",
+      "bytes": 3568
     },
     {
       "file": "src/worldConnect.js",
-      "sha256": "11ffbfb7d8048a75aa61666338b44f1525f0169eaf5ecfe35d41efa466fcfb1d",
-      "bytes": 7254
+      "sha256": "cbcc102564df96e32cc34871c3c6a4a604f4c4629b8e1215ec7287738b0947b1",
+      "bytes": 9331
     },
     {
       "file": "src/worldFocus.js",
@@ -3005,6 +3050,11 @@
       "file": "supabase/migrations/20260927000000_map_source_daily_schedule.sql",
       "sha256": "37a074b3c3adb716959bc863921b6dd494ce91ab39761e3c44a9579d5fb23a1c",
       "bytes": 723
+    },
+    {
+      "file": "supabase/migrations/20260927010000_plasma_accounts.sql",
+      "sha256": "fb9e232cf3dc17988765ec8d3b21616a243a1b7d0582d45d16630e30a4f22e6a",
+      "bytes": 1997
     },
     {
       "file": "tools/README.md",
@@ -3082,9 +3132,14 @@
       "bytes": 4694
     },
     {
+      "file": "worker/connectFeeds.js",
+      "sha256": "1dadee51edce93fdc616f54f86e7b28a81a42792007294cd82c9ddaf706cac2e",
+      "bytes": 4963
+    },
+    {
       "file": "worker/extraRoutes.js",
-      "sha256": "680379928e8c6d5d805d9e300b5dcb114e87bd26745bb9565d7eef963ad62d11",
-      "bytes": 6823
+      "sha256": "1a323cd3c6efbcd7e597975b0a9a9b5f036e4f8cf1dc37ba7ab39546d378bab5",
+      "bytes": 6931
     },
     {
       "file": "worker/flowPages.js",
@@ -3103,8 +3158,8 @@
     },
     {
       "file": "worker/index.js",
-      "sha256": "5a5704af9622383d156e6ee3683bf2053f87f35987032d76bdcce38d05dfa068",
-      "bytes": 26980
+      "sha256": "2b65b611f4e2fdf494c4977e71f522effa05b806414d1af92f0f0561884a2c87",
+      "bytes": 28871
     },
     {
       "file": "worker/index.test.mjs",
@@ -3137,6 +3192,11 @@
       "bytes": 6274
     },
     {
+      "file": "worker/roadRoutes.js",
+      "sha256": "9d13aecb9fa9c081cafff0e987e273e012ead5a0b8dde0e58f8aabeea867f620",
+      "bytes": 2444
+    },
+    {
       "file": "worker/sharedCooldown.js",
       "sha256": "af29e8348aae2ee6360876ba81313a440bcb83532bc1312cdcabd471ec7ae424",
       "bytes": 1116
@@ -3145,6 +3205,11 @@
       "file": "worker/sharedCooldown.test.mjs",
       "sha256": "ef5d88265c02ca631f205ce94f7af4ae9b8bcd6147bb9e08b16f244d66aa3ec9",
       "bytes": 1293
+    },
+    {
+      "file": "worker/voiceRoutes.js",
+      "sha256": "95aa2fa2dc467a5b531e0424ddc6d18a9bfdd70af0c8fd94a62d2b3adc892add",
+      "bytes": 2475
     },
     {
       "file": "worker/worldConnectAI.js",

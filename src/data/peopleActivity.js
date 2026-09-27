@@ -13,6 +13,7 @@ let _rows = [];
 let _enabled = false;
 let _removePreRender = null;
 let _lastPulseMs = 0;
+let _error = null;
 
 function hashString(value) {
   let hash = 2166136261;
@@ -118,7 +119,7 @@ function animatePulse(scene, time) {
 
 const peopleActivityLayer = {
   id: 'people-activity',
-  name: 'People Activity',
+  name: '사람 위치 · 공급자 미연결',
   icon: '👥',
   source: 'Estimated city activity',
   showInTogglePanel: true,
@@ -129,14 +130,10 @@ const peopleActivityLayer = {
   },
 
   async enable(viewer = _viewer) {
-    if (!viewer) return;
-    _viewer = viewer;
-    renderRows(viewer);
-    _enabled = true;
-    _points.show = true;
-    holdContinuousRender('people-activity');
-    if (!_removePreRender) _removePreRender = viewer.scene.preRender.addEventListener(animatePulse);
-    governorRequestRender('people-activity');
+    _enabled = false;
+    _error = '동의받은 실시간 사람 위치 공급자가 없습니다. 추정 점을 실제 위치로 표시하지 않습니다.';
+    if (_points) _points.show = false;
+    return false;
   },
 
   async disable() {
@@ -192,9 +189,9 @@ const peopleActivityLayer = {
     return {
       count: _enabled ? _rows.length : 0,
       lastUpdate: _enabled ? new Date() : null,
-      source: '오프라인 도시 사람·차량 활동 추정',
-      mode: 'estimate',
-      fallback: true,
+      source: '동의 기반 사람 위치 공급자 필요',
+      mode: 'unsupported', status: 'unsupported', available: false, error: _error,
+      fallback: false,
     };
   },
 };

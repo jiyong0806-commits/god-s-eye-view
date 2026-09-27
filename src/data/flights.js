@@ -98,7 +98,7 @@ import { holdContinuousRender, releaseContinuousRender } from '../renderGovernor
 const FOCUS_EVIDENCE_DEV = import.meta.env?.DEV === true;
 
 /** Amber tint for known-military aircraft rendered by this layer (matches the military layer's icon color). */
-const MIL_TINT = Cesium.Color.fromCssColorString('#FFB800');
+const MIL_TINT = Cesium.Color.fromCssColorString('#ff913d');
 
 // --- Ground traffic (owner reversal 2026-07-03: "absolutely we should see planes
 // taxiing and landing") -----------------------------------------------------------
@@ -123,7 +123,7 @@ const GROUND_SCALE = 0.8;
 /** Fleet (untracked) billboard tint: amber for known-military, white otherwise.
  *  Ground traffic gets NO special tint (owner verdict 2026-07-03 field test). */
 function _fleetBillboardColor(icao24) {
-  return isMilitaryIcao(icao24) ? MIL_TINT : Cesium.Color.WHITE;
+  return isMilitaryIcao(icao24) ? MIL_TINT : Cesium.Color.fromCssColorString('#66cfff');
 }
 
 /** Fleet billboard scale: per-class scale, ×GROUND_SCALE while grounded. */
@@ -1498,7 +1498,7 @@ function _resetTrackedDisplay() {
 /** Model tint, mirroring the billboard color rules. */
 function _modelColor(icao24) {
   if (icao24 === _trackedIcao) return Cesium.Color.CYAN;
-  return isMilitaryIcao(icao24) ? MIL_TINT : Cesium.Color.WHITE;
+  return isMilitaryIcao(icao24) ? MIL_TINT : Cesium.Color.fromCssColorString('#66cfff');
 }
 
 /** The FLEET's 3D-model regime: models3d enabled AND the camera zoomed in past the altitude

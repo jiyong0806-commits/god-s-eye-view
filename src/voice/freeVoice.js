@@ -35,10 +35,10 @@ import {
   stripWakeWords,
 } from './freeAgent.js';
 
-const CHAT_URL = '/api/openrouter/chat';
+const CHAT_URL = '/api/voice/interpret';
 const ELEVENLABS_TTS_URL = '/api/elevenlabs/tts';
 /** A free model that has not answered in this long is not going to. */
-const CHAT_TIMEOUT_MS = 20000;
+const CHAT_TIMEOUT_MS = 85000;
 
 /** Longest a command will wait for the startup camera restore to settle. */
 const STARTUP_WAIT_CAP_MS = 8000;

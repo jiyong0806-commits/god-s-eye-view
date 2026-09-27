@@ -4,6 +4,9 @@ import { flowRoutes } from './flowRoutes.js';
 import { worldConnectRoutes } from './worldConnectRoutes.js';
 import { mapSourceStatus } from './mapSourceStatus.js';
 import { withSharedCooldown } from './sharedCooldown.js';
+import { connectFeeds } from './connectFeeds.js';
+import { roadRoutes } from './roadRoutes.js';
+import { voiceRoutes } from './voiceRoutes.js';
 import { cachedProvider, failure, reserveBudget, retrySeconds } from './providerRuntime.js';
 
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8' };
@@ -341,9 +344,25 @@ async function wikidataPlace(query) {
     source: 'Wikidata', sourceUrl: `https://www.wikidata.org/wiki/${exact.id}` };
 }
 
-async function handleGeocode(url) {
+async function handleGeocode(url, env = {}) {
   const query = String(url.searchParams.get('q') || url.searchParams.get('address') || '').trim();
   if (!query || query.length > 160) return json({ status: 'INVALID_REQUEST', results: [] }, 400);
+  if (env.TOMTOM_API_KEY && env.PROVIDER_DB?.prepare) {
+    const fromTomTom = await cachedProvider(`search:${query}`, 'TomTom search', 3600000, async () => {
+      if (!await reserveBudget(env, 'tomtom')) return failure('TomTom', 429, '하루 500회 통합 한도', 3600);
+      const target = new URL(`https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json`);
+      target.search = new URLSearchParams({ key: env.TOMTOM_API_KEY, language: 'ko-KR', limit: '5' });
+      const response = await fetchWithTimeout(target, { headers: { accept: 'application/json' } });
+      if (!response.ok) return failure('TomTom', response.status, `검색 공급자 HTTP ${response.status}`);
+      const data = await response.json();
+      const results = (data.results || []).filter(row => Number.isFinite(row.position?.lat) && Number.isFinite(row.position?.lon))
+        .map(row => ({ formatted_address: row.poi?.name ? `${row.poi.name} · ${row.address?.freeformAddress || ''}` : row.address?.freeformAddress || query,
+          types: row.type === 'Geography' ? ['locality', 'political'] : ['point_of_interest', 'establishment'],
+          geometry: { location: { lat: row.position.lat, lng: row.position.lon }, viewport: null, bounds: null }, source: 'TomTom' }));
+      return json({ status: results.length ? 'OK' : 'ZERO_RESULTS', results }, 200, { 'x-geocoder-source': 'TomTom' });
+    });
+    if (fromTomTom.ok && (await fromTomTom.clone().json()).results?.length) return fromTomTom;
+  }
   const upstreamUrl = new URL('https://nominatim.openstreetmap.org/search');
   upstreamUrl.searchParams.set('q', query);
   upstreamUrl.searchParams.set('format', 'jsonv2');
@@ -420,6 +439,9 @@ async function handleGbfs(request, url) {
 }
 
 async function handleApi(request, env, url) {
+  const feeds = await connectFeeds(request, env, url); if (feeds) return feeds;
+  const roads = await roadRoutes(request, url); if (roads) return roads;
+  const voice = await voiceRoutes(request, env, url); if (voice) return voice;
   if (url.pathname === '/api/map-source/status') {
     if (request.method !== 'GET') return json({ error: 'method-not-allowed' }, 405);
     return mapSourceStatus(env);
@@ -440,7 +462,7 @@ async function handleApi(request, env, url) {
   if (url.pathname === '/api/opensky') return cachedProvider(`flights:${url.search}`, 'adsb.lol', 15000, () => withSharedCooldown(env, 'adsb.lol', () => handleOpenSky(url, env)));
   if (url.pathname === '/api/adsblol/mil') return cachedProvider('military', 'adsb.lol', 15000, () => withSharedCooldown(env, 'adsb.lol', () => handleMilitaryFlights()));
   if (url.pathname.startsWith('/api/celestrak/')) return handleCelesTrak(url.pathname);
-  if (url.pathname === '/api/geocode') return handleGeocode(url);
+  if (url.pathname === '/api/geocode') return handleGeocode(url, env);
   if (url.pathname.startsWith('/api/gbfs/')) return handleGbfs(request, url);
   if (url.pathname === '/api/rainviewer/metadata') {
     if (env.GEV_RAINVIEWER_PERMITTED !== '1') return failure('RainViewer', 451, '공개 서비스 사용 조건 확인 필요', 3600);

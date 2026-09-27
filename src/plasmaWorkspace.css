@@ -1,0 +1,27 @@
+.plasma-tools { position: fixed; top: 94px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 5px; z-index: 125; padding: 6px; max-width: calc(100vw - 32px); background: rgba(8,12,21,.65); backdrop-filter: blur(28px) saturate(195%); border: 1px solid #ffffff18; border-radius: 8px; color: #eef5f5; }
+.plasma-tools button, .plasma-dialog button { display: inline-flex; justify-content: center; align-items: center; gap: 6px; min-height: 36px; color: inherit; background: #ffffff08; border: 1px solid #ffffff22; border-radius: 4px; padding: 6px 9px; cursor: pointer; font: inherit; }
+.plasma-tools button { width: 36px; flex: 0 0 36px; }
+.plasma-tools form { display: flex; min-width: 100px; gap: 4px; }
+.plasma-tools input { width: 180px; min-width: 0; background: transparent; border: 0; padding: 6px; color: inherit; font: inherit; font-size: 12px; }
+.plasma-tools button[aria-pressed="true"] { color: #00f0ff; border-color: #00f0ff70; }
+.plasma-dialog { width: min(440px, calc(100vw - 32px)); padding: 0; max-height: 80dvh; color: #eef5f5; background: rgba(8,12,21,.88); backdrop-filter: blur(28px) saturate(195%); border: 1px solid #ffffff20; border-radius: 8px; font: 13px 'Pretendard',sans-serif; letter-spacing: 0; box-shadow: 0 16px 48px #0008; overflow: auto; }
+.plasma-dialog::backdrop { background: #0005; }
+.plasma-dialog header { display: flex; gap: 10px; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #ffffff18; }
+.plasma-dialog h2 { font-size: 17px; margin: 0; }
+.plasma-dialog h3 { font-size: 14px; margin: 16px 0 8px; }
+.plasma-dialog .pd-body { padding: 16px; }
+.plasma-dialog p { font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.plasma-dialog a { color: #00f0ff; }
+.plasma-dialog form { display: grid; gap: 10px; }
+.plasma-dialog label { display: grid; gap: 5px; font-size: 12px; }
+.plasma-dialog input:not([type="checkbox"]), .plasma-dialog select { min-width: 0; width: 100%; box-sizing: border-box; border: 1px solid #ffffff25; background: #0004; color: #fff; border-radius: 4px; padding: 10px; font: inherit; }
+.plasma-dialog select option { background: #12171c; }
+.plasma-dialog .pd-check { display: flex; align-items: center; gap: 8px; }
+.plasma-dialog .pd-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 0; border-bottom: 1px solid #ffffff18; }
+.plasma-dialog .pd-row span { overflow-wrap: anywhere; min-width: 0; }
+.plasma-dialog .pd-status { color: #9be5d2; white-space: pre-wrap; }
+.plasma-dialog .pd-logo { width: 112px; height: 48px; object-fit: contain; display: block; margin: 0 auto 12px; }
+#plasma-notice { position: fixed; top: 145px; left: 50%; transform: translateX(-50%); z-index: 150; max-width: min(550px,calc(100vw - 32px)); padding: 10px 14px; color: #fff; background: #102028f2; border: 1px solid #00f0ff50; border-radius: 4px; font: 12px 'Pretendard',sans-serif; line-height: 1.5; overflow-wrap: anywhere; }
+#plasma-notice[hidden] { display: none; }
+.loading-plasma-logo { position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: 112px; height: 48px; object-fit: contain; }
+@media (max-width: 760px) { .plasma-tools { top: 102px; width: calc(100vw - 24px); box-sizing: border-box; flex-wrap: wrap; justify-content: center; } .plasma-tools input { width: 135px; } #plasma-notice { top: 197px; } }

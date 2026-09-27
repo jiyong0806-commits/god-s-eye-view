@@ -2,6 +2,7 @@ import { createLocalGeoJsonLayer } from './localGeojson.js';
 import { createFirmsHeatmapLayer } from './firmsHeatmap.js';
 import submarineCablesLayer from './telegeographySubmarineCables.js';
 import capabilityLayers from './capabilityLayers.js';
+import weatherRadar from './weatherRadar.js';
 
 // Use Vite's ?url import to properly resolve these assets in dev and build
 import datacentersUrl from './local_data/datacenters/datacenters.geojsonl?url';
@@ -50,5 +51,6 @@ export default [
   dams,
   submarineCablesLayer,
   fires,
-  ...capabilityLayers,
+  weatherRadar,
+  ...capabilityLayers.filter(layer => layer.id !== 'weather-radar'),
 ];

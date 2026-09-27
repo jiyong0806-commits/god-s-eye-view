@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { createElement } from 'react';
 import { Network, X, ArrowUpRight } from 'lucide-react';
 import './worldConnect.css';
+import { accountProfile, rankNews } from './plasmaAccount.js';
 
 const iconRoots = new Map();
 function cleanupIcons() {
@@ -24,7 +25,9 @@ export function initWorldConnect(viewer) {
   const header = document.createElement('header'); header.append(text('h2', 'World Connect'));
   const close = document.createElement('button'); close.title = '닫기'; close.setAttribute('aria-label', '닫기'); icon(close, X); header.append(close);
   const content = document.createElement('div'); content.className = 'wc-content'; panel.append(header, content); document.body.append(toggle, panel);
-  let controller = null, current = null, version = 0;
+  let controller = null, current = null, version = 0, activeTab = 'economy', profile = null;
+  accountProfile().then(value => { profile = value; }).catch(() => {});
+  window.addEventListener('plasma:profile', event => { profile = event.detail; if (!panel.hidden && activeTab === 'economy') showFeed('economy'); });
   const cancel = () => { controller?.abort(); controller = new AbortController(); return ++version; };
   close.onclick = () => { panel.hidden = true; cancel(); };
   async function get(path, options) {
@@ -69,16 +72,36 @@ export function initWorldConnect(viewer) {
       };
     } catch (error) { if (generation === version) status.textContent = `${error.message} · 재시도하려면 사건을 다시 선택하세요.`; }
   }
-  toggle.onclick = async () => {
-    if (!panel.hidden) { close.click(); return; }
-    const generation = cancel(); panel.hidden = false; content.replaceChildren(text('p', 'USGS 최근 사건 조회 중…')); cleanupIcons();
+  function tabs() {
+    const row = document.createElement('div'); row.className = 'wc-tabs'; row.setAttribute('role', 'tablist');
+    for (const [id, label] of [['economy', '경제 뉴스'], ['events', '재난 사건']]) {
+      const b = text('button', label); b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(activeTab === id)); b.dataset.wcTab = id; b.onclick = () => showFeed(id); row.append(b);
+    } return row;
+  }
+  async function showFeed(tab = activeTab) {
+    activeTab = tab;
+    const generation = cancel(); panel.hidden = false; content.replaceChildren(tabs(), text('p', tab === 'economy' ? '경제 뉴스 조회 중…' : 'USGS 최근 사건 조회 중…')); cleanupIcons();
     try {
+      if (tab === 'economy') {
+        const data = await get('/api/world-connect/news'); if (generation !== version) return;
+        content.replaceChildren(tabs(), text('h3', profile?.personalization_consent ? '웰컴 맞춤 뉴스' : '최근 경제 뉴스'), text('p', '발행사 공식 RSS · 원문 출처', 'wc-state'));
+        for (const article of rankNews(data.articles, profile)) {
+          const row = document.createElement('section'); row.className = 'wc-news';
+          const headline = text('a', article.title); headline.href = article.url; headline.target = '_blank'; headline.rel = 'noopener noreferrer';
+          row.append(headline, text('small', `${article.provider} · ${new Date(article.publishedAt).toLocaleString('ko-KR')}`),
+            text('p', article.recommendationReason), text('p', article.evidence, 'wc-muted'), text('p', article.limitations, 'wc-muted'));
+          const photo = sourceLink({ title: '사진·기사 원문 확인', url: article.photoSourceUrl }); row.append(photo); content.append(row);
+        }
+        if (!data.articles.length) content.append(text('p', '최신 경제 뉴스가 없습니다.'));
+        return;
+      }
       const data = await get('/api/world-connect/events'); if (generation !== version) return;
-      content.replaceChildren(text('h3', '최근 24시간 · USGS'), text('p', '단일 출처 보고 · 독립 검증 전', 'wc-state'));
+      content.replaceChildren(tabs(), text('h3', '최근 24시간 · USGS'), text('p', '단일 출처 보고 · 독립 검증 전', 'wc-state'));
       for (const event of data.events) { const button = text('button', event.title, 'wc-event'); button.onclick = () => { navigate(event); open(event); }; content.append(button); }
       if (!data.events.length) content.append(text('p', '규모 2.5 이상 사건 없음'));
     } catch (error) { if (generation === version) content.replaceChildren(text('p', error.message)); }
-  };
+  }
+  toggle.onclick = () => { if (!panel.hidden) close.click(); else showFeed(); };
   const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
   handler.setInputAction(({ position }) => {
     const entity = viewer.scene.pick(position)?.id;
