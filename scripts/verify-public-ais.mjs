@@ -19,7 +19,9 @@ try {
   await page.goto(`${base}/map/#v=2&lat=20&lon=0&alt=18000000&pitch=-90&map=nasa-blue-marble&l=a`, { waitUntil: 'domcontentloaded', timeout: 60000 });
   await page.waitForFunction(() => {
     const entry = window.__godsEyeView?.dataManager?.layers.get('ais-live-vessels');
-    return entry?.enabled && entry.lifecycleState === 'enabled' && entry.module.getStats().count > 0;
+    const stats = entry?.module?.getStats?.();
+    return entry?.enabled && entry.lifecycleState === 'enabled' && stats?.count > 0
+      && stats.transportStatus === 'live' && !stats.stale && !stats.loading;
   }, { timeout: 95000 });
   const state = await page.evaluate(() => {
     const gev = window.__godsEyeView;

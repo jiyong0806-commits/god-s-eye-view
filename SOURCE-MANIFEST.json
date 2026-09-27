@@ -1178,8 +1178,8 @@
     },
     {
       "file": "scripts/verify-public-ais.mjs",
-      "sha256": "cdc9aeaf10d100a05796c58cd601c3dc66768e39f217cb4ab2b6eb30560a80ae",
-      "bytes": 3310
+      "sha256": "ad724fc58ee5adec26111a9007b16e32ccb57312022e3e84f898942d9d68e280",
+      "bytes": 3416
     },
     {
       "file": "scripts/verify-public-performance.mjs",
