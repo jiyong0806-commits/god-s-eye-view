@@ -57,6 +57,16 @@ test('unconfigured AIS route reports its missing stream backend', async () => {
   assert.match(body.error, /persistent backend/);
 });
 
+test('AIS service binding serves real collector response without exposing credentials', async () => {
+  const env = { ASSETS: assets, AIS_BACKEND: { fetch: async request => {
+    assert.equal(new URL(request.url).pathname, '/api/ais-live');
+    return Response.json({ status: 'live', rows: [{ mmsi: '123456789', lat: 37, lon: 127 }] });
+  } } };
+  const result = await worker.fetch(new Request('https://example.test/api/ais-live'), env);
+  assert.equal(result.status, 200); assert.equal((await result.json()).rows.length, 1);
+  assert.equal((await worker.fetch(new Request('https://example.test/api/ais-live', { method: 'POST' }), env)).status, 405);
+});
+
 test('public military route serves valid aircraft and coalesces requests', async () => {
   let calls = 0;
   globalThis.fetch = async (input) => {

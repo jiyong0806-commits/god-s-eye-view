@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T03:10:35.183Z",
+  "generatedAt": "2026-09-27T03:27:48.352Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -50,6 +50,11 @@
       "file": "AGENTS.md",
       "sha256": "0952d28b0ae583dc7d2a01adb9c95128ac679ca0b8c058102fb9ef8facc8f992",
       "bytes": 1063
+    },
+    {
+      "file": "AIS-RECOVERY-2026-09-27.md",
+      "sha256": "edf214c4af747bc8fadeb6686198b473d29d5dc8934676329f7134967f869419",
+      "bytes": 2982
     },
     {
       "file": "CHANGELOG.md",
@@ -485,6 +490,11 @@
       "file": "migrations/0001_provider_usage.sql",
       "sha256": "620d1d65bd9000fd74accaaea5db022833b712739f3a5a06f0b5422a14ef9cbd",
       "bytes": 188
+    },
+    {
+      "file": "migrations/0002_provider_cooldown.sql",
+      "sha256": "ddfafd409f84710ced76ad3a3177eb663b707ae69a6ac3662954524cd948e18e",
+      "bytes": 107
     },
     {
       "file": "mobile.html",
@@ -3057,6 +3067,16 @@
       "bytes": 344364
     },
     {
+      "file": "worker/aisCollector.js",
+      "sha256": "5d3142243e3569aaab64a768e3f0fd0f954ad300e30f0d83b959dd5c86b6b16f",
+      "bytes": 9724
+    },
+    {
+      "file": "worker/aisCollector.test.mjs",
+      "sha256": "488ac8e70c474df3f459a9e28c44de54c4ffa12f7e0cc611c5ce16618358736e",
+      "bytes": 4647
+    },
+    {
       "file": "worker/extraRoutes.js",
       "sha256": "680379928e8c6d5d805d9e300b5dcb114e87bd26745bb9565d7eef963ad62d11",
       "bytes": 6823
@@ -3078,13 +3098,13 @@
     },
     {
       "file": "worker/index.js",
-      "sha256": "af4766909af30af7e41baa26edb0bbb63826cfc81c17c7684827bd380ac5fefd",
-      "bytes": 26680
+      "sha256": "5a5704af9622383d156e6ee3683bf2053f87f35987032d76bdcce38d05dfa068",
+      "bytes": 26980
     },
     {
       "file": "worker/index.test.mjs",
-      "sha256": "1f73ca9c959a853a3a29611d3be795b9aa549e101844ef0dee2fac950c0ac9d8",
-      "bytes": 10854
+      "sha256": "e574fa2be2724418eb53da1d401d37d573a4a724e463bed1a47685f6970d452e",
+      "bytes": 11510
     },
     {
       "file": "worker/mapSourceStatus.js",
@@ -3112,6 +3132,16 @@
       "bytes": 6274
     },
     {
+      "file": "worker/sharedCooldown.js",
+      "sha256": "af29e8348aae2ee6360876ba81313a440bcb83532bc1312cdcabd471ec7ae424",
+      "bytes": 1116
+    },
+    {
+      "file": "worker/sharedCooldown.test.mjs",
+      "sha256": "ef5d88265c02ca631f205ce94f7af4ae9b8bcd6147bb9e08b16f244d66aa3ec9",
+      "bytes": 1293
+    },
+    {
       "file": "worker/worldConnectAI.js",
       "sha256": "1ab598a35fa5c9633b707127d26a1d6f3bef3679a57766e9194a597b1d15ca2e",
       "bytes": 3466
@@ -3132,14 +3162,19 @@
       "bytes": 5184
     },
     {
+      "file": "wrangler.ais.jsonc",
+      "sha256": "4401dc8ba24ab99ef23a6f00e0ac58eac1222f7da30d98ce6d1efc7c3a5fc7f8",
+      "bytes": 336
+    },
+    {
       "file": "wrangler.jsonc",
       "sha256": "f161f09185ec9aaadf0ab9d574a92f227ffd83f10899735618e4eacf944cff74",
       "bytes": 460
     },
     {
       "file": "wrangler.pages.jsonc",
-      "sha256": "393f34563f03bf72ef77e5f38cd5b7d9390da103096f4a1ee978ba5090561697",
-      "bytes": 544
+      "sha256": "f5ff3de3d1d3bdfd90bf0f29582dd28c476d7709435a60a4a917d897f2d0dc6f",
+      "bytes": 622
     }
   ]
 }

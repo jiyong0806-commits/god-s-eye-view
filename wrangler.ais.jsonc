@@ -1,0 +1,11 @@
+{
+  "name": "gev-ais-collector",
+  "main": "worker/aisCollector.js",
+  "compatibility_date": "2026-09-27",
+  "workers_dev": false,
+  "preview_urls": false,
+  "durable_objects": {
+    "bindings": [{ "name": "AIS_COLLECTOR", "class_name": "AisCollector" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AisCollector"] }]
+}

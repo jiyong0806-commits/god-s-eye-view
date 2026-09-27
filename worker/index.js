@@ -3,6 +3,7 @@ import { extraRoutes } from './extraRoutes.js';
 import { flowRoutes } from './flowRoutes.js';
 import { worldConnectRoutes } from './worldConnectRoutes.js';
 import { mapSourceStatus } from './mapSourceStatus.js';
+import { withSharedCooldown } from './sharedCooldown.js';
 import { cachedProvider, failure, reserveBudget, retrySeconds } from './providerRuntime.js';
 
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8' };
@@ -430,12 +431,14 @@ async function handleApi(request, env, url) {
   const extra = await extraRoutes(request, env, url);
   if (extra) return extra;
   if (url.pathname === '/api/ais-live' || url.pathname === '/api/ais-live/track') {
+    if (request.method !== 'GET') return json({ error: 'method-not-allowed' }, 405);
+    if (env.AIS_BACKEND?.fetch) return env.AIS_BACKEND.fetch(request);
     return json({ status: 'unsupported', error: 'AISStream persistent backend is not configured on this host',
       rows: [], count: 0 }, 503, { 'retry-after': '900' });
   }
   if (url.pathname === '/api/firms' || url.pathname === '/api/firms/status') return handleFirms(env, url.pathname);
-  if (url.pathname === '/api/opensky') return cachedProvider(`flights:${url.search}`, 'adsb.lol', 15000, () => handleOpenSky(url, env));
-  if (url.pathname === '/api/adsblol/mil') return cachedProvider('military', 'adsb.lol', 15000, () => handleMilitaryFlights());
+  if (url.pathname === '/api/opensky') return cachedProvider(`flights:${url.search}`, 'adsb.lol', 15000, () => withSharedCooldown(env, 'adsb.lol', () => handleOpenSky(url, env)));
+  if (url.pathname === '/api/adsblol/mil') return cachedProvider('military', 'adsb.lol', 15000, () => withSharedCooldown(env, 'adsb.lol', () => handleMilitaryFlights()));
   if (url.pathname.startsWith('/api/celestrak/')) return handleCelesTrak(url.pathname);
   if (url.pathname === '/api/geocode') return handleGeocode(url);
   if (url.pathname.startsWith('/api/gbfs/')) return handleGbfs(request, url);
