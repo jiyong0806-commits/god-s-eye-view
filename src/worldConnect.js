@@ -54,12 +54,16 @@ export function initWorldConnect(viewer) {
       const form = document.createElement('form'); form.className = 'wc-question';
       const input = document.createElement('input'); input.placeholder = '이 사건에 대해 질문'; input.maxLength = 1000; input.required = true; input.setAttribute('aria-label', '사건 질문');
       const send = document.createElement('button'); send.type = 'submit'; send.title = '질문 보내기'; send.setAttribute('aria-label', '질문 보내기'); icon(send, ArrowUpRight);
-      const answer = text('p', '', 'wc-answer'); form.append(input, send); content.append(text('h3', '근거 기반 AI 질문'), form, answer);
+      const answer = text('p', '', 'wc-answer'); form.append(input, send); content.append(text('h3', '사건 질문'), form, answer);
       form.onsubmit = async e => {
         e.preventDefault(); if (send.disabled) return; send.disabled = true; answer.textContent = '응답 대기 중…';
         try {
           const result = await get('/api/world-connect/question', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: current.id, question: input.value }) });
-          if (generation === version) answer.textContent = `${result.mode === 'grounded-answer' ? '근거 응답 · AI 질문 해석' : '원본 요약 · AI 응답 제외'} · ${result.provider}\n${result.text}`;
+          if (generation === version) {
+            const label = result.mode === 'grounded-answer' ? '근거 응답 · AI 질문 해석'
+              : result.mode === 'source-lookup' ? '출처 기록 조회 · AI 아님' : '원본 요약 · AI 응답 제외';
+            answer.textContent = `${label} · ${result.provider}\n${result.text}${result.ai ? `\nAI 상태: ${result.ai.reason} (${result.ai.httpStatus})` : ''}`;
+          }
         } catch (error) { if (generation === version) answer.textContent = error.message; }
         finally { send.disabled = false; }
       };

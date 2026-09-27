@@ -1,4 +1,5 @@
 import { localModelChat } from '../packages/god-runtime/ollama.js';
+import { cloudWorldQuestion, sourceQuestionFocus, FOCUS_INSTRUCTION } from './worldConnectAI.js';
 
 export const WORLD_EVENT_FEED = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson';
 const json = (data, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
@@ -6,7 +7,7 @@ const validId = id => typeof id === 'string' && /^[a-zA-Z0-9_-]{1,64}$/.test(id)
 
 export function eventFromFeature(feature) {
   const p = feature?.properties, c = feature?.geometry?.coordinates;
-  if (!validId(feature?.id) || !p || !Array.isArray(c) || c.length < 3 ||
+  if (!validId(feature?.id) || !p || (p.type && p.type !== 'earthquake') || !Array.isArray(c) || c.length < 3 ||
       !c.slice(0, 3).every(Number.isFinite) || Math.abs(c[0]) > 180 || Math.abs(c[1]) > 90 ||
       !Number.isFinite(p.mag) || !Number.isFinite(p.time) || !Number.isFinite(new Date(p.time).getTime())) return null;
   const sourceUrl = `https://earthquake.usgs.gov/earthquakes/eventpage/${encodeURIComponent(feature.id)}`;
@@ -38,7 +39,7 @@ export function guardWorldAnswer(result, event, relations = [], question = '') {
   // The model selects a focus only. All displayed facts come from verified server records.
   let focus;
   try { focus = JSON.parse(result.text).focus; } catch { focus = null; }
-  if (/여진|인과|원인|피해|예측|aftershock|caus(?:e|al)|predict|damage/i.test(question)) focus = 'unknown';
+  if (/여진|인과|원인|피해|예측|진도|aftershock|caus(?:e|al)|predict|damage|intensity/i.test(question)) focus = 'unknown';
   const answers = {
     summary: event.summary, magnitude: `USGS 보고 규모: ${event.magnitude.toFixed(1)}`,
     location: `USGS 원문 위치: ${event.place}\n좌표: ${event.lat}, ${event.lon}`,
@@ -46,7 +47,7 @@ export function guardWorldAnswer(result, event, relations = [], question = '') {
     depth: `USGS 보고 깊이: ${event.depthKm.toFixed(1)}km`,
     sources: `출처: USGS\n${event.source.url}`,
     relations: relations.length ? relations.map(link => `${link.event.title} · ${link.reason}`).join('\n') : '500km · 24시간 범위의 관련 기록 없음',
-    unknown: '제공된 위치·시간 기록만으로 여진, 인과 관계 또는 피해를 판단할 수 없습니다. 추가 독립 근거가 필요합니다.',
+    unknown: '이 피드의 규모·위치·시간·깊이 기록만으로 요청한 내용을 판단할 수 없습니다. 진도, 여진, 인과 관계 또는 피해에는 추가 독립 근거가 필요합니다.',
   };
   const valid = typeof focus === 'string' && Object.hasOwn(answers, focus);
   return { ...result, text: valid ? answers[focus] : `${event.summary}\nAI 질문 해석을 검증할 수 없어 원본 요약만 표시합니다. 추가 판단은 할 수 없습니다.`,
@@ -107,12 +108,20 @@ export function createWorldConnectRoutes({ fetcher = fetch, chat = localModelCha
       if (path === 'analyze') return json({ event, relations, depth: 1, checkedAt: cachedAt,
         limitations: 'USGS 단일 출처. 인과·피해 예측·경제 영향은 미분석. 숫자 신뢰도는 부여하지 않습니다.' });
       const local = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname) && env.FLOW_LOCAL_RUNTIME === '1';
-      if (!local || !env.OLLAMA_MODEL) return json({ error: 'AI 모델 미연결. 사건과 근거는 열람할 수 있습니다.', mode: 'unavailable' }, 503);
-      const result = await chat({ text: JSON.stringify({ question: input.question }), sources: [event.source, ...relations.map(link => link.event.source)],
-        instruction: '질문의 주제를 분류하세요. JSON 객체만 출력하세요: {"focus":"summary"}. focus는 summary,magnitude,location,time,depth,sources,relations,unknown 중 하나입니다. 확인된 정보나 요약 요청은 summary입니다. 여진·원인·피해·예측 질문은 unknown입니다. 사실 내용을 답하지 마세요.' },
-      { url: 'http://127.0.0.1:11434', model: env.OLLAMA_MODEL, maxTokens: 64, contextSize: 1024, jsonFormat: true,
-        signal: AbortSignal.any([request.signal, AbortSignal.timeout(85000)]) });
-      return json(guardWorldAnswer(result, event, relations, input.question));
+      try {
+        const result = local && env.OLLAMA_MODEL
+          ? await chat({ text: JSON.stringify({ question: input.question }), sources: [event.source, ...relations.map(link => link.event.source)], instruction: FOCUS_INSTRUCTION },
+            { url: 'http://127.0.0.1:11434', model: env.OLLAMA_MODEL, maxTokens: 64, contextSize: 1024, jsonFormat: true,
+              signal: AbortSignal.any([request.signal, AbortSignal.timeout(85000)]) })
+          : await cloudWorldQuestion(env, input.question, { now });
+        return json(guardWorldAnswer(result, event, relations, input.question));
+      } catch (error) {
+        if (request.signal.aborted) throw error;
+        const answer = guardWorldAnswer({ text: JSON.stringify({ focus: sourceQuestionFocus(input.question) }) }, event, relations, input.question);
+        return json({ ...answer, mode: 'source-lookup', provider: 'USGS 원본 조회 · AI 아님',
+          ai: { state: 'unavailable', code: error.code || 'local-model-failed', httpStatus: error.status || 502,
+            reason: error.code ? error.message : '로컬 AI 연결 실패', retryAfterSeconds: error.retryAfterSeconds || 60 } });
+      }
     } catch (error) { return json({ error: ['TimeoutError', 'AbortError'].includes(error?.name) ? '응답 시간 초과. 잠시 후 다시 시도하세요.' : String(error?.message || '연결 실패').slice(0, 240), provider: 'USGS / Ollama', retryAfterSeconds: 60 }, error instanceof SyntaxError ? 400 : 502); }
   };
 }

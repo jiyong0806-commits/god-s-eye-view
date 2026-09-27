@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T02:55:14.189Z",
+  "generatedAt": "2026-09-27T03:10:35.183Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -110,6 +110,11 @@
       "file": "TESTING.md",
       "sha256": "d4945245e3630e58a83975e2145c1b0fc8479d4fc7832ec430d0505fa55dd5cf",
       "bytes": 11591
+    },
+    {
+      "file": "URGENT-RECOVERY-2026-09-27.md",
+      "sha256": "27ede05753177f03c4b79311f8bb7c40938d1447a344bd63db7bdac3a5b88c59",
+      "bytes": 3031
     },
     {
       "file": "WORLD-CONNECT-2026-09-27.md",
@@ -2948,8 +2953,8 @@
     },
     {
       "file": "src/worldConnect.js",
-      "sha256": "7a14a4756534bb91e57f7d3af2a879733991792b45201dd313d6489e93314cf2",
-      "bytes": 7039
+      "sha256": "11ffbfb7d8048a75aa61666338b44f1525f0169eaf5ecfe35d41efa466fcfb1d",
+      "bytes": 7254
     },
     {
       "file": "src/worldFocus.js",
@@ -3107,14 +3112,24 @@
       "bytes": 6274
     },
     {
+      "file": "worker/worldConnectAI.js",
+      "sha256": "1ab598a35fa5c9633b707127d26a1d6f3bef3679a57766e9194a597b1d15ca2e",
+      "bytes": 3466
+    },
+    {
+      "file": "worker/worldConnectAI.test.mjs",
+      "sha256": "c664ed914c95f3c62824764a40efe8b1ecd587ad05884b6bc06ac34f40cf8a5c",
+      "bytes": 4735
+    },
+    {
       "file": "worker/worldConnectRoutes.js",
-      "sha256": "af66fa672980feeada52e3c51b6e3f8bfc05bf8be38664e93e9bda850eb14729",
-      "bytes": 9278
+      "sha256": "34e3ddff5406a7e810d461ac295299e5ccfa18a76445ac7849e9592608bdb8bb",
+      "bytes": 9702
     },
     {
       "file": "worker/worldConnectRoutes.test.mjs",
-      "sha256": "4b009aaef0e2ced61e5a43b98f93c0c4bc325e9998e78ac70c03299842057f3b",
-      "bytes": 4965
+      "sha256": "484a534a3faba17a67611a7774538a67e42fb32135e09574f3cbddd22969a660",
+      "bytes": 5184
     },
     {
       "file": "wrangler.jsonc",
@@ -3123,8 +3138,8 @@
     },
     {
       "file": "wrangler.pages.jsonc",
-      "sha256": "c65d8f2c8803ca51b1059218b835b94babcb682d6ede4ba6b15785db95c53f22",
-      "bytes": 436
+      "sha256": "393f34563f03bf72ef77e5f38cd5b7d9390da103096f4a1ee978ba5090561697",
+      "bytes": 544
     }
   ]
 }

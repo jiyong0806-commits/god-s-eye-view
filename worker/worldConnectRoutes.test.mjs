@@ -30,11 +30,14 @@ test('concurrent feed calls share one real upstream request and cache', async ()
   assert.deepEqual(responses.map(r => r.status), [200, 200]); assert.equal(calls, 1);
   await handle(new Request('https://x.test/api/world-connect/events')); assert.equal(calls, 1);
 });
-test('unknown events and unavailable models are explicit, never invented', async () => {
+test('unknown events fail and unavailable AI returns explicitly non-AI source lookup', async () => {
   const handle = route();
   assert.equal((await handle(new Request('https://x.test/api/world-connect/analyze?id=missing'))).status, 404);
   const result = await handle(question(), { FLOW_LOCAL_RUNTIME: '1', OLLAMA_MODEL: 'qwen3:1.7b' });
-  assert.equal(result.status, 503); assert.match((await result.json()).error, /未|미연결/);
+  assert.equal(result.status, 200); const body = await result.json();
+  assert.equal(body.mode, 'source-lookup'); assert.match(body.provider, /AI 아님/);
+  assert.equal(body.ai.code, 'ai-not-enabled'); assert.equal(body.ai.httpStatus, 503);
+  assert.match(body.text, /https:\/\/earthquake.usgs.gov/);
 });
 test('local questions receive only server-verified events, not user-supplied evidence', async () => {
   let seen;
