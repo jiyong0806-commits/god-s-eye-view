@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T02:37:59.123Z",
+  "generatedAt": "2026-09-27T02:55:14.189Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -113,8 +113,8 @@
     },
     {
       "file": "WORLD-CONNECT-2026-09-27.md",
-      "sha256": "93a37cb01f0037a23a40953916088b8de89ecf9aec339dc70f9515b64d810105",
-      "bytes": 1913
+      "sha256": "1287a8e39f45d01a8fc71eac1d18e6cf142a4a7fdbb2c2d73ddfb00e49763a85",
+      "bytes": 3684
     },
     {
       "file": "api/_utils.js",
@@ -528,8 +528,8 @@
     },
     {
       "file": "packages/god-runtime/ollama.js",
-      "sha256": "435d91f3215aba4eee220c2af3f658145a6ff88aedeb189e1309c2d18d145ebf",
-      "bytes": 2359
+      "sha256": "b88ca7b2c8170402c8adb55b439d9d3cabd23ac50d864b54efdcccb1bb860177",
+      "bytes": 2533
     },
     {
       "file": "packages/god-runtime/router.js",
@@ -1168,8 +1168,8 @@
     },
     {
       "file": "scripts/verify-world-connect.mjs",
-      "sha256": "83f2b5c40ff04a45d0dfdd11c66b84302e39fb06c563102c087f07a185b94e9e",
-      "bytes": 3953
+      "sha256": "977cca0f452bd3e5d02a34c7d99059ac1ea287ae174c1517f6293650e0dcaace",
+      "bytes": 3971
     },
     {
       "file": "skills/plasma-source-delivery/SKILL.md",
@@ -2948,8 +2948,8 @@
     },
     {
       "file": "src/worldConnect.js",
-      "sha256": "ad2191f9bce17687da144272675e3ac3794c62bbbccd22f35a574c2f332d2158",
-      "bytes": 6936
+      "sha256": "7a14a4756534bb91e57f7d3af2a879733991792b45201dd313d6489e93314cf2",
+      "bytes": 7039
     },
     {
       "file": "src/worldFocus.js",
@@ -3108,13 +3108,13 @@
     },
     {
       "file": "worker/worldConnectRoutes.js",
-      "sha256": "7d6188a6ed336f79ebcb756456d29b6174768ae5617b56d06315a372a6c22ac5",
-      "bytes": 7382
+      "sha256": "af66fa672980feeada52e3c51b6e3f8bfc05bf8be38664e93e9bda850eb14729",
+      "bytes": 9278
     },
     {
       "file": "worker/worldConnectRoutes.test.mjs",
-      "sha256": "21296ace969b6b71db04e1c2afbb6e1cbebe2623aaffc962d07d517c59687ed5",
-      "bytes": 3933
+      "sha256": "4b009aaef0e2ced61e5a43b98f93c0c4bc325e9998e78ac70c03299842057f3b",
+      "bytes": 4965
     },
     {
       "file": "wrangler.jsonc",

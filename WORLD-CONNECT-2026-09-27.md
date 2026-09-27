@@ -6,7 +6,7 @@
 - No causal, aftershock, loss, confidence-percentage or second-disaster predictions.
 - Single-source reports are not marked independently confirmed. All inference stays labeled.
 - Map remains interactive; close/change cancels pending UI requests. Feed requests coalesce and cache for 60 seconds; no frame-loop analysis.
-- Local questions use server-verified feed records through Ollama's loopback backend. Configure OLLAMA_MODEL, then run Vite locally. Ollama must already be installed and serving on 127.0.0.1:11434.
+- Local questions are classified by Ollama through the loopback backend. The model returns only a JSON focus enum; the server composes the answer from verified USGS fields. Model prose, numbers and translated directions are never rendered. Configure OLLAMA_MODEL, then run Vite locally with Ollama serving on 127.0.0.1:11434.
 - Public Cloudflare has no model attached. Questions return an explicit model-unavailable status; no silent simulated AI. Do not expose Ollama's unauthenticated port to the Internet.
 
 ## Daily map service check
@@ -26,5 +26,6 @@ Multi-source corroboration, depth 2/3, event economics, timeline, conflict/corre
 - Public God Flow graph: stages 1-4 completed against real search results, with stages 3/4 explicitly labeled non-AI evidence extraction.
 - Desktop 1440x900 and narrow 393x852 browser checks passed panel opening/closing, source display, bounds and no WebGL context loss / JavaScript errors. These are short functional checks, not a 10-minute stress/FPS certification.
 - Public security smoke: 16 bounded checks passed. This is not a penetration-test certification.
-- Ollama 0.34.4 and qwen3:1.7b installed locally. First full prompt timed out at 85 seconds on CPU; compact evidence / 128-token cap returned HTTP 200 in 44 seconds. Model incorrectly asserted an aftershock relationship; a conservative output guard now replaces causal/damage/prediction mentions with source facts and labels the result evidence-only. This guard is not comprehensive fact verification of all possible model output.
+- Ollama 0.34.4 and qwen3:1.7b installed locally. First full prompt timed out at 85 seconds on CPU; compact evidence returned HTTP 200 in 44 seconds. Free-form output misstated aftershock relationships and geographic directions. The final pipeline therefore accepts only a whitelist JSON focus enum and generates all displayed facts from server records. Invalid classification falls back to the source summary; causal/prediction questions return insufficient-evidence status, never a model prediction. This is grounded question interpretation, not open-ended AI investigation or independent corroboration.
 - Model is bound to loopback only. Public site cannot reach this PC's model and reports that limitation.
+- Final grounded classifier request returned HTTP 200 in 11.7 seconds on this PC and composed the original magnitude without free-form model facts. Focused regression suite: 38 passed. No universal latency guarantee.

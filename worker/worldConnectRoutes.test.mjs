@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createWorldConnectRoutes, eventFromFeature, relateEvents } from './worldConnectRoutes.js';
+import { createWorldConnectRoutes, eventFromFeature, relateEvents, guardWorldAnswer } from './worldConnectRoutes.js';
 
 const feature = (id = 'us-test', lon = 127, time = 1760000000000) => ({ id, geometry: { coordinates: [lon, 37, 10] }, properties: { mag: 4.1, place: 'Test location', time } });
 const feed = { features: [feature(), feature('us-near', 127.1), feature('us-far', -80)] };
@@ -18,6 +18,11 @@ test('relations are location-only, bounded and never causal predictions', () => 
   assert.equal(links.length, 1); assert.equal(links[0].type, 'LOCATION'); assert.equal(links[0].confidence, null);
   assert.match(links[0].reason, /인과 또는 여진 판단이 아닙니다/);
 });
+test('unsupported model causality claims are replaced with source facts, not served as AI analysis', () => {
+  const result = guardWorldAnswer({ text: '이 사건은 여진 관계가 없습니다.', provider: 'Ollama' }, eventFromFeature(feature()));
+  assert.equal(result.mode, 'evidence-only'); assert.match(result.text, /할 수 없습니다/);
+  assert.equal(result.text.includes('여진 관계가 없습니다'), false);
+});
 test('concurrent feed calls share one real upstream request and cache', async () => {
   let calls = 0;
   const handle = route({ fetcher: async () => { calls++; return Response.json(feed); } });
@@ -33,11 +38,18 @@ test('unknown events and unavailable models are explicit, never invented', async
 });
 test('local questions receive only server-verified events, not user-supplied evidence', async () => {
   let seen;
-  const handle = route({ chat: async (input, options) => { seen = { input, options }; return { text: '근거를 확인했습니다.', provider: 'test' }; } });
+  const handle = route({ chat: async (input, options) => { seen = { input, options }; return { text: '{"focus":"location"}', provider: 'test' }; } });
   const result = await handle(question('us-test', 'http://127.0.0.1:5182'), { FLOW_LOCAL_RUNTIME: '1', OLLAMA_MODEL: 'test' });
-  assert.equal(result.status, 200); assert.equal((await result.json()).state, 'ai-inference');
-  assert.equal(seen.options.url, 'http://127.0.0.1:11434'); assert.match(seen.input.text, /LOCATION/);
+  assert.equal(result.status, 200); const answer = await result.json(); assert.equal(answer.state, 'source-reported');
+  assert.equal(answer.mode, 'grounded-answer'); assert.match(answer.text, /Test location/);
+  assert.equal(seen.options.url, 'http://127.0.0.1:11434'); assert.equal(seen.options.jsonFormat, true);
   assert.equal(seen.input.sources.length, 2);
+});
+test('model cannot fabricate coordinates or assert a causal answer through a forged focus', () => {
+  const event = eventFromFeature(feature());
+  const result = guardWorldAnswer({ text: '{"focus":"location","lat":9,"place":"southwest"}' }, event);
+  assert.match(result.text, /127/); assert.equal(result.text.includes('southwest'), false);
+  assert.match(guardWorldAnswer({ text: '{"focus":"summary"}' }, event, [], '여진인가?').text, /판단할 수 없습니다/);
 });
 test('origin, ID, question limit and provider errors fail safely', async () => {
   const handle = route();

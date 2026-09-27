@@ -34,6 +34,26 @@ export function relateEvents(event, candidates) {
       sources: [event.source, link.event.source] }));
 }
 
+export function guardWorldAnswer(result, event, relations = [], question = '') {
+  // The model selects a focus only. All displayed facts come from verified server records.
+  let focus;
+  try { focus = JSON.parse(result.text).focus; } catch { focus = null; }
+  if (/여진|인과|원인|피해|예측|aftershock|caus(?:e|al)|predict|damage/i.test(question)) focus = 'unknown';
+  const answers = {
+    summary: event.summary, magnitude: `USGS 보고 규모: ${event.magnitude.toFixed(1)}`,
+    location: `USGS 원문 위치: ${event.place}\n좌표: ${event.lat}, ${event.lon}`,
+    time: `발생 시각: ${new Date(event.time).toISOString()} (UTC)`,
+    depth: `USGS 보고 깊이: ${event.depthKm.toFixed(1)}km`,
+    sources: `출처: USGS\n${event.source.url}`,
+    relations: relations.length ? relations.map(link => `${link.event.title} · ${link.reason}`).join('\n') : '500km · 24시간 범위의 관련 기록 없음',
+    unknown: '제공된 위치·시간 기록만으로 여진, 인과 관계 또는 피해를 판단할 수 없습니다. 추가 독립 근거가 필요합니다.',
+  };
+  const valid = typeof focus === 'string' && Object.hasOwn(answers, focus);
+  return { ...result, text: valid ? answers[focus] : `${event.summary}\nAI 질문 해석을 검증할 수 없어 원본 요약만 표시합니다. 추가 판단은 할 수 없습니다.`,
+    provider: valid ? `${result.provider} 질문 해석 / USGS 근거` : 'USGS 원본 요약 (모델 응답 제외)',
+    state: 'source-reported', mode: valid ? 'grounded-answer' : 'evidence-only' };
+}
+
 export function createWorldConnectRoutes({ fetcher = fetch, chat = localModelChat, now = Date.now } = {}) {
   let cached = null, pending = null, cachedAt = 0;
   const windows = new Map();
@@ -88,11 +108,12 @@ export function createWorldConnectRoutes({ fetcher = fetch, chat = localModelCha
         limitations: 'USGS 단일 출처. 인과·피해 예측·경제 영향은 미분석. 숫자 신뢰도는 부여하지 않습니다.' });
       const local = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname) && env.FLOW_LOCAL_RUNTIME === '1';
       if (!local || !env.OLLAMA_MODEL) return json({ error: 'AI 모델 미연결. 사건과 근거는 열람할 수 있습니다.', mode: 'unavailable' }, 503);
-      const result = await chat({ text: JSON.stringify({ event, relations }), sources: [event.source, ...relations.map(link => link.event.source)],
-        instruction: `질문: ${input.question}\n제공된 사건 기록만 사용하세요. LOCATION은 인과·여진 관계가 아닙니다. 확정 정보와 AI 추론을 구분하고 모르는 것은 모른다고 답하세요.` },
-      { url: 'http://127.0.0.1:11434', model: env.OLLAMA_MODEL, signal: AbortSignal.any([request.signal, AbortSignal.timeout(85000)]) });
-      return json({ ...result, state: 'ai-inference' });
-    } catch (error) { return json({ error: String(error?.message || '연결 실패').slice(0, 240), provider: 'USGS / Ollama', retryAfterSeconds: 60 }, error instanceof SyntaxError ? 400 : 502); }
+      const result = await chat({ text: JSON.stringify({ question: input.question }), sources: [event.source, ...relations.map(link => link.event.source)],
+        instruction: '질문의 주제를 분류하세요. JSON 객체만 출력하세요: {"focus":"summary"}. focus는 summary,magnitude,location,time,depth,sources,relations,unknown 중 하나입니다. 확인된 정보나 요약 요청은 summary입니다. 여진·원인·피해·예측 질문은 unknown입니다. 사실 내용을 답하지 마세요.' },
+      { url: 'http://127.0.0.1:11434', model: env.OLLAMA_MODEL, maxTokens: 64, contextSize: 1024, jsonFormat: true,
+        signal: AbortSignal.any([request.signal, AbortSignal.timeout(85000)]) });
+      return json(guardWorldAnswer(result, event, relations, input.question));
+    } catch (error) { return json({ error: ['TimeoutError', 'AbortError'].includes(error?.name) ? '응답 시간 초과. 잠시 후 다시 시도하세요.' : String(error?.message || '연결 실패').slice(0, 240), provider: 'USGS / Ollama', retryAfterSeconds: 60 }, error instanceof SyntaxError ? 400 : 502); }
   };
 }
 export const worldConnectRoutes = createWorldConnectRoutes();

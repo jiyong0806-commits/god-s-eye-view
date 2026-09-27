@@ -59,7 +59,7 @@ export function initWorldConnect(viewer) {
         e.preventDefault(); if (send.disabled) return; send.disabled = true; answer.textContent = '응답 대기 중…';
         try {
           const result = await get('/api/world-connect/question', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: current.id, question: input.value }) });
-          if (generation === version) answer.textContent = `${result.mode === 'evidence-only' ? '근거 응답 · AI 판단 제한' : 'AI 추론 · 검증 전'} · ${result.provider}\n${result.text}`;
+          if (generation === version) answer.textContent = `${result.mode === 'grounded-answer' ? '근거 응답 · AI 질문 해석' : '원본 요약 · AI 응답 제외'} · ${result.provider}\n${result.text}`;
         } catch (error) { if (generation === version) answer.textContent = error.message; }
         finally { send.disabled = false; }
       };
@@ -83,4 +83,5 @@ export function initWorldConnect(viewer) {
     open({ id: p.usgsId, title: `M${Number(p.mag).toFixed(1)} ${p.place}`, magnitude: p.mag, place: p.place,
       source: { title: 'USGS 사건 기록', url: `https://earthquake.usgs.gov/earthquakes/eventpage/${encodeURIComponent(p.usgsId)}` } });
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-  return { open, destro
+  return { open, destroy() { cancel(); handler.destroy(); toggle.remove(); panel.remove(); cleanupIcons(); } };
+}
