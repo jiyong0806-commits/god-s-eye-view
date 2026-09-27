@@ -30,6 +30,7 @@ import { initLogoGaze } from './logoGaze.js';
 import { initStreetPhotoPanel } from './streetPhotoPanel.js';
 import { initPlasmaBgm } from './plasmaBgm.js';
 import { initPlasmaControls } from './plasmaControls.js';
+import { initWorldConnect } from './worldConnect.js';
 import { initCockpitCloudEffects } from './cockpitCloudEffects.js';
 import {
   installRenderGovernor,
@@ -441,6 +442,7 @@ async function init() {
       getRenderGovernorDiagnostics,
       requestRender: governorRequestRender,
     };
+    window.__godsEyeView.worldConnect = initWorldConnect(viewer);
     const openAiVoiceReady = Boolean(import.meta.env.OPENAI_API_KEY);
     if (openAiVoiceReady) {
       window.__godsEyeView.voiceCommands = initGevVoiceCommands({ viewer, styleManager, dataManager, sceneDirector, annotations });

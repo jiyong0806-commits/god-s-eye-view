@@ -125,6 +125,29 @@ test('Korean geocode request returns a usable camera destination', async () => {
   assert.equal(body.results[0].geometry.location.lat, 37.5665);
 });
 
+test('Korean place with spaces resolves an exact Wikidata coordinate when Nominatim misses', async () => {
+  const calls = [];
+  globalThis.fetch = async input => {
+    const url = String(input); calls.push(url);
+    if (url.includes('nominatim.openstreetmap.org')) return Response.json([]);
+    if (url.includes('wbsearchentities')) return Response.json({ search: [{ id: 'Q17314835',
+      label: 'Jipyeongseon Middle School', match: { text: '지평선중학교' } }] });
+    if (url.includes('Special:EntityData/Q17314835')) return Response.json({ entities: { Q17314835: {
+      labels: { ko: { value: '지평선중학교' } },
+      claims: { P625: [{ mainsnak: { datavalue: { value: { latitude: 35.827415,
+        longitude: 126.830054, globe: 'http://www.wikidata.org/entity/Q2' } } } }] },
+    } } });
+    throw new Error('Unexpected provider');
+  };
+  const response = await worker.fetch(new Request('https://example.test/api/geocode?q=%EC%A7%80%ED%8F%89%EC%84%A0%20%EC%A4%91%ED%95%99%EA%B5%90'), { ASSETS: assets });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('x-geocoder-source'), 'Wikidata');
+  const body = await response.json();
+  assert.equal(body.results[0].formatted_address, '지평선중학교');
+  assert.deepEqual(body.results[0].geometry.location, { lat: 35.827415, lng: 126.830054 });
+  assert.equal(calls.length, 3);
+});
+
 test('unconfigured paid TTS does not call upstream', async () => {
   globalThis.fetch = async () => { throw new Error('unexpected upstream request'); };
   const response = await worker.fetch(new Request('https://example.test/api/elevenlabs/tts', { method: 'POST', body: JSON.stringify({ text: 'test' }) }), { ASSETS: assets });

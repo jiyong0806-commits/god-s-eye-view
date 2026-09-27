@@ -81,6 +81,18 @@ const NASA_BLUE_MARBLE_CREDIT = 'NASA GIBS / Blue Marble';
 // line. Terms note in DATA_SOURCES.md.
 const ESRI_WORLD_IMAGERY_URL =
   'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
+// Esri advertises levels through 23, but many locations return blank placeholder
+// tiles above 19. Keep the latest available parent image visible when zooming in.
+export const ESRI_RELIABLE_MAXIMUM_LEVEL = 19;
+export function capImageryLevel(provider, maximumLevel) {
+  return new Proxy(provider, {
+    get(target, property) {
+      if (property === 'maximumLevel') return Math.min(target.maximumLevel ?? maximumLevel, maximumLevel);
+      const value = Reflect.get(target, property, target);
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  });
+}
 const ESRI_IMAGERY_CREDIT =
   'Powered by Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community';
 // The on-screen notice Esri requires when a third-party library draws its
@@ -363,10 +375,11 @@ export class MapStackController {
       provider = await Cesium.IonImageryProvider.fromAssetId(stack.assetId);
     } else if (stack.kind === 'esri-imagery') {
       try {
-        provider = await Cesium.ArcGisMapServerImageryProvider.fromUrl(ESRI_WORLD_IMAGERY_URL, {
+        const esri = await Cesium.ArcGisMapServerImageryProvider.fromUrl(ESRI_WORLD_IMAGERY_URL, {
           credit: ESRI_IMAGERY_CREDIT,
           enablePickFeatures: false,
         });
+        provider = capImageryLevel(esri, ESRI_RELIABLE_MAXIMUM_LEVEL);
       } catch (error) {
         // The keyless DEFAULT landing must never strand a first run on a blank
         // globe because Esri is unreachable — fall back to OSM tiles for this

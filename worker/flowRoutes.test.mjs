@@ -41,6 +41,17 @@ test('public host cannot activate local model even when env is incorrectly suppl
   const status = await (await route(new Request('https://example.test/api/flow/status'), env)).json();
   assert.equal(status.ai.configured, false);
 });
+test('public flow completes evidence and output stages without presenting fallback as AI', async () => {
+  const route = createFlowRoutes({ chat: () => assert.fail('local model exposed') });
+  const evidence = [{ title: '지구', url: 'https://ko.wikipedia.org/wiki/지구', snippet: '태양계의 행성' }];
+  const response = await route(request('ai', { text: '지구에 대해 조사', sources: evidence }));
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.mode, 'extractive');
+  assert.match(result.provider, /AI 아님/);
+  assert.match(result.text, /태양계의 행성/);
+  assert.deepEqual(result.sources, evidence);
+});
 test('local status requires an installed, reachable model', async () => {
   const route = createFlowRoutes({ probe: async () => ({ available: false, reason: 'offline' }) });
   const status = await (await route(new Request('http://localhost/api/flow/status'), { FLOW_LOCAL_RUNTIME: '1', OLLAMA_MODEL: 'test' })).json();

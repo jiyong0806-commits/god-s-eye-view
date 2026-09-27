@@ -56,7 +56,12 @@ export function initPlasmaControls() {
       app?.viewer?.scene?.imageryLayers?.raiseToTop?.(app.viewer.imageryLayers.get(app.viewer.imageryLayers.length - 1));
       governorRequestRender('manual-map-refresh');
       window.dispatchEvent(new CustomEvent('gev:map-refreshed', { detail: { activeIds } }));
-      refresh.title = `${activeIds.length}개 활성 레이어 업데이트 완료`;
+      const sourceStatus = await fetch('/api/map-source/status').then(async response => {
+        const data = await response.json(); if (!response.ok) throw new Error(data.error); return data;
+      }).catch(error => ({ error: error.message }));
+      refresh.title = sourceStatus.checked_at
+        ? `${activeIds.length}개 레이어 갱신 · 공급원 ${sourceStatus.health} · 마지막 점검 ${new Date(sourceStatus.checked_at).toLocaleString('ko-KR')} · 촬영일 갱신 아님`
+        : `${activeIds.length}개 레이어 갱신 · 공급원 점검 실패: ${sourceStatus.error}`;
     } finally {
       refresh.dataset.loading = 'false';
       refresh.classList.remove('is-refreshing');

@@ -2,6 +2,15 @@ import { searchWikipedia } from '../tools/search/wikipedia.js';
 import { localModelChat, localModelStatus } from '../packages/god-runtime/ollama.js';
 
 const json = (data, status = 200) => Response.json(data, { status, headers: { 'cache-control': 'no-store' } });
+
+export function extractiveFlowFallback(sources) {
+  if (!sources.length) return null;
+  const rows = sources.slice(0, 5).map((source, index) =>
+    `[${index + 1}] ${source.title || '자료'}\n${source.snippet || '요약 없음'}\n${source.url}`);
+  return { text: `AI 모델이 연결되지 않았습니다. 아래는 검색 결과의 원문 발췌이며 AI 분석이 아닙니다.\n\n${rows.join('\n\n')}`,
+    sources: sources.slice(0, 5), provider: 'Wikipedia 근거 정리 (AI 아님)', mode: 'extractive' };
+}
+
 export function createFlowRoutes({ search = searchWikipedia, chat = localModelChat, probe = localModelStatus, now = Date.now } = {}) {
 const windows = new Map();
 return async function handleFlowRoutes(request, env = {}) {
@@ -14,7 +23,7 @@ return async function handleFlowRoutes(request, env = {}) {
     const model = localReady ? await probe({ model: env.OLLAMA_MODEL, signal: request.signal }) : { available: false, reason: '로컬 모델 연결 대기' };
     return json({ search: { provider: 'Wikipedia', scope: '백과사전 검색', configured: true },
     ai: { provider: 'Ollama', configured: model.available, model: model.available ? env.OLLAMA_MODEL : null,
-      reason: model.reason },
+      reason: model.reason, fallback: '근거 발췌 (AI 아님)' },
     storage: { provider: 'browser', scope: '이 브라우저' }, browser: { configured: false }, mcp: { transport: 'stdio', public: false } });
   }
   if (!['/api/flow/search', '/api/flow/ai'].includes(url.pathname)) return json({ error: '도구 경로가 없습니다.' }, 404);
@@ -50,10 +59,14 @@ return async function handleFlowRoutes(request, env = {}) {
       if (typeof input.query !== 'string' || !input.query.trim() || input.query.length > 12000) return json({ error: '검색어 형식이 올바르지 않습니다.' }, 400);
       return json(await search(input.query, { signal }));
     }
-    if (!localReady) return json({ error: local ? '로컬 AI 연결 대기: Ollama 설치와 모델 설정이 필요합니다.' : '공개 사이트에는 아직 보안 모델 연결이 없습니다.' }, 503);
     if (typeof input.text !== 'string' || input.text.length > 24000) return json({ error: 'AI 입력 형식이 올바르지 않습니다.' }, 400);
     const sources = Array.isArray(input.sources) ? input.sources.slice(0, 20).filter(s => typeof s?.url === 'string' && /^https:\/\//.test(s.url))
-      .map(s => ({ url: s.url.slice(0, 1000), title: String(s.title || '').slice(0, 200) })) : [];
+      .map(s => ({ url: s.url.slice(0, 1000), title: String(s.title || '').slice(0, 200),
+        snippet: String(s.snippet || '').slice(0, 700) })) : [];
+    if (!localReady) {
+      const fallback = extractiveFlowFallback(sources);
+      return fallback ? json(fallback) : json({ error: local ? '로컬 AI 연결 대기: Ollama 설치와 모델 설정이 필요합니다.' : '공개 사이트에는 AI 모델이 없고 정리할 검색 근거도 없습니다.' }, 503);
+    }
     return json(await chat({ text: input.text, sources, instruction: input.instruction },
       { signal, url: 'http://127.0.0.1:11434', model: env.OLLAMA_MODEL }));
   } catch (error) {

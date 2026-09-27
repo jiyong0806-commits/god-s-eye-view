@@ -1,6 +1,8 @@
 import { filterTrailing24h, parseFirmsCsv } from '../src/data/firmsCsv.js';
 import { extraRoutes } from './extraRoutes.js';
 import { flowRoutes } from './flowRoutes.js';
+import { worldConnectRoutes } from './worldConnectRoutes.js';
+import { mapSourceStatus } from './mapSourceStatus.js';
 import { cachedProvider, failure, reserveBudget, retrySeconds } from './providerRuntime.js';
 
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8' };
@@ -307,6 +309,37 @@ function nominatimTypes(place) {
   return ['point_of_interest', 'establishment'];
 }
 
+function compactPlaceName(value) {
+  return String(value || '').normalize('NFKC').replace(/(?<=[가-힣])\s+(?=[가-힣])/g, '').trim().toLocaleLowerCase();
+}
+
+async function wikidataPlace(query) {
+  const compact = compactPlaceName(query);
+  const language = /[가-힣]/.test(compact) ? 'ko' : 'en';
+  const searchUrl = new URL('https://www.wikidata.org/w/api.php');
+  searchUrl.search = new URLSearchParams({ action: 'wbsearchentities', search: compact, language, format: 'json', limit: '5' });
+  const searchResponse = await fetchWithTimeout(searchUrl, {
+    headers: { accept: 'application/json', 'user-agent': 'GODsEyeView/1.0 (https://godseyeview-c6q.pages.dev/)' },
+    cf: { cacheTtl: 86400, cacheEverything: true },
+  });
+  if (!searchResponse.ok) return null;
+  const matches = (await searchResponse.json()).search || [];
+  const exact = matches.find(item => compactPlaceName(item.match?.text || item.label) === compact && /^Q\d+$/.test(item.id));
+  if (!exact) return null;
+  const entityResponse = await fetchWithTimeout(`https://www.wikidata.org/wiki/Special:EntityData/${exact.id}.json`, {
+    headers: { accept: 'application/json', 'user-agent': 'GODsEyeView/1.0 (https://godseyeview-c6q.pages.dev/)' },
+    cf: { cacheTtl: 86400, cacheEverything: true },
+  });
+  if (!entityResponse.ok) return null;
+  const entity = (await entityResponse.json()).entities?.[exact.id];
+  const point = entity?.claims?.P625?.find(claim => claim.mainsnak?.datavalue?.value?.globe?.endsWith('/Q2'))?.mainsnak.datavalue.value;
+  if (!Number.isFinite(point?.latitude) || !Number.isFinite(point?.longitude)) return null;
+  return { formatted_address: entity.labels?.[language]?.value || exact.match?.text || exact.label,
+    types: ['point_of_interest', 'establishment'],
+    geometry: { location: { lat: point.latitude, lng: point.longitude }, viewport: null, bounds: null },
+    source: 'Wikidata', sourceUrl: `https://www.wikidata.org/wiki/${exact.id}` };
+}
+
 async function handleGeocode(url) {
   const query = String(url.searchParams.get('q') || url.searchParams.get('address') || '').trim();
   if (!query || query.length > 160) return json({ status: 'INVALID_REQUEST', results: [] }, 400);
@@ -317,11 +350,10 @@ async function handleGeocode(url) {
   upstreamUrl.searchParams.set('limit', '5');
   upstreamUrl.searchParams.set('accept-language', 'ko,en');
   const response = await fetchWithTimeout(upstreamUrl, {
-    headers: { accept: 'application/json', 'user-agent': 'GODsEyeView/1.0 (https://godseyeview.jiyong0806.chatgpt.site/)', referer: 'https://godseyeview.jiyong0806.chatgpt.site/' },
+    headers: { accept: 'application/json', 'user-agent': 'GODsEyeView/1.0 (https://godseyeview-c6q.pages.dev/)', referer: 'https://godseyeview-c6q.pages.dev/' },
     cf: { cacheTtl: 86400, cacheEverything: true },
-  });
-  if (!response.ok) return json({ status: 'ERROR', results: [] }, response.status);
-  const places = await response.json();
+  }).catch(() => null);
+  const places = response?.ok ? await response.json() : [];
   const results = places.map((place) => {
     const bounds = Array.isArray(place.boundingbox) ? place.boundingbox.map(Number) : [];
     const viewport = bounds.length === 4 ? {
@@ -339,9 +371,15 @@ async function handleGeocode(url) {
       source: 'OpenStreetMap Nominatim',
     };
   });
+  if (!results.length) {
+    const matched = await wikidataPlace(query).catch(() => null);
+    if (matched) results.push(matched);
+  }
+  if (!response?.ok && !results.length) return json({ status: 'ERROR', results: [], providerStatus: response?.status || 502 }, response?.status || 502);
+  const source = results[0]?.source || 'OpenStreetMap Nominatim';
   return json({ status: results.length ? 'OK' : 'ZERO_RESULTS', results }, 200, {
     'cache-control': 'public, max-age=3600, s-maxage=86400',
-    'x-geocoder-source': 'OpenStreetMap Nominatim',
+    'x-geocoder-source': source,
   });
 }
 
@@ -381,6 +419,12 @@ async function handleGbfs(request, url) {
 }
 
 async function handleApi(request, env, url) {
+  if (url.pathname === '/api/map-source/status') {
+    if (request.method !== 'GET') return json({ error: 'method-not-allowed' }, 405);
+    return mapSourceStatus(env);
+  }
+  const world = await worldConnectRoutes(request, env);
+  if (world) return world;
   const flow = await flowRoutes(request, env);
   if (flow) return flow;
   const extra = await extraRoutes(request, env, url);
