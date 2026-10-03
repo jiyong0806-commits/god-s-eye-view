@@ -19,6 +19,7 @@ export const PRESENTED_MAP_STACK_IDS = Object.freeze([
   'bing-labels',
   'ion-3830185',
   'esri-imagery',
+  'nasa-daily',
   'nasa-blue-marble',
   'osm',
 ]);

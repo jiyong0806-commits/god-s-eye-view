@@ -56,6 +56,13 @@ export const MAP_STACKS = [
     requiresIon: false,
   },
   {
+    id: 'nasa-daily',
+    label: 'NASA 일일영상',
+    shortLabel: '일일',
+    kind: 'nasa-daily',
+    requiresIon: false,
+  },
+  {
     id: 'nasa-blue-marble',
     label: 'NASA 지구',
     shortLabel: 'NASA',
@@ -228,7 +235,7 @@ export class MapStackController {
     return true;
   }
 
-  async setStack(id, { silent = false } = {}) {
+  async setStack(id, { silent = false, refresh = false } = {}) {
     const stack = this.getStack(id) || this.getStack('photoreal');
     if (!stack) return null;
 
@@ -240,6 +247,7 @@ export class MapStackController {
     }
 
     const gen = ++this._switchGen;
+    if (refresh) this._imageryProviders.delete(stack.id);
     this._isSwitching = true;
     this._lastError = null;
     if (!silent) this._emitChange('switching');
@@ -290,6 +298,7 @@ export class MapStackController {
       stacks: this.getStacks(),
       status,
       lastError: this._lastError,
+      imageryDate: this._activeId === 'nasa-daily' ? this._imageryProviders.get('nasa-daily')?.imageryDate || null : null,
       hasCesiumIonToken: !!this.cesiumToken,
     };
   }
@@ -369,6 +378,7 @@ export class MapStackController {
     let provider;
     let effectiveStackId = stack.id;
     let fallbackMessage = null;
+    let imageryDate = null;
     if (stack.kind === 'ion') {
       provider = await Cesium.createWorldImageryAsync({ style: stack.style });
     } else if (stack.kind === 'ion-asset') {
@@ -398,6 +408,18 @@ export class MapStackController {
         url: 'https://tile.openstreetmap.org/',
         credit: DEFAULT_OSM_CREDIT,
       });
+    } else if (stack.kind === 'nasa-daily') {
+      const response = await fetch('/api/map-source/daily', { signal: AbortSignal.timeout(10000) });
+      const metadata = await response.json();
+      if (!response.ok) throw new Error(metadata.error || `NASA 날짜 조회 HTTP ${response.status}`);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(metadata.date || '') || metadata.date > new Date().toISOString().slice(0, 10)) throw new Error('NASA 촬영 날짜 검증 실패');
+      imageryDate = metadata.date;
+      provider = new Cesium.WebMapTileServiceImageryProvider({
+        url: `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/${imageryDate}/{TileMatrixSet}/{TileMatrix}/{TileRow}/{TileCol}.jpeg`,
+        layer: 'MODIS_Terra_CorrectedReflectance_TrueColor', style: 'default', format: 'image/jpeg',
+        tileMatrixSetID: 'GoogleMapsCompatible_Level9', maximumLevel: 9,
+        credit: new Cesium.Credit(`NASA GIBS / Terra MODIS · ${imageryDate} · 250m`, true),
+      });
     } else if (stack.kind === 'nasa') {
       provider = new Cesium.WebMapTileServiceImageryProvider({
         url: 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/wmts.cgi',
@@ -412,7 +434,7 @@ export class MapStackController {
       throw new Error(`Unsupported map stack: ${stack.id}`);
     }
 
-    const resolution = { provider, effectiveStackId, fallbackMessage };
+    const resolution = { provider, effectiveStackId, fallbackMessage, imageryDate };
     this._imageryProviders.set(stack.id, resolution);
     if (effectiveStackId === 'osm' && !this._imageryProviders.has('osm')) {
       this._imageryProviders.set('osm', { provider, effectiveStackId: 'osm', fallbackMessage: null });

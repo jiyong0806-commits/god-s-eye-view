@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-27T08:23:50.781Z",
+  "generatedAt": "2026-10-03T13:04:14.908Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -258,8 +258,8 @@
     },
     {
       "file": "apps/web/devPlugin.js",
-      "sha256": "2e0443dbca4ab38dc0f379f35a2a71eeda778ce13a9932e08e20931d9673642e",
-      "bytes": 1574
+      "sha256": "dfa8885eb4958115731633c57f414f143cab21777c7c9075c21c90d5ec79c4fc",
+      "bytes": 1618
     },
     {
       "file": "apps/web/main.jsx",
@@ -315,6 +315,11 @@
       "file": "docs/VERIFICATION-2026-09-27.md",
       "sha256": "2ac9075e28d6e9df1725ecffb4c96d7bb912d4d38e02b3868a83c2ff27eed3d7",
       "bytes": 5568
+    },
+    {
+      "file": "docs/VERIFICATION-2026-10-03.md",
+      "sha256": "afa8493855ba1da15bcda2a4ac47d238d3305f02e6815d8c89891dc76063a969",
+      "bytes": 4240
     },
     {
       "file": "docs/google-3d-commercial-setup-ko.md",
@@ -1193,8 +1198,8 @@
     },
     {
       "file": "scripts/verify-plasma-workspace.mjs",
-      "sha256": "769a534b54c6280b6dbe4246b27517812becf2afc78d7f5f70dc37088ff30791",
-      "bytes": 5591
+      "sha256": "470d2c2a691cd09a96ed85c42eb8edc37bfc6e3ba3f9e043d5fc3e1e26e1aaaf",
+      "bytes": 6046
     },
     {
       "file": "scripts/verify-public-ais.mjs",
@@ -1210,6 +1215,11 @@
       "file": "scripts/verify-public-soak.mjs",
       "sha256": "95919edb90310badf41e4fb709cba1c4be92797875cb1a992c26480cc534e022",
       "bytes": 3120
+    },
+    {
+      "file": "scripts/verify-search-layout.mjs",
+      "sha256": "a2a59a49ae00993df0a7d968881524d1fb2ca656b95e96f747c7028fedec5161",
+      "bytes": 5521
     },
     {
       "file": "scripts/verify-world-connect.mjs",
@@ -1558,8 +1568,8 @@
     },
     {
       "file": "src/data/cctv.js",
-      "sha256": "c460039ce53b20dcf80293b613f92ca25a1952e49f7c02aa99ff702b2e5e00b5",
-      "bytes": 198383
+      "sha256": "d6eb1c087e802269239bd46a9a279b56374c10424ae80c75e86f9cd3a14ccf6a",
+      "bytes": 198458
     },
     {
       "file": "src/data/cctv.test.mjs",
@@ -1905,6 +1915,16 @@
       "file": "src/data/iconOrientation.test.mjs",
       "sha256": "c9a57240c07e972ac4879b9a9d2aef47d60881a331aa1024ba89b1a0c26c2e01",
       "bytes": 21070
+    },
+    {
+      "file": "src/data/imageRequest.js",
+      "sha256": "deb3ba7046eef9a35e6bf0c94ad99b2c064ca3c6561ca2c09fd2a41e7cd82f81",
+      "bytes": 773
+    },
+    {
+      "file": "src/data/imageRequest.test.mjs",
+      "sha256": "21e35fd214762c41b5796d4dd27c3f795781f6b8b079eb18e63c6c47070c2d79",
+      "bytes": 960
     },
     {
       "file": "src/data/installationFeedback.js",
@@ -2613,8 +2633,8 @@
     },
     {
       "file": "src/locations.js",
-      "sha256": "669ca98fe25caaa561c19fd21fb5be117dd17debf3249c99fcdccdaff1da09a1",
-      "bytes": 42236
+      "sha256": "4ba935590d30d60a53d2c4dbcfe2ffb62e18436861d07ba6c83be09e18f5ef6b",
+      "bytes": 43961
     },
     {
       "file": "src/locations.test.mjs",
@@ -2633,8 +2653,8 @@
     },
     {
       "file": "src/main.js",
-      "sha256": "6501220041930a8e37ae5dd64cbb1e484f118722d4a9fda9af5f976ab16a16bf",
-      "bytes": 20270
+      "sha256": "93cb2e90174b4903b97806c0223e1843e4dfae488e935586925c319411f0f228",
+      "bytes": 20441
     },
     {
       "file": "src/mapImageryCap.test.mjs",
@@ -2643,8 +2663,8 @@
     },
     {
       "file": "src/mapStackChips.js",
-      "sha256": "0999bba3aeaf8c1e885825c80b1add6fb3d820b37b4770765bcb839ba3248452",
-      "bytes": 6045
+      "sha256": "b19fb2392ef2c30e0edfec326548627925fd9d955e17cb9a73f73746724bec07",
+      "bytes": 6061
     },
     {
       "file": "src/mapStackChips.test.mjs",
@@ -2653,8 +2673,8 @@
     },
     {
       "file": "src/mapStackController.js",
-      "sha256": "6270d944dda08c41d23a56c298d37f7b9982f250bd93bdf539ce6d34011634fb",
-      "bytes": 21416
+      "sha256": "659fb39d6ea822170861f024e039dad347c76861103410363430838d61f91a54",
+      "bytes": 22823
     },
     {
       "file": "src/mapStackUnavailableReason.test.mjs",
@@ -2793,18 +2813,18 @@
     },
     {
       "file": "src/plasmaControls.js",
-      "sha256": "0acc6e65c561f2e7f4e832de1475df9deb02b8f8f02345efbabdc2a9526a9bd5",
-      "bytes": 3934
+      "sha256": "c76dc6b6344bcd140cbb8e168b32b087df00b0019c278e7022f0deb804ae9fae",
+      "bytes": 4270
     },
     {
       "file": "src/plasmaWorkspace.css",
-      "sha256": "57d62059be551e544808c283a933b232b9944ec56a49e3d0a61436dd38530123",
-      "bytes": 3445
+      "sha256": "fec143a6e78b27571a1a774d142dc76ab75402a399ca529218e99d3d6e4bf2fa",
+      "bytes": 6832
     },
     {
       "file": "src/plasmaWorkspace.js",
-      "sha256": "3ec2dcf0168aef6fe5a92335ae28a19243a03f724b9a3103f3981f4d075505ce",
-      "bytes": 15936
+      "sha256": "939494281e36bd3b6f56f30916425c29cc71172bc869ae09289ad4904091e0a9",
+      "bytes": 19533
     },
     {
       "file": "src/plasmaWorkspace.test.mjs",
@@ -2902,6 +2922,11 @@
       "bytes": 22197
     },
     {
+      "file": "src/searchResults.test.mjs",
+      "sha256": "a71fce02426cd46067a70f7db0ebf683f50c091c99ddc8685ad79527ca17afff",
+      "bytes": 2174
+    },
+    {
       "file": "src/setupDoctor.test.mjs",
       "sha256": "a1a1b73455110ac663a561f83c75ac1c818958626093387b3e83633a6107f5ec",
       "bytes": 9579
@@ -2963,8 +2988,8 @@
     },
     {
       "file": "src/ui.js",
-      "sha256": "8aca5e9f1426dc08c04316e0b4704f693ff2ef7e3dd60a17a23a1bd4e7186f39",
-      "bytes": 456572
+      "sha256": "7f5b610e3927f60d1e69eff915d33769a2f86b4cf7012d51432ca671c04898b4",
+      "bytes": 456883
     },
     {
       "file": "src/unitTestRunner.test.mjs",
@@ -2988,8 +3013,8 @@
     },
     {
       "file": "src/voice/gevActions.js",
-      "sha256": "d69d2e08e0741259f72db637cc641c91a9bce5116d5a83e5ccc754ea92bdc43d",
-      "bytes": 135980
+      "sha256": "a94b8b295824a8c55d5fd0592c39b7a648c27e4ce28e5d68a11ed66f5c5f4125",
+      "bytes": 136085
     },
     {
       "file": "src/voice/gevActions.test.mjs",
@@ -3138,8 +3163,8 @@
     },
     {
       "file": "vite.config.js",
-      "sha256": "413690c7cc8a7eeb833de25cd1d4c37f792057bd8313d6b0565d03874d075dc8",
-      "bytes": 344364
+      "sha256": "b1dae6ce40d70c2aa416087baceadffd083eaccb48ac8e2607b55d1a5976e0e4",
+      "bytes": 344378
     },
     {
       "file": "worker/aisCollector.js",
@@ -3160,6 +3185,16 @@
       "file": "worker/connectFeeds.test.mjs",
       "sha256": "acdd117a14451b6d861dbcfdcdc2c180723f80ca3e34bfe357eb841f45ded5ed",
       "bytes": 1966
+    },
+    {
+      "file": "worker/dailyImagery.js",
+      "sha256": "6f8b9fd0d5f6e9097f162173d3d31013a7f1d42a337abd5994fa2491b47cd21b",
+      "bytes": 2110
+    },
+    {
+      "file": "worker/dailyImagery.test.mjs",
+      "sha256": "2282f1ad917d4bfcfabba1eea928a81f5194327c950b56ba60c6d30634f60211",
+      "bytes": 947
     },
     {
       "file": "worker/extraRoutes.js",
@@ -3183,8 +3218,8 @@
     },
     {
       "file": "worker/index.js",
-      "sha256": "d4786b92124d10defc36b867d9f190c582839dfd12b538f6db8aa8ebf5251136",
-      "bytes": 29111
+      "sha256": "75dadada1c66db2a9b3e54ef2f5e24c86ebbf76a4b59af8d2931c4b1f1e7395c",
+      "bytes": 29348
     },
     {
       "file": "worker/index.test.mjs",

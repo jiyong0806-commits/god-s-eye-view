@@ -1,8 +1,8 @@
 import * as Cesium from 'cesium';
 import { createRoot } from 'react-dom/client';
 import { createElement } from 'react';
-import { Search, UserRound, Bookmark, RefreshCw, Map as MapIcon, CloudRain, Bell, X, Trash2, ArrowUpRight, CircleHelp, Volume2 } from 'lucide-react';
-import { searchAndFlyTo } from './locations.js';
+import { Search, UserRound, Bookmark, RefreshCw, Map as MapIcon, CloudRain, Bell, X, Trash2, ArrowUpRight, CircleHelp, Volume2, Ellipsis, Layers2, Link, Globe2, Workflow } from 'lucide-react';
+import { searchAndFlyTo, searchPlaces, CANCELLED_SEARCH } from './locations.js';
 import { accountClient, accountUser, accountProfile, saveProfile } from './plasmaAccount.js';
 import { initPlasmaAlerts } from './plasmaAlerts.js';
 import { initQuietSfx } from './quietSfx.js';
@@ -26,7 +26,10 @@ export function initPlasmaWorkspace(app) {
   const dialog = el('dialog'); dialog.className = 'plasma-dialog'; document.body.append(dialog);
   const tools = el('div'); tools.className = 'plasma-tools'; tools.setAttribute('aria-label', 'Plasma 지도 도구'); document.body.append(tools);
   const sfx = initQuietSfx(); const alerts = initPlasmaAlerts({ notify, viewer: app.viewer });
+  let searchController, cancelSelection;
+  dialog.addEventListener('close', () => { cancelSelection?.(); cancelSelection = null; });
   function open(title) {
+    cancelSelection?.(); cancelSelection = null;
     dialog.replaceChildren(); cleanup(); const header = el('header'); header.append(el('h2', title), button('닫기', X, () => dialog.close()));
     const body = el('div'); body.className = 'pd-body'; dialog.append(header, body); if (!dialog.open) dialog.showModal(); return body;
   }
@@ -105,11 +108,56 @@ export function initPlasmaWorkspace(app) {
     } catch (error) { status.textContent = error.message; }
   }
   const search = el('form'), input = el('input'); input.placeholder = '시·도·지역·학교 검색'; input.required = true; input.maxLength = 160; input.setAttribute('aria-label', '한국어·전세계 위치 검색');
-  const go = button('검색 후 이동', Search); go.type = 'submit'; search.append(input, go); tools.append(search);
+  const go = button('위치 검색', Search); go.type = 'submit'; search.append(input, go); tools.append(search);
+  async function chooseSearchResult(query, candidates) {
+    const body = open(`검색 결과 · ${candidates.length}개`);
+    const list = el('ul'); list.className = 'pd-search-results'; body.append(list);
+    return new Promise(resolve => {
+      cancelSelection = () => resolve(null);
+      for (const candidate of candidates) {
+        const row = el('li'), pick = el('button'); pick.type = 'button';
+        const name = candidate.name || candidate.formatted_address?.split(',')[0] || query;
+        pick.append(el('strong', name), el('span', candidate.formatted_address || name));
+        pick.onclick = () => { cancelSelection = null; resolve(candidate); dialog.close(); };
+        row.append(pick); list.append(row);
+      }
+      list.addEventListener('keydown', event => {
+        if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
+        event.preventDefault(); const buttons = [...list.querySelectorAll('button')];
+        const next = buttons.indexOf(document.activeElement) + (event.key === 'ArrowDown' ? 1 : -1);
+        buttons[(next + buttons.length) % buttons.length].focus();
+      });
+      list.querySelector('button')?.focus();
+    });
+  }
+  async function searchLocation(query, options = {}) {
+    searchController?.abort(); cancelSelection?.();
+    const controller = new AbortController(); searchController = controller;
+    const generation = options.beforeFly ? null : app.styleManager?._beginDeferredNavigation?.('location');
+    if (generation === false) return CANCELLED_SEARCH;
+    const beforeFly = options.beforeFly || (generation == null ? undefined : () => app.styleManager._reassertNavigationHandoff(generation));
+    const candidates = await searchPlaces(app.viewer, query, { signal: controller.signal });
+    if (controller.signal.aborted) return CANCELLED_SEARCH;
+    if (!candidates.length) return null;
+    const result = candidates.length > 1 ? await chooseSearchResult(query, candidates) : candidates[0];
+    if (!result || controller.signal.aborted) return CANCELLED_SEARCH;
+    const destination = await searchAndFlyTo(app.viewer, query, { ...options, beforeFly, result, resolveBuilding: false, duration: .6 });
+    if (destination && !destination.cancelled) { app.requestRender('search-selection'); sfx.play('navigate'); }
+    return destination;
+  }
   search.onsubmit = async e => { e.preventDefault(); if (go.disabled) return; go.disabled = true;
-    try { const result = await searchAndFlyTo(app.viewer, input.value.trim(), { duration: .6 }); if (!result) throw new Error('검색 결과가 없습니다. 지역명과 함께 검색하세요.'); sfx.play('navigate'); }
-    catch (error) { notify(error.message); } finally { go.disabled = false; } };
-  tools.append(button('지도·활성 레이어 업데이트', RefreshCw, () => document.getElementById('refresh-map-data')?.click()), button('찜한 위치', Bookmark, showBookmarks), button('PLASMA 계정 설정', UserRound, () => showAccount()));
+    try { const result = await searchLocation(input.value.trim()); if (!result) throw new Error('검색 결과가 없습니다. 지역명과 함께 검색하세요.'); }
+    catch (error) { if (error.name !== 'AbortError') notify(error.message); } finally { go.disabled = false; } };
+  const actionRail = document.getElementById('top-center-actions');
+  actionRail?.querySelector('a')?.remove();
+  for (const [id, Icon] of [['refresh-map-data', RefreshCw], ['clear-selected-layers', Layers2], ['share-btn', Link], ['reset-globe-view', Globe2]]) {
+    const target = document.getElementById(id); if (!target) continue;
+    const mount = el('span'); target.replaceChildren(mount); const root = createRoot(mount); roots.set(mount, root);
+    root.render(createElement(Icon, { size: 20, strokeWidth: 1.5 }));
+  }
+  const accountButton = button('PLASMA 계정 설정', UserRound, () => showAccount()); accountButton.id = 'plasma-account-action'; actionRail?.append(accountButton);
+  tools.append(button('찜한 위치', Bookmark, showBookmarks));
+  const extra = el('div'); extra.className = 'plasma-extra-tools'; tools.append(extra);
   const map = button('OSM 2D / 3D 지도', MapIcon, async () => { if (map.disabled) return; map.disabled = true;
     try { const two = app.viewer.scene.mode !== Cesium.SceneMode.SCENE2D; await app.mapStackController.setStack(two ? 'osm' : 'esri-imagery');
       if (app.mapStackController.getState().activeId !== (two ? 'osm' : 'esri-imagery')) throw new Error('지도 공급원 전환 실패');
@@ -118,18 +166,21 @@ export function initPlasmaWorkspace(app) {
   const radar = button('날씨 레이더 모드', CloudRain, async () => { if (radar.disabled) return; radar.disabled = true;
     try { await app.dataManager.toggle('weather-radar'); const entry = app.dataManager.layers.get('weather-radar'); radar.setAttribute('aria-pressed', String(entry.enabled));
       if (!entry.enabled || entry.module.getStats().error) notify(entry.module.getStats().error || '레이더 연결 실패');
-    } catch (error) { notify(error.message); } finally { radar.disabled = false; } }); tools.append(radar);
+    } catch (error) { notify(error.message); } finally { radar.disabled = false; } }); extra.append(radar);
   const bell = button('재난 알림 설정', Bell, async () => { const body = open('재난 관측 알림'); body.append(el('p', '페이지가 열려 있는 동안 새로 수신한 사건을 알립니다. 국가 재난문자·조기경보가 아닙니다. 닫힌 앱의 푸시는 아직 지원하지 않습니다.'));
     const enabled = el('button', alerts.enabled() ? '알림 끄기' : '알림 켜기'); enabled.onclick = async () => { await alerts.toggle(); enabled.textContent = alerts.enabled() ? '알림 끄기' : '알림 켜기'; bell.setAttribute('aria-pressed', String(alerts.enabled())); }; body.append(enabled);
     const status = el('p', '출처 확인 중…'); body.append(status); try { const data = await alerts.refresh(); if (!body.isConnected) return; status.textContent = data.domestic.error;
       for (const row of data.alerts.slice(0, 10)) { const link = el('a', `${row.title} · ${new Date(row.occurredAt).toLocaleString('ko-KR')}`); link.href = row.sourceUrl; link.target = '_blank'; link.rel = 'noopener noreferrer'; const line = el('p'); line.append(link); body.append(line); }
-    } catch (error) { status.textContent = error.message; } }); tools.append(bell);
-  tools.append(button('효과음 설정', Volume2, () => { const body = open('효과음'); const label = el('label'); label.className = 'pd-check'; const check = el('input'); check.type = 'checkbox'; check.checked = sfx.enabled();
+    } catch (error) { status.textContent = error.message; } }); extra.append(bell);
+  extra.append(button('효과음 설정', Volume2, () => { const body = open('효과음'); const label = el('label'); label.className = 'pd-check'; const check = el('input'); check.type = 'checkbox'; check.checked = sfx.enabled();
     check.onchange = () => { sfx.setEnabled(check.checked); if (check.checked) sfx.play('save'); }; label.append(check, el('span', '작은 효과음')); body.append(label); }));
   const steps = [ ['위치 검색', '시·도나 학교 이름을 검색하면 좌표가 확인된 장소로 이동합니다.'], ['실시간 레이어', '데이터 레이어에서 선박·항공기·CCTV를 켭니다. 제한·재시도 상태는 실제 공급자 응답입니다.'],
     ['지도 모드와 찜', 'OSM 2D와 3D를 전환하고 현재 위치를 찜한 뒤 바로 이동할 수 있습니다.'], ['World Connect', '경제 탭에서 공식 RSS 뉴스와 원본 출처를 확인합니다. 계정 설정의 선택 설문으로 관련 제목을 먼저 표시합니다.'],
     ['음성과 경보', '마이크는 브라우저 한국어 인식입니다. 로컬 실행에서는 Ollama가 명령을 해석합니다. 재난 알림은 직접 켜야 합니다.'] ];
-  tools.append(button('튜토리얼', CircleHelp, () => { let index = 0; const render = () => { const body = open(`튜토리얼 ${index + 1} / ${steps.length}`); body.append(el('h3', steps[index][0]), el('p', steps[index][1]));
+  extra.append(button('튜토리얼', CircleHelp, () => { let index = 0; const render = () => { const body = open(`튜토리얼 ${index + 1} / ${steps.length}`); body.append(el('h3', steps[index][0]), el('p', steps[index][1]));
     const next = el('button', index === steps.length - 1 ? '완료' : '다음'); next.onclick = () => { if (index === steps.length - 1) dialog.close(); else { index++; render(); } }; body.append(next); }; render(); }));
-  return { notify, showAccount, showBookmarks, destroy() { alerts.destroy(); sfx.destroy(); tools.remove(); dialog.remove(); notice.remove(); clearTimeout(noticeTimer); cleanup(); } };
+  extra.append(button('God Flow', Workflow, () => { location.assign('/home/'); }));
+  const more = button('추가 지도 도구', Ellipsis, () => { const expanded = tools.classList.toggle('tools-expanded'); more.setAttribute('aria-expanded', String(expanded)); });
+  more.className = 'plasma-more'; more.setAttribute('aria-expanded', 'false'); tools.append(more);
+  return { notify, showAccount, showBookmarks, search: searchLocation, destroy() { searchController?.abort(); cancelSelection?.(); accountButton.remove(); alerts.destroy(); sfx.destroy(); tools.remove(); dialog.remove(); notice.remove(); clearTimeout(noticeTimer); cleanup(); } };
 }

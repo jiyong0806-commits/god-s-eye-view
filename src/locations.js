@@ -341,13 +341,41 @@ export function findPoiByName(query) {
 /** Distinguishes an authority veto from a genuine not-found result. */
 export const CANCELLED_SEARCH = Object.freeze({ cancelled: true });
 
+export function normalizeSearchResults(results) {
+  const seen = new Set();
+  return (Array.isArray(results) ? results : []).filter(result => {
+    const point = result?.geometry?.location;
+    if (!Number.isFinite(point?.lat) || Math.abs(point.lat) > 90
+        || !Number.isFinite(point?.lng) || Math.abs(point.lng) > 180) return false;
+    const identity = `${result.formatted_address || ''}:${point.lat.toFixed(6)}:${point.lng.toFixed(6)}`;
+    if (seen.has(identity)) return false;
+    seen.add(identity);
+    return true;
+  }).slice(0, 20);
+}
+
+export async function searchPlaces(viewer, query, { signal } = {}) {
+  const apiKey = window.__GOOGLE_MAPS_API_KEY__ || import.meta.env?.GOOGLE_MAPS_API_KEY;
+  let url = apiKey
+    ? `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${apiKey}`
+    : `/api/geocode?q=${encodeURIComponent(query)}`;
+  const bias = viewportBias(viewer);
+  if (bias && apiKey) url += `&bounds=${bias}`;
+  const timeout = AbortSignal.timeout(12000);
+  const response = await fetch(url, { signal: signal ? AbortSignal.any([signal, timeout]) : timeout });
+  if (response.ok === false) throw new Error(`위치 검색 HTTP ${response.status}`);
+  const data = await response.json();
+  if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') throw new Error(data.error || '위치 검색 공급자 응답 오류');
+  return data.status === 'OK' ? normalizeSearchResults(data.results) : [];
+}
+
 /**
  * Geocode a place name using Google Geocoding API, then fly there at a scale
  * appropriate to the request. Countries and cities use their viewport by
  * default; precise landmarks/buildings use close landmark framing.
  */
 export async function searchAndFlyTo(viewer, query, options = {}) {
-  const apiKey = window.__GOOGLE_MAPS_API_KEY__ || import.meta.env.GOOGLE_MAPS_API_KEY;
+  const apiKey = window.__GOOGLE_MAPS_API_KEY__ || import.meta.env?.GOOGLE_MAPS_API_KEY;
 
   const beforeFly = typeof options.beforeFly === 'function' ? options.beforeFly : null;
   const mayFly = () => beforeFly === null || beforeFly() !== false;
@@ -360,10 +388,15 @@ export async function searchAndFlyTo(viewer, query, options = {}) {
     : `/api/geocode?q=${encodeURIComponent(query)}`;
   const bias = viewportBias(viewer);
   if (bias && apiKey) url += `&bounds=${bias}`;
-  const response = await fetch(url);
-  const data = await response.json();
-
-  const result = (data.status === 'OK' && data.results?.length) ? data.results[0] : null;
+  let result;
+  if (options.result) {
+    result = normalizeSearchResults([options.result])[0];
+    if (!result) throw new Error('선택한 검색 결과의 좌표가 잘못되었습니다.');
+  } else {
+    const response = await fetch(url);
+    const data = await response.json();
+    result = (data.status === 'OK' && data.results?.length) ? data.results[0] : null;
+  }
   let lat = result?.geometry.location.lat;
   let lng = result?.geometry.location.lng;
   let label = result ? result.formatted_address : null;
@@ -373,7 +406,7 @@ export async function searchAndFlyTo(viewer, query, options = {}) {
   // Places-near-view recovery (annotationResolver's twin): a missed geocode, or one
   // that landed implausibly far from the view centre, snaps back to a view-biased
   // Places hit within the trust bound — "the Capitol" means the one on screen.
-  const recovered = apiKey ? await placesNearViewRecovery(viewer, query, result ? { lat, lon: lng } : null) : null;
+  const recovered = apiKey && !options.result ? await placesNearViewRecovery(viewer, query, result ? { lat, lon: lng } : null) : null;
   if (recovered) {
     lat = recovered.lat;
     lng = recovered.lon;
@@ -452,7 +485,7 @@ export async function searchAndFlyTo(viewer, query, options = {}) {
     }
   }
 
-  const shouldResolveBuilding = navigationMode === 'precise-place';
+  const shouldResolveBuilding = navigationMode === 'precise-place' && options.resolveBuilding !== false;
   const buildingBounds = shouldResolveBuilding
     ? await resolveBuildingBounds(lat, lng, query)
     : null;

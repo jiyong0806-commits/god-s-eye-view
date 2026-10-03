@@ -353,10 +353,13 @@ async function init() {
     const annotations = initAnnotations({ viewer, tileset });
 
     // The globe is usable before slower layer feeds settle.
-    void Promise.race([
-      Promise.resolve(styleManager.initialRestorePromise).catch(() => {}),
-      new Promise((resolve) => setTimeout(resolve, 1800)),
-    ]).finally(() => {
+    void new Promise(resolve => {
+      let settled = false, timer;
+      const remove = viewer.scene.postRender.addEventListener(() => finish());
+      function finish() { if (settled) return; settled = true; clearTimeout(timer); remove(); resolve(); }
+      timer = setTimeout(finish, 600);
+      viewer.scene.requestRender();
+    }).finally(() => {
       loadingScreen.classList.add('hidden');
       // Reveal only after the loading cover has yielded. transitionend can be
       // absent under reduced motion, so a bounded fallback makes this reliable.

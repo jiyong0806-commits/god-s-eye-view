@@ -3553,7 +3553,7 @@ export class StyleManager {
       const label = stack?.label || '지도';
       this._mapSourceSubtitle.textContent = state.lastError
         ? `${label} 사용 중 · ${state.lastError}`
-        : `${label} 사용 중`;
+        : (state.imageryDate ? `${label} · ${state.imageryDate} · 250m` : `${label} 사용 중`);
     }
   }
 
@@ -9318,7 +9318,11 @@ export class StyleManager {
         this._activeLocationSearchGeneration = generation;
         this._locationSearch.classList.add('searching');
         try {
-          const destination = await searchAndFlyTo(this.viewer, query, {
+          const search = window.__godsEyeView?.workspace?.search;
+          const navigationOwner = this;
+          const destination = search ? await search(query, {
+            beforeFly() { return navigationOwner._reassertNavigationHandoff(generation); },
+          }) : await searchAndFlyTo(this.viewer, query, {
             beforeFly: () => this._reassertNavigationHandoff(generation),
           });
           if (this._disposed || generation !== this._navigationGeneration) return;

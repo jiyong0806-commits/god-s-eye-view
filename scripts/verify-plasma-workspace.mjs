@@ -18,7 +18,13 @@ try {
     await page.evaluate(() => document.querySelector('[data-first-run-choice="explore"]')?.click());
     await new Promise(resolve => setTimeout(resolve, 1200));
     await page.waitForSelector('.plasma-tools', { timeout: 30000 });
-    const click = title => { console.log(JSON.stringify({ width, step: title })); return page.click(`.plasma-tools button[title="${title}"]`); };
+    const click = async title => {
+      console.log(JSON.stringify({ width, step: title }));
+      const selector = `button[title="${title}"]`;
+      const hidden = await page.$eval(selector, node => node.getBoundingClientRect().width === 0);
+      if (hidden) await page.click('.plasma-more');
+      return page.click(selector);
+    };
     await click('PLASMA 계정 설정');
     await page.waitForSelector('.plasma-dialog input[name="email"]', { timeout: 20000 });
     await page.waitForFunction(() => { const image = document.querySelector('.pd-logo'); return image?.complete && image.naturalWidth > 0; }, { timeout: 20000 });
@@ -32,7 +38,10 @@ try {
     await page.click('.pd-row button[title="찜 위치로 이동"]');
     await page.waitForFunction(() => !document.querySelector('.plasma-dialog').open);
     await page.type('.plasma-tools form input', '지평선중학교');
-    await click('검색 후 이동');
+    await click('위치 검색');
+    await page.waitForFunction(() => document.querySelector('.pd-search-results') || window.__godsEyeView.viewer.camera.positionCartographic.height < 10000);
+    const candidate = await page.$('.pd-search-results button');
+    if (candidate) await candidate.click();
     await page.waitForFunction(() => {
       const p = window.__godsEyeView.viewer.camera.positionCartographic;
       return Math.abs(p.latitude * 180 / Math.PI - 35.827415) < .05

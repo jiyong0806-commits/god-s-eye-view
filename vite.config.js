@@ -5984,7 +5984,7 @@ const GEV_REALTIME_TOOLS = [
       properties: {
         stack: {
           type: 'string',
-          enum: ['photoreal', 'bing-aerial', 'bing-labels', 'esri-imagery', 'osm', 'ion-3830185', 'nasa-blue-marble'],
+          enum: ['photoreal', 'bing-aerial', 'bing-labels', 'esri-imagery', 'osm', 'ion-3830185', 'nasa-blue-marble', 'nasa-daily'],
           description: 'photoreal = Google 3D. Use bing-aerial only when the user explicitly says "Bing aerial" — "satellite(s)" never means a basemap; only the explicit phrase "Esri" / "Esri imagery" means esri-imagery.',
         },
       },

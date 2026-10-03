@@ -24,4 +24,47 @@
 #plasma-notice { position: fixed; top: 145px; left: 50%; transform: translateX(-50%); z-index: 150; max-width: min(550px,calc(100vw - 32px)); padding: 10px 14px; color: #fff; background: #102028f2; border: 1px solid #00f0ff50; border-radius: 4px; font: 12px 'Pretendard',sans-serif; line-height: 1.5; overflow-wrap: anywhere; }
 #plasma-notice[hidden] { display: none; }
 .loading-plasma-logo { position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: 112px; height: 48px; object-fit: contain; }
-@media (max-width: 760px) { .plasma-tools { top: 102px; width: calc(100vw - 24px); box-sizing: border-box; flex-wrap: wrap; justify-content: center; } .plasma-tools input { width: 135px; } #plasma-notice { top: 197px; } }
+.plasma-tools { top: 72px; box-sizing: border-box; flex-wrap: nowrap; }
+.plasma-tools form { flex: 1 1 240px; }
+.plasma-tools input { width: 100%; }
+.plasma-extra-tools { display: flex; gap: 5px; }
+.plasma-tools .plasma-more { display: none; }
+.pd-search-results { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.plasma-dialog .pd-search-results button { width: 100%; display: grid; justify-content: stretch; text-align: left; padding: 12px; }
+.pd-search-results strong, .pd-search-results span { overflow-wrap: anywhere; line-height: 1.5; }
+.pd-search-results span { color: #b7c4c9; font-size: 12px; }
+.pd-search-results button:focus-visible { outline: 2px solid #00f0ff; outline-offset: 1px; }
+body #top-center-actions { top: auto; right: auto; left: 16px; bottom: calc(24px + env(safe-area-inset-bottom)); transform: none; display: flex; gap: 6px; z-index: 146; }
+body #top-center-actions button { width: 44px; height: 44px; flex: 0 0 44px; }
+body #top-center-actions svg { display: block; }
+#refresh-map-data.is-refreshing svg { animation: plasma-spin 700ms linear infinite; }
+@media (max-width: 1100px) {
+  .plasma-tools { top: 72px; width: min(520px, calc(100vw - 24px)); }
+  .plasma-tools .plasma-more { display: inline-flex; }
+  .plasma-extra-tools { display: none; position: absolute; right: 0; top: calc(100% + 6px); padding: 8px; background: rgba(8,12,21,.94); border: 1px solid #ffffff22; border-radius: 4px; }
+  .plasma-tools.tools-expanded .plasma-extra-tools { display: flex; }
+  #plasma-notice { top: 124px; }
+}
+@media (max-width: 760px) {
+  body #top-center-actions { left: 12px; bottom: calc(36px + env(safe-area-inset-bottom)); }
+  body #left-panel-stack { top: 128px; bottom: calc(50vh + 8px); }
+  body #command-dock { bottom: calc(100px + env(safe-area-inset-bottom)); }
+  body #title-bar { max-width: calc(100vw - 140px); }
+  body #title-bar .subtitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .plasma-dialog { max-height: calc(100dvh - 100px); }
+  body #left-panel-stack { right: 12px; left: 12px; width: auto; bottom: auto; max-height: none; display: flex; flex-direction: row; gap: 8px; overflow: visible; }
+  body #left-panel-stack > :is(#data-panel, #scene-panel) { flex: 1 1 0; min-width: 0; width: auto; }
+  body #right-context-rail { top: 182px; bottom: auto; left: 12px; right: 12px; width: auto; max-height: none; display: flex; flex-direction: row; gap: 8px; overflow: visible; }
+  body #right-context-rail > :is(#pp-toggles, #cctv-panel, #global-context-panel) { width: auto; min-width: 0; flex: 1 1 0; }
+  body :is(#left-panel-stack, #right-context-rail) > .collapsed { height: 46px; }
+  body :is(#left-panel-stack, #right-context-rail) .panel-header { padding: 10px; }
+  body :is(#left-panel-stack, #right-context-rail) > :not(.collapsed) { position: absolute; top: 54px; left: 0; right: 0; width: 100%; max-height: calc(100dvh - 370px); z-index: 148; overflow-y: auto; }
+  body #left-panel-stack:has(> :not(.collapsed)) ~ #right-context-rail { visibility: hidden; }
+  body #world-connect-toggle { top: auto; bottom: calc(36px + env(safe-area-inset-bottom)); right: 12px; }
+  body #right-context-rail { top: 190px; }
+  body :is(#left-panel-stack, #right-context-rail) > .collapsed { overflow: hidden; }
+  body #right-context-rail .panel-title { font-size: 10px; letter-spacing: 0; }
+  body #right-context-rail .panel-divider { display: none; }
+  body #right-context-rail .panel-collapse-btn { width: 26px; height: 26px; min-width: 26px; }
+  body #global-context-panel.collapsed .context-timeline-toggle { display: none; }
+}

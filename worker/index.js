@@ -3,6 +3,7 @@ import { extraRoutes } from './extraRoutes.js';
 import { flowRoutes } from './flowRoutes.js';
 import { worldConnectRoutes } from './worldConnectRoutes.js';
 import { mapSourceStatus } from './mapSourceStatus.js';
+import { dailyImagery } from './dailyImagery.js';
 import { withSharedCooldown } from './sharedCooldown.js';
 import { connectFeeds } from './connectFeeds.js';
 import { roadRoutes } from './roadRoutes.js';
@@ -447,6 +448,10 @@ async function handleApi(request, env, url) {
   if (url.pathname === '/api/map-source/status') {
     if (request.method !== 'GET') return json({ error: 'method-not-allowed' }, 405);
     return mapSourceStatus(env);
+  }
+  if (url.pathname === '/api/map-source/daily') {
+    if (request.method !== 'GET') return Response.json({ error: 'Method not allowed' }, { status: 405 });
+    return dailyImagery();
   }
   const world = await worldConnectRoutes(request, env);
   if (world) return world;

@@ -46,6 +46,7 @@
  * plus CCTV-specific methods (selectCamera, cycleCamera, focusNearest, etc.).
  */
 import * as Cesium from 'cesium';
+import { requestImage, cancelImageRequest } from './imageRequest.js';
 import { registerSpriteCollection, restoreSpriteOrder } from './spriteOrder.js';
 import {
   CCTV_ACTIVATION_RESULT,
@@ -3129,9 +3130,7 @@ function fetchCardFrame(record, slot, refreshMs, { userGesture = false } = {}) {
     Object.assign(slot, applyFrameResult(slot, { ok: !!frame, frame }, Date.now()));
     _viewer?.scene?.requestRender?.();
   };
-  image.onload = () => settle(true);
-  image.onerror = () => settle(false);
-  image.src = frameUrlFor(record.camera, refreshMs);
+  requestImage(image, frameUrlFor(record.camera, refreshMs), settle);
 }
 
 /** Starts the card-frame pacer (idempotent; policy-gated per tick). */
@@ -3150,6 +3149,7 @@ if (typeof document !== 'undefined') {
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) return;
     for (const image of _cardFetchImages) {
+      cancelImageRequest(image);
       image.onload = null;
       image.onerror = null;
       image.removeAttribute('src');
@@ -3167,6 +3167,7 @@ function stopCardFrameLoop() {
     _cardFetchTimer = 0;
   }
   for (const image of _cardFetchImages) {
+    cancelImageRequest(image);
     image.onload = null;
     image.onerror = null;
     image.removeAttribute('src');

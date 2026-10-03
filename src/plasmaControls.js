@@ -49,6 +49,12 @@ export function initPlasmaControls() {
     const app = window.__godsEyeView;
     try {
       const manager = app?.dataManager;
+      const maps = app?.mapStackController;
+      if (maps?.getActiveId() === 'nasa-daily') {
+        const state = await maps.setStack('nasa-daily', { refresh: true });
+        if (state.lastError) app.workspace?.notify(state.lastError);
+        else app.workspace?.notify(`NASA 일일영상 · ${state.imageryDate} · 250m`);
+      }
       const activeIds = manager
         ? [...manager.layers.entries()].filter(([, entry]) => entry.enabled).map(([id]) => id)
         : [];

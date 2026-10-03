@@ -4,7 +4,7 @@ export function godFlowDevPlugin() {
   return { name: 'god-flow-routes', configureServer(server) {
     server.middlewares.use(async (req, res, next) => {
       const url = new URL(req.url, `http://${req.headers.host}`);
-      if (url.pathname.startsWith('/api/flow/') || url.pathname.startsWith('/api/world-connect/') || url.pathname.startsWith('/api/account/') || url.pathname.startsWith('/api/voice/') || url.pathname === '/api/alerts' || url.pathname === '/api/geocode' || url.pathname === '/api/map-source/status') {
+      if (url.pathname.startsWith('/api/flow/') || url.pathname.startsWith('/api/world-connect/') || url.pathname.startsWith('/api/account/') || url.pathname.startsWith('/api/voice/') || url.pathname === '/api/alerts' || url.pathname === '/api/geocode' || url.pathname === '/api/map-source/status' || url.pathname === '/api/map-source/daily') {
         try {
           const request = new Request(url, { method: req.method, headers: req.headers,
             ...(!['GET', 'HEAD'].includes(req.method) ? { body: req, duplex: 'half' } : {}) });
