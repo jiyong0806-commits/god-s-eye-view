@@ -36,6 +36,7 @@
 .pd-search-results button:focus-visible { outline: 2px solid #00f0ff; outline-offset: 1px; }
 body #top-center-actions { top: auto; right: auto; left: 16px; bottom: calc(24px + env(safe-area-inset-bottom)); transform: none; display: flex; gap: 6px; z-index: 146; }
 body #top-center-actions button { width: 44px; height: 44px; flex: 0 0 44px; }
+body #top-center-actions button:is(:hover, :focus-visible, :active) { transform: none; }
 body #top-center-actions svg { display: block; }
 #refresh-map-data.is-refreshing svg { animation: plasma-spin 700ms linear infinite; }
 @media (max-width: 1100px) {
@@ -48,7 +49,8 @@ body #top-center-actions svg { display: block; }
 @media (max-width: 760px) {
   body #top-center-actions { left: 12px; bottom: calc(36px + env(safe-area-inset-bottom)); }
   body #left-panel-stack { top: 128px; bottom: calc(50vh + 8px); }
-  body #command-dock { bottom: calc(100px + env(safe-area-inset-bottom)); }
+  body #command-dock { bottom: calc(156px + env(safe-area-inset-bottom)); }
+  body #key-setup-chip { top: 244px; right: 12px; bottom: auto; }
   body #title-bar { max-width: calc(100vw - 140px); }
   body #title-bar .subtitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .plasma-dialog { max-height: calc(100dvh - 100px); }
@@ -58,13 +60,17 @@ body #top-center-actions svg { display: block; }
   body #right-context-rail > :is(#pp-toggles, #cctv-panel, #global-context-panel) { width: auto; min-width: 0; flex: 1 1 0; }
   body :is(#left-panel-stack, #right-context-rail) > .collapsed { height: 46px; }
   body :is(#left-panel-stack, #right-context-rail) .panel-header { padding: 10px; }
-  body :is(#left-panel-stack, #right-context-rail) > :not(.collapsed) { position: absolute; top: 54px; left: 0; right: 0; width: 100%; max-height: calc(100dvh - 370px); z-index: 148; overflow-y: auto; }
-  body #left-panel-stack:has(> :not(.collapsed)) ~ #right-context-rail { visibility: hidden; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).panel-collapsible:not(.collapsed) { position: absolute; top: 54px; left: 0; right: 0; width: 100%; height: min(480px, calc(100dvh - 320px)); max-height: calc(100dvh - 320px); z-index: 148; overflow-y: auto; }
+  body:has(#left-panel-stack > :not(.collapsed)) #right-context-rail { visibility: hidden; }
   body #world-connect-toggle { top: auto; bottom: calc(36px + env(safe-area-inset-bottom)); right: 12px; }
   body #right-context-rail { top: 190px; }
   body :is(#left-panel-stack, #right-context-rail) > .collapsed { overflow: hidden; }
-  body #right-context-rail .panel-title { font-size: 10px; letter-spacing: 0; }
-  body #right-context-rail .panel-divider { display: none; }
-  body #right-context-rail .panel-collapse-btn { width: 26px; height: 26px; min-width: 26px; }
-  body #global-context-panel.collapsed .context-timeline-toggle { display: none; }
+  body :is(#left-panel-stack, #right-context-rail) .panel-title,
+  body #pp-toggles .pp-header-label { font-size: 11px; letter-spacing: 0; color: #cfd9dc; }
+  body :is(#left-panel-stack, #right-context-rail) .panel-divider { flex: 1 1 0; min-width: 0; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #cctv-panel, #global-context-panel).collapsed > :is(.data-panel-inner, .scene-panel-inner, .cctv-panel-inner, .global-context-panel-inner) { box-sizing: border-box; padding: 0; height: 44px; min-height: 44px; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #cctv-panel, #global-context-panel).collapsed .panel-header { box-sizing: border-box; height: 42px; min-height: 42px; margin: 0; padding: 0 10px; gap: 6px; }
+  body #right-context-rail #pp-toggles.collapsed .pp-header-row { box-sizing: border-box; height: 44px; min-height: 44px; margin: 0; padding: 0 10px; gap: 6px; }
+  body :is(#left-panel-stack, #right-context-rail) .panel-collapse-btn { width: 28px; height: 28px; min-width: 28px; flex: 0 0 28px; }
+  body #global-context-panel.collapsed #context-radio-dock { display: none; }
 }

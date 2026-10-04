@@ -154,6 +154,7 @@ export async function initKeySetup({ documentRef = globalThis.document, fetchImp
     const response = await doFetch('/api/setup/status', { cache: 'no-store' });
     if (!response.ok) throw new Error(String(response.status));
     status = await response.json();
+    if (status?.external === true || !Array.isArray(status?.keys)) throw new Error('Key setup is server-managed');
   } catch {
     // Prod build or non-loopback visitor: the surface cannot function, so it
     // does not exist. (The README covers .env for headless/self-host setups.)

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T13:04:14.908Z",
+  "generatedAt": "2026-10-04T05:08:26.029Z",
   "sourceCommit": "4c1e980f6f189a349995a7593c3c8b4a16c15123",
   "includesUncommittedWorkingTree": true,
   "excluded": [
@@ -320,6 +320,11 @@
       "file": "docs/VERIFICATION-2026-10-03.md",
       "sha256": "afa8493855ba1da15bcda2a4ac47d238d3305f02e6815d8c89891dc76063a969",
       "bytes": 4240
+    },
+    {
+      "file": "docs/VERIFICATION-2026-10-04.md",
+      "sha256": "699fa275af5cca64898cc7b07fbaea3a100abdcea26c55a1c0eeb04885784496",
+      "bytes": 4166
     },
     {
       "file": "docs/google-3d-commercial-setup-ko.md",
@@ -868,8 +873,8 @@
     },
     {
       "file": "scripts/export-source.mjs",
-      "sha256": "6d79b857430200b6cf3fa08bd8e8ec88eb08b6e634fb0e85acf8312a6204dd18",
-      "bytes": 5092
+      "sha256": "04cec381fe67b62331e83c6d310db0244e277dc520070ad8c49b83f565f96b2d",
+      "bytes": 5280
     },
     {
       "file": "scripts/fixtures/voice/README.md",
@@ -943,8 +948,8 @@
     },
     {
       "file": "scripts/prepare-pages-build.mjs",
-      "sha256": "5a423d0cabaaa4d9ea8334f102b2ea5b7e5ffd0722af7ea684a0a3cd65e16220",
-      "bytes": 2067
+      "sha256": "080dded81f7ba836e02f30640c6f7119a168ff7c5609739522eea10b276752d9",
+      "bytes": 2285
     },
     {
       "file": "scripts/prepare-sites-build.mjs",
@@ -1218,8 +1223,8 @@
     },
     {
       "file": "scripts/verify-search-layout.mjs",
-      "sha256": "a2a59a49ae00993df0a7d968881524d1fb2ca656b95e96f747c7028fedec5161",
-      "bytes": 5521
+      "sha256": "da52f1d3eabdbc137c27ddf5848356f7eaec16a5d1103bef4bf8711fe5069367",
+      "bytes": 7795
     },
     {
       "file": "scripts/verify-world-connect.mjs",
@@ -2578,8 +2583,8 @@
     },
     {
       "file": "src/keySetup.js",
-      "sha256": "73784a986d7ea8f0be8cb629790364d40c154305dc32c370a36627f901495ecd",
-      "bytes": 13753
+      "sha256": "e542a76d2b6cc59cab3ca1fdf624d80d17ff32268ecba9d92a72013863d2b5a8",
+      "bytes": 13868
     },
     {
       "file": "src/keySetup.test.mjs",
@@ -2605,6 +2610,11 @@
       "file": "src/keySetupHardening.test.mjs",
       "sha256": "de510d3c477690fb19d8ff0f97256dc47528daee948cb474fb9278a9ff1a75fe",
       "bytes": 9936
+    },
+    {
+      "file": "src/keySetupHosted.test.mjs",
+      "sha256": "1cb0b07f5233bc5192042536c9a036286656e3224f6b62b3c37ac74021ce16dd",
+      "bytes": 831
     },
     {
       "file": "src/loadingFeedback.js",
@@ -2818,8 +2828,8 @@
     },
     {
       "file": "src/plasmaWorkspace.css",
-      "sha256": "fec143a6e78b27571a1a774d142dc76ab75402a399ca529218e99d3d6e4bf2fa",
-      "bytes": 6832
+      "sha256": "9ce7d04e63fd1bdba4528f1f53907e9ec93a653950ca2f304f0f7f6059aa52d4",
+      "bytes": 7971
     },
     {
       "file": "src/plasmaWorkspace.js",

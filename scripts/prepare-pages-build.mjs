@@ -1,4 +1,4 @@
-import { cpSync, existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,6 +13,10 @@ for (const name of ['index.html', 'app-icon.png', 'fonts/PretendardVariable.woff
 if (/src=["']\/(?:src\/|apps\/web\/)/.test(readFileSync(path.join(client, 'index.html'), 'utf8'))) {
   throw new Error('Source HTML is not deployable. Run npm run build first.');
 }
+if (path.relative(path.join(root, 'dist'), path.resolve(output)) !== 'pages') {
+  throw new Error('Refusing to clean outside the generated Pages directory');
+}
+rmSync(output, { recursive: true, force: true });
 cpSync(client, output, { recursive: true });
 const requireVite = createRequire(import.meta.resolve('vite'));
 await requireVite('esbuild').build({ entryPoints: [path.join(root, 'worker/pages.js')],

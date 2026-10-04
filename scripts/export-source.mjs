@@ -36,14 +36,16 @@ if (process.argv.includes('--check-built')) {
     if (item.isSymbolicLink()) throw new Error('Unexpected symlink in build output');
     return item.isDirectory() ? walk(name) : [name];
   });
-  const built = walk(path.join(root, 'dist/client'));
+  const directories = [path.join(root, 'dist/client')];
+  if (existsSync(path.join(root, 'dist/pages'))) directories.push(path.join(root, 'dist/pages'));
+  const built = directories.flatMap(walk);
   for (const name of built) {
     const bytes = readFileSync(name);
     if (secretValues.some(value => bytes.includes(Buffer.from(value)))) {
       throw new Error(`Known credential in build: ${path.relative(root, name)}. Its value was not printed.`);
     }
   }
-  console.log(JSON.stringify({ builtFilesChecked: built.length, status: 'known-credential-scan-passed' }));
+  console.log(JSON.stringify({ builtFilesChecked: built.length, buildDirectoriesChecked: directories.length, status: 'known-credential-scan-passed' }));
 }
 for (const file of files) {
   if (deny.test(file) || file.startsWith('../') || path.isAbsolute(file)) continue;
