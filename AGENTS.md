@@ -15,3 +15,8 @@ as a complete backend deployment. Do not activate billing or purchase a domain i
 
 The source-delivery preference does not itself authorize future remote publication.
 Respect each task's push/deploy authorization and preserve unrelated work.
+
+For new spatial providers, register the source in `src/spatial/sourceRegistry.js`
+before adding an adapter. Track sourceId, retrievedAt and freshness. Code licenses
+do not confer data rights. Unknown/restricted sources must not automatically
+activate production raster layers; preserve the globe when a provider fails.

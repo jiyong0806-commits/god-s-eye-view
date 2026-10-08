@@ -7747,6 +7747,17 @@ export default defineConfig(({ mode }) => {
     plugins: [
       godFlowDevPlugin(),
       cesium(),
+      {
+        name: 'plasma-lazy-map-runtime',
+        transformIndexHtml: { order: 'post', handler(html, context) {
+          const filename = context.filename.replaceAll('\\', '/');
+          const script = /<script\b[^>]*src=["'](\/cesium\/Cesium\.js)["'][^>]*><\/script>/g;
+          if (/\/(auth|home|event)\/index\.html$/.test(filename)) {
+            return html.replace(script, '').replace(/<link\b[^>]*href=["']\/cesium\/Widgets\/widgets\.css["'][^>]*>/g, '');
+          }
+          return html.replace(script, '<script type="application/json" data-gev-runtime-src="$1"></script>');
+        } },
+      },
       openSkyProxy(),
       celestrakProxy(),
       tomtomProxy(),
@@ -7804,6 +7815,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         input: {
           main: path.resolve(__dirname, 'index.html'),
+          auth: path.resolve(__dirname, 'auth/index.html'),
           home: path.resolve(__dirname, 'home/index.html'),
           mobile: path.resolve(__dirname, 'mobile.html'),
           app: path.resolve(__dirname, 'app/index.html'),

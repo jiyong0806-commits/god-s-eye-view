@@ -14,6 +14,7 @@ function assetPath(root, raw) {
   if (name.includes('\0') || name.includes('\\') || name.includes(':')) return null;
   if (['/', '/map', '/map/'].includes(name)) name = '/index.html';
   if (['/home', '/home/'].includes(name)) name = '/home/index.html';
+  if (['/auth', '/auth/'].includes(name)) name = '/auth/index.html';
   if (name.endsWith('/')) name += 'index.html';
   const target = path.resolve(root, `.${name}`);
   const relative = path.relative(root, target);

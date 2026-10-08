@@ -15,6 +15,8 @@
 .plasma-dialog form { display: grid; gap: 10px; }
 .plasma-dialog label { display: grid; gap: 5px; font-size: 12px; }
 .plasma-dialog input:not([type="checkbox"]), .plasma-dialog select { min-width: 0; width: 100%; box-sizing: border-box; border: 1px solid #ffffff25; background: #0004; color: #fff; border-radius: 4px; padding: 10px; font: inherit; }
+.pd-search-warning { color: #e1cf89; font-size: 13px; line-height: 1.65; }
+.pd-search-results small { color: #9aafb8; font-size: 11px; overflow-wrap: anywhere; }
 .plasma-dialog select option { background: #12171c; }
 .plasma-dialog .pd-check { display: flex; align-items: center; gap: 8px; }
 .plasma-dialog .pd-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 0; border-bottom: 1px solid #ffffff18; }

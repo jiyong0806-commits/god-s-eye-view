@@ -4,6 +4,8 @@ import { createElement } from 'react';
 import { Network, X, ArrowUpRight } from 'lucide-react';
 import './worldConnect.css';
 import { accountProfile, rankNews } from './plasmaAccount.js';
+import { newsBrief, newsMatches } from './newsContext.js';
+import { sourceCard } from './spatial/sourceCard.js';
 
 const iconRoots = new Map();
 function cleanupIcons() {
@@ -25,15 +27,41 @@ export function initWorldConnect(viewer) {
   const header = document.createElement('header'); header.append(text('h2', 'World Connect'));
   const close = document.createElement('button'); close.title = '닫기'; close.setAttribute('aria-label', '닫기'); icon(close, X); header.append(close);
   const content = document.createElement('div'); content.className = 'wc-content'; panel.append(header, content); document.body.append(toggle, panel);
-  let controller = null, current = null, version = 0, activeTab = 'economy', profile = null;
+  let controller = null, current = null, version = 0, activeTab = 'economy', profile = null, mapTerms = [], selectedLocation = null, satelliteView = null;
   accountProfile().then(value => { profile = value; }).catch(() => {});
   const profileHandler = event => { profile = event.detail; if (!panel.hidden && activeTab === 'economy') showFeed('economy'); };
   window.addEventListener('plasma:profile', profileHandler);
-  const cancel = () => { controller?.abort(); controller = new AbortController(); return ++version; };
+  const locationHandler = event => { mapTerms = [event.detail?.query, ...(event.detail?.name || '').split(/[,\s]+/)].filter(Boolean).slice(0, 12);
+    if (Number.isFinite(event.detail?.lat) && Number.isFinite(event.detail?.lon)) selectedLocation = event.detail; };
+  window.addEventListener('plasma:location', locationHandler);
+  const cancel = () => { satelliteView?.destroy(); satelliteView = null; controller?.abort(); controller = new AbortController(); return ++version; };
   close.onclick = () => { panel.hidden = true; cancel(); };
   async function get(path, options) {
-    const response = await fetch(path, { ...options, signal: controller.signal }); const data = await response.json();
+    const response = await fetch(path, { ...options, signal: AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]) }); const data = await response.json();
     if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`); return data;
+  }
+  function openNews(article) {
+    const generation = cancel(); content.replaceChildren(tabs()); cleanupIcons();
+    const back = text('button', '뉴스 목록', 'wc-back'); back.onclick = () => showFeed('economy'); content.append(back);
+    const brief = article.brief || newsBrief(article);
+    content.append(text('span', '출처 기반 브리핑 · 제목 확인 범위', 'wc-state'), text('h3', article.title),
+      text('p', brief.text), text('p', brief.assessment), text('p', brief.scope, 'wc-muted'),
+      text('p', `${article.provider} · ${new Date(article.publishedAt).toLocaleString('ko-KR')}`),
+      text('p', article.recommendationReason), text('p', article.evidence, 'wc-muted'),
+      sourceLink({ title: '원문 출처 (선택)', url: article.url }));
+    content.append(sourceCard(article));
+    const form = document.createElement('form'); form.className = 'wc-question';
+    const input = document.createElement('input'); input.required = true; input.maxLength = 1000; input.placeholder = '이 뉴스의 출처·시각·내용 질문'; input.setAttribute('aria-label', '뉴스 질문');
+    const send = document.createElement('button'); send.type = 'submit'; send.title = '질문 보내기'; send.setAttribute('aria-label', '질문 보내기'); icon(send, ArrowUpRight);
+    const answer = text('p', '', 'wc-answer'); answer.setAttribute('aria-live', 'polite'); form.append(input, send); content.append(text('h3', '뉴스 질문'), form, answer);
+    form.onsubmit = async event => {
+      event.preventDefault(); if (send.disabled) return; send.disabled = true; answer.textContent = '출처 확인 중…';
+      try {
+        const result = await get('/api/world-connect/news-question', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: article.id, question: input.value }) });
+        if (generation === version) answer.textContent = `${result.provider} · 출처 기록 응답 (생성형 AI 아님)\n${result.text}`;
+      } catch (error) { if (generation === version) answer.textContent = error.message; }
+      finally { send.disabled = false; }
+    };
   }
   function navigate(event) { viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(event.lon, event.lat, 1200000), duration: 0.8 }); }
   async function open(event) {
@@ -45,6 +73,7 @@ export function initWorldConnect(viewer) {
       const data = await get(`/api/world-connect/analyze?id=${encodeURIComponent(event.id)}`);
       if (generation !== version) return;
       current = data.event; status.textContent = data.limitations;
+      content.append(sourceCard(current));
       content.append(text('h3', '연결 관계 · 깊이 1'));
       const graph = document.createElement('div'); graph.className = 'wc-graph'; graph.append(text('div', current.title, 'wc-center'));
       if (!data.relations.length) graph.append(text('p', '500km · 24시간 범위의 관련 기록 없음', 'wc-muted'));
@@ -75,23 +104,39 @@ export function initWorldConnect(viewer) {
   }
   function tabs() {
     const row = document.createElement('div'); row.className = 'wc-tabs'; row.setAttribute('role', 'tablist');
-    for (const [id, label] of [['economy', '경제 뉴스'], ['events', '재난 사건']]) {
+    for (const [id, label] of [['economy', '경제 뉴스'], ['events', '재난 사건'], ['satellite', '위성영상']]) {
       const b = text('button', label); b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(activeTab === id)); b.dataset.wcTab = id; b.onclick = () => showFeed(id); row.append(b);
     } return row;
   }
-  async function showFeed(tab = activeTab) {
+  async function showFeed(tab = activeTab, initialQuery = '') {
     activeTab = tab;
     const generation = cancel(); panel.hidden = false; content.replaceChildren(tabs(), text('p', tab === 'economy' ? '경제 뉴스 조회 중…' : 'USGS 최근 사건 조회 중…')); cleanupIcons();
     try {
+      if (tab === 'satellite') {
+        const { satellitePanel } = await import('./satelliteExplorer/panel.js'); if (generation !== version) return;
+        content.replaceChildren(tabs());
+        satelliteView = satellitePanel({ container: content, viewer, selectedLocation, initialQuery,
+          onResolveLocation: async query => {
+            const result = await window.__godsEyeView?.workspace?.search(query);
+            if (!result || result.cancelled || generation !== version) return null;
+            return selectedLocation;
+          } }); return;
+      }
       if (tab === 'economy') {
         const data = await get('/api/world-connect/news'); if (generation !== version) return;
-        content.replaceChildren(tabs(), text('h3', profile?.personalization_consent ? '웰컴 맞춤 뉴스' : '최근 경제 뉴스'), text('p', '발행사 공식 RSS · 원문 출처', 'wc-state'));
-        for (const article of rankNews(data.articles, profile)) {
+        content.replaceChildren(tabs(), text('h3', profile?.personalization_consent ? '관심 뉴스' : '최근 경제 뉴스'), text('p', '공식 RSS · 단일 매체 · 독립 사실 검증 전', 'wc-state'));
+        if (mapTerms.length) content.append(text('p', `최근 검색 지역: ${mapTerms[0]} · 제목에 지역명이 있을 때만 연결`, 'wc-muted'));
+        const ranked = rankNews(data.articles, profile).map(article => {
+          const matched = newsMatches(article, { mapTerms });
+          return { ...article, score: article.score + matched.map.length * 2,
+            recommendationReason: `${article.recommendationReason}${matched.map.length ? ` · 검색 지역명과 제목 일치: ${matched.map.join(', ')}` : ''}` };
+        }).sort((a, b) => b.score - a.score || b.publishedAt - a.publishedAt);
+        for (const article of ranked) {
           const row = document.createElement('section'); row.className = 'wc-news';
-          const headline = text('a', article.title); headline.href = article.url; headline.target = '_blank'; headline.rel = 'noopener noreferrer';
+          const headline = text('button', article.title, 'wc-headline'); headline.onclick = () => openNews(article);
           row.append(headline, text('small', `${article.provider} · ${new Date(article.publishedAt).toLocaleString('ko-KR')}`),
             text('p', article.recommendationReason), text('p', article.evidence, 'wc-muted'), text('p', article.limitations, 'wc-muted'));
-          const photo = sourceLink({ title: '사진·기사 원문 확인', url: article.photoSourceUrl }); row.append(photo); content.append(row);
+          content.append(row);
         }
         if (!data.articles.length) content.append(text('p', '최신 경제 뉴스가 없습니다.'));
         return;
@@ -103,6 +148,8 @@ export function initWorldConnect(viewer) {
     } catch (error) { if (generation === version) content.replaceChildren(tabs(), text('p', error.message)); }
   }
   toggle.onclick = () => { if (!panel.hidden) close.click(); else showFeed(); };
+  const intentHandler = event => { if (event.detail?.concept === 'satellite-imagery') showFeed('satellite', event.detail.location || ''); };
+  window.addEventListener('plasma:spatial-intent', intentHandler);
   const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
   handler.setInputAction(({ position }) => {
     const entity = viewer.scene.pick(position)?.id;
@@ -111,5 +158,5 @@ export function initWorldConnect(viewer) {
     open({ id: p.usgsId, title: `M${Number(p.mag).toFixed(1)} ${p.place}`, magnitude: p.mag, place: p.place,
       source: { title: 'USGS 사건 기록', url: `https://earthquake.usgs.gov/earthquakes/eventpage/${encodeURIComponent(p.usgsId)}` } });
   }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-  return { open, destroy() { cancel(); window.removeEventListener('plasma:profile', profileHandler); handler.destroy(); toggle.remove(); panel.remove(); cleanupIcons(); } };
+  return { open, destroy() { cancel(); window.removeEventListener('plasma:profile', profileHandler); window.removeEventListener('plasma:location', locationHandler); window.removeEventListener('plasma:spatial-intent', intentHandler); handler.destroy(); toggle.remove(); panel.remove(); cleanupIcons(); } };
 }

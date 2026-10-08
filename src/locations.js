@@ -1,5 +1,6 @@
 import * as Cesium from 'cesium';
 import { viewportBias, placesNearViewRecovery } from './annotations/annotationResolver.js';
+import { searchPolicy } from './searchPolicy.js';
 
 /**
  * Points of Interest per city.
@@ -344,6 +345,7 @@ export const CANCELLED_SEARCH = Object.freeze({ cancelled: true });
 export function normalizeSearchResults(results) {
   const seen = new Set();
   return (Array.isArray(results) ? results : []).filter(result => {
+    if (['fictional', 'unverified'].includes(result?.locationStatus)) return false;
     const point = result?.geometry?.location;
     if (!Number.isFinite(point?.lat) || Math.abs(point.lat) > 90
         || !Number.isFinite(point?.lng) || Math.abs(point.lng) > 180) return false;
@@ -375,6 +377,9 @@ export async function searchPlaces(viewer, query, { signal } = {}) {
  * default; precise landmarks/buildings use close landmark framing.
  */
 export async function searchAndFlyTo(viewer, query, options = {}) {
+  if (searchPolicy(query).requireSelection && !options.result) {
+    throw new Error('가상·미확인 장소입니다. 위치 검색에서 이름이 같은 실제 장소 후보를 확인하세요.');
+  }
   const apiKey = window.__GOOGLE_MAPS_API_KEY__ || import.meta.env?.GOOGLE_MAPS_API_KEY;
 
   const beforeFly = typeof options.beforeFly === 'function' ? options.beforeFly : null;

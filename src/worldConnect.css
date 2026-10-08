@@ -29,7 +29,22 @@
 #world-connect-panel .wc-tabs button { border-bottom: 2px solid transparent; padding: 6px 0; font-size: 12px; }
 #world-connect-panel .wc-tabs button[aria-selected="true"] { color: #00f0ff; border-color: #00f0ff; }
 .wc-news { padding: 14px 0; border-bottom: 1px solid #ffffff20; }
-#world-connect-panel .wc-news > a:first-child { font-size: 14px; line-height: 1.6; }
+#world-connect-panel .wc-headline { font-size: 14px; line-height: 1.6; width: 100%; padding: 0; overflow-wrap: anywhere; }
+#world-connect-panel .wc-headline:hover { color: #00f0ff; }
+#world-connect-panel .wc-back { font-size: 12px; padding: 10px 0; color: #00f0ff; }
 .wc-news small { display: block; font-size: 10px; color: #abbfc6; margin-top: 8px; }
+.source-card { margin: 12px 0; border-top: 1px solid #ffffff20; padding-top: 8px; font-size: 12px; }
+.source-card summary { cursor: pointer; color: #b2efe1; }
+.source-card p { margin: 6px 0; }
+.satellite-search { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.satellite-search label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; min-width: 0; }
+.satellite-search label:first-child, .satellite-search label:last-of-type, .satellite-search > button { grid-column: 1 / -1; }
+.satellite-search input { width: 100%; min-width: 0; box-sizing: border-box; color-scheme: dark; background: #060a0d80; color: #eef5f5; border: 1px solid #ffffff30; border-radius: 4px; padding: 8px; font: inherit; }
+.satellite-search input[type=range] { padding: 0; accent-color: #00f0ff; }
+#world-connect-panel .satellite-search > button, #world-connect-panel .satellite-scene > button { border: 1px solid #00f0ff60; border-radius: 4px; padding: 10px; font-size: 12px; }
+#world-connect-panel button:disabled { opacity: .5; cursor: default; }
+.satellite-scene { padding: 10px 0; border-bottom: 1px solid #ffffff20; }
+.satellite-scene h3 { overflow-wrap: anywhere; }
+.satellite-preview img { width: 100%; max-height: 280px; object-fit: contain; background: #050709; }
 #world-connect-panel .wc-event { display: block; width: 100%; font-size: 12px; padding: 12px 0; border-bottom: 1px solid #ffffff18; line-height: 1.5; }
 @media (prefers-reduced-motion: no-preference) { #world-connect-panel { animation: wc-enter 180ms ease-out; } @keyframes wc-enter { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } } }

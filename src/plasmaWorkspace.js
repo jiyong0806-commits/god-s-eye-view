@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { createElement } from 'react';
 import { Search, UserRound, Bookmark, RefreshCw, Map as MapIcon, CloudRain, Bell, X, Trash2, ArrowUpRight, CircleHelp, Volume2, Ellipsis, Layers2, Link, Globe2, Workflow } from 'lucide-react';
 import { searchAndFlyTo, searchPlaces, CANCELLED_SEARCH } from './locations.js';
-import { accountClient, accountUser, accountProfile, saveProfile } from './plasmaAccount.js';
+import { searchPolicy } from './searchPolicy.js';
+import { accountClient, accountUser, accountProfile, saveProfile, accountRedirect } from './plasmaAccount.js';
 import { initPlasmaAlerts } from './plasmaAlerts.js';
 import { initQuietSfx } from './quietSfx.js';
 import './plasmaWorkspace.css';
@@ -52,7 +53,7 @@ export function initPlasmaWorkspace(app) {
         const mode = el('button', signUp ? '로그인으로' : '회원가입'); mode.onclick = () => showAccount(!signUp); body.append(mode);
         form.onsubmit = async event => { event.preventDefault(); if (send.disabled) return; send.disabled = true;
           try { const c = await accountClient(); const result = signUp ? await c.auth.signUp({ email: email.value, password: pass.value,
-            options: { emailRedirectTo: `${location.origin}/map/` } }) : await c.auth.signInWithPassword({ email: email.value, password: pass.value });
+            options: { emailRedirectTo: accountRedirect() } }) : await c.auth.signInWithPassword({ email: email.value, password: pass.value });
             if (result.error) throw result.error; pass.value = '';
             if (result.data.session) { await showAccount(); notify('로그인되었습니다.'); }
             else status.textContent = '인증 이메일을 확인하세요. 메일이 오지 않으면 메일 발송 설정 확인이 필요합니다.';
@@ -109,8 +110,9 @@ export function initPlasmaWorkspace(app) {
   }
   const search = el('form'), input = el('input'); input.placeholder = '시·도·지역·학교 검색'; input.required = true; input.maxLength = 160; input.setAttribute('aria-label', '한국어·전세계 위치 검색');
   const go = button('위치 검색', Search); go.type = 'submit'; search.append(input, go); tools.append(search);
-  async function chooseSearchResult(query, candidates) {
+  async function chooseSearchResult(query, candidates, policy = searchPolicy(query)) {
     const body = open(`검색 결과 · ${candidates.length}개`);
+    if (policy.warning) { const warning = el('p', policy.warning); warning.className = 'pd-search-warning'; warning.setAttribute('role', 'status'); body.append(warning); }
     const list = el('ul'); list.className = 'pd-search-results'; body.append(list);
     return new Promise(resolve => {
       cancelSelection = () => resolve(null);
@@ -118,6 +120,8 @@ export function initPlasmaWorkspace(app) {
         const row = el('li'), pick = el('button'); pick.type = 'button';
         const name = candidate.name || candidate.formatted_address?.split(',')[0] || query;
         pick.append(el('strong', name), el('span', candidate.formatted_address || name));
+        const point = candidate.geometry.location;
+        pick.append(el('small', `${candidate.source || '지도 검색 공급자'} · ${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`));
         pick.onclick = () => { cancelSelection = null; resolve(candidate); dialog.close(); };
         row.append(pick); list.append(row);
       }
@@ -138,15 +142,23 @@ export function initPlasmaWorkspace(app) {
     const beforeFly = options.beforeFly || (generation == null ? undefined : () => app.styleManager._reassertNavigationHandoff(generation));
     const candidates = await searchPlaces(app.viewer, query, { signal: controller.signal });
     if (controller.signal.aborted) return CANCELLED_SEARCH;
-    if (!candidates.length) return null;
-    const result = candidates.length > 1 ? await chooseSearchResult(query, candidates) : candidates[0];
+    const policy = searchPolicy(query);
+    if (!candidates.length) {
+      if (policy.warning) notify(`${policy.warning.split(' 아래는')[0]} 확인된 장소 검색 결과가 없습니다.`);
+      return null;
+    }
+    const result = candidates.length > 1 || policy.requireSelection ? await chooseSearchResult(query, candidates, policy) : candidates[0];
     if (!result || controller.signal.aborted) return CANCELLED_SEARCH;
     const destination = await searchAndFlyTo(app.viewer, query, { ...options, beforeFly, result, resolveBuilding: false, duration: .6 });
+    if (destination) window.dispatchEvent(new CustomEvent('plasma:location', { detail: { name: result.name || result.formatted_address || query, query,
+      lat: result.geometry?.location?.lat, lon: result.geometry?.location?.lng } }));
     if (destination && !destination.cancelled) { app.requestRender('search-selection'); sfx.play('navigate'); }
     return destination;
   }
   search.onsubmit = async e => { e.preventDefault(); if (go.disabled) return; go.disabled = true;
-    try { const result = await searchLocation(input.value.trim()); if (!result) throw new Error('검색 결과가 없습니다. 지역명과 함께 검색하세요.'); }
+    try { const query = input.value.trim(); const { parseSpatialIntent } = await import('./spatial/intent.js'); const intent = parseSpatialIntent(query);
+      if (intent?.concept === 'satellite-imagery') { window.dispatchEvent(new CustomEvent('plasma:spatial-intent', { detail: intent })); return; }
+      const result = await searchLocation(query); if (!result && !searchPolicy(query).warning) throw new Error('검색 결과가 없습니다. 지역명과 함께 검색하세요.'); }
     catch (error) { if (error.name !== 'AbortError') notify(error.message); } finally { go.disabled = false; } };
   const actionRail = document.getElementById('top-center-actions');
   actionRail?.querySelector('a')?.remove();

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080c15">
+  <title>PLASMA 계정 | GOD'S EYE VIEW</title>
+  <link rel="icon" href="/app-icon.png">
+  <link rel="preload" href="/fonts/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
+</head>
+<body>
+  <div class="account-backdrop" aria-hidden="true"></div>
+  <div class="account-shell">
+    <header class="account-brand"><img src="/brand/plasma-logo.png" alt="PLASMA"><span>PLASMA</span></header>
+    <main class="account-main">
+      <h1>GOD'S EYE VIEW</h1>
+      <section class="account-panel" aria-labelledby="account-title">
+        <div class="account-heading"><img src="/app-icon.png" alt=""><h2 id="account-title">PLASMA 계정</h2></div>
+        <div class="account-tabs" aria-label="계정 접속">
+          <button type="button" id="signin-tab" aria-pressed="true">로그인</button>
+          <button type="button" id="register-tab" aria-pressed="false">회원가입</button>
+        </div>
+        <form id="account-form">
+          <label id="name-field" hidden>이름<input name="name" autocomplete="name" maxlength="80"></label>
+          <label id="email-field">이메일<input name="email" type="email" autocomplete="username" maxlength="254" required></label>
+          <label id="password-field">비밀번호
+            <span class="password-input"><input name="password" type="password" autocomplete="current-password" maxlength="128" required><button type="button" id="password-visible" aria-label="비밀번호 표시" title="비밀번호 표시"></button></span>
+          </label>
+          <label id="confirm-field" hidden>비밀번호 확인<input name="passwordConfirm" type="password" autocomplete="new-password" maxlength="128"></label>
+          <label id="consent-field" class="account-check" hidden><input name="consent" type="checkbox"><span>만 14세 이상이며 <a href="/terms/" target="_blank" rel="noopener">이용약관</a>과 <a href="/privacy/" target="_blank" rel="noopener">개인정보 처리방침</a>에 동의합니다.</span></label>
+          <button id="account-submit" class="account-submit" type="submit" disabled>로그인</button>
+        </form>
+        <div class="account-secondary"><button id="reset-mode" type="button">비밀번호 찾기</button><button id="retry-account" type="button" hidden>다시 연결</button></div>
+        <p id="account-status" role="status" aria-live="polite">계정 서버 연결 중…</p>
+        <nav class="account-products" aria-label="PLASMA 앱"><a href="/auth/?next=%2Fmap%2F">God's Eye View</a><a href="/auth/?next=%2Fhome%2F">God Flow</a></nav>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="/src/plasmaAuthPage.js"></script>
+</body>
+</html>

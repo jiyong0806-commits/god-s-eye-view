@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { safeAccountReturn } from '../packages/plasma-account/config.js';
 
 let client, pending;
 export async function accountClient() {
@@ -18,6 +19,24 @@ export async function accountUser() {
   const c = await accountClient(); const { data, error } = await c.auth.getUser();
   if (error?.name === 'AuthSessionMissingError') return null;
   if (error) throw error; return data.user;
+}
+export function accountRedirect(mode = '') {
+  const origin = ['http:', 'https:'].includes(location.protocol) ? location.origin : 'https://godseyeview-c6q.pages.dev';
+  return `${origin}/auth/?next=${encodeURIComponent(safeAccountReturn('/map/'))}${mode ? `&mode=${encodeURIComponent(mode)}` : ''}`;
+}
+
+export async function requirePlasmaAccount({ getUser = accountUser, current = globalThis.location, listen = true } = {}) {
+  let user;
+  try { user = await getUser(); } catch { user = null; }
+  const next = safeAccountReturn(`${current.pathname}${current.search}${current.hash}`);
+  if (!user) { current.replace(`/auth/?next=${encodeURIComponent(next)}`); return false; }
+  if (listen) {
+    const c = await accountClient();
+    c.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || (event === 'TOKEN_REFRESHED' && !session)) current.replace(`/auth/?next=${encodeURIComponent(next)}`);
+    });
+  }
+  return true;
 }
 export async function accountProfile() {
   const user = await accountUser(); if (!user) return null;

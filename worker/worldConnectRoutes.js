@@ -1,4 +1,5 @@
 import { localModelChat } from '../packages/god-runtime/ollama.js';
+import { sourceProvenance } from '../src/spatial/sourceRegistry.js';
 import { cloudWorldQuestion, sourceQuestionFocus, FOCUS_INSTRUCTION } from './worldConnectAI.js';
 
 export const WORLD_EVENT_FEED = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson';
@@ -68,7 +69,8 @@ export function createWorldConnectRoutes({ fetcher = fetch, chat = localModelCha
       if (body.length > 3000000) throw new Error('USGS 응답 크기 초과');
       const feed = JSON.parse(body);
       if (!Array.isArray(feed.features)) throw new Error('USGS 응답 형식 오류');
-      cached = feed.features.slice(0, 4000).map(eventFromFeature).filter(event => event && event.magnitude >= 2.5);
+      cached = feed.features.slice(0, 4000).map(eventFromFeature).filter(event => event && event.magnitude >= 2.5)
+        .map(event => ({ ...event, ...sourceProvenance('usgs-earthquakes', { retrievedAt: now() }) }));
       cachedAt = now(); return cached;
     })().finally(() => { pending = null; });
     return pending;

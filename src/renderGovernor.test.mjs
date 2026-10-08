@@ -21,6 +21,15 @@ function makeViewer() {
 
 beforeEach(() => _resetRenderGovernorForTest());
 
+test('three animated workloads cap rendering without replacing the chosen baseline', () => {
+  const { viewer } = makeViewer(); viewer.targetFrameRate = 60; installRenderGovernor(viewer);
+  holdContinuousRender('flights'); holdContinuousRender('satellites'); holdContinuousRender('traffic');
+  assert.equal(viewer.targetFrameRate, 30);
+  releaseContinuousRender('traffic'); assert.equal(viewer.targetFrameRate, 60);
+  _resetRenderGovernorForTest(); viewer.targetFrameRate = 20; installRenderGovernor(viewer);
+  holdContinuousRender('a'); holdContinuousRender('b'); holdContinuousRender('c'); assert.equal(viewer.targetFrameRate, 20);
+});
+
 test('install with zero holds enters idle mode and pins maximumRenderTimeChange', () => {
   const { viewer, scene } = makeViewer();
   installRenderGovernor(viewer);

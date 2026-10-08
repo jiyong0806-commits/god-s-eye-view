@@ -1,5 +1,8 @@
 import { XMLParser, XMLValidator } from 'fast-xml-parser';
 import { cachedProvider, failure, reply, upstream } from './providerRuntime.js';
+import { publicAccountConfig } from '../packages/plasma-account/config.js';
+import { newsBrief, newsAnswer } from '../src/newsContext.js';
+import { sourceProvenance } from '../src/spatial/sourceRegistry.js';
 
 const NEWS = 'https://www.hankyung.com/feed/economy';
 const KMA = 'https://www.weather.go.kr/w/rss/cap/eqk.do';
@@ -16,10 +19,13 @@ export function newsFromRss(xml, now = Date.now()) {
     const publishedAt = Date.parse(String(item.pubDate));
     if (url.protocol !== 'https:' || url.hostname !== 'www.hankyung.com' || !/^\/article\/\d+$/.test(url.pathname)
       || !Number.isFinite(publishedAt) || publishedAt > now + 60000 || now - publishedAt > 7 * 86400000) return [];
-    return [{ id: url.pathname.split('/').at(-1), title: String(item.title || '').slice(0, 200), url: url.href,
+    const title = String(item.title || '').replace(/<[^>]*>/g, '').slice(0, 200);
+    const article = { id: url.pathname.split('/').at(-1), title, url: url.href,
       publishedAt, provider: '한국경제', author: String(item.author || '').slice(0, 80), category: '경제',
+      ...sourceProvenance('hankyung-rss', { retrievedAt: now }),
       image: null, photoSourceUrl: url.href, evidence: '발행사의 공식 RSS 제목·발행 시각. 기사 본문·사진은 재배포하지 않습니다.',
-      limitations: '단일 매체 보도. 인과 관계·투자 수익·피해 예측 분석이 아닙니다.' }];
+      limitations: '단일 매체 보도. 인과 관계·투자 수익·피해 예측 분석이 아닙니다.' };
+    return [{ ...article, brief: newsBrief(article) }];
   }).filter(row => row.title).slice(0, 30);
 }
 export function currentEarthquakes(feed, now = Date.now()) {
@@ -36,19 +42,31 @@ export function currentEarthquakes(feed, now = Date.now()) {
   }).sort((a, b) => b.occurredAt - a.occurredAt).slice(0, 100);
 }
 export async function connectFeeds(request, env, url) {
-  if (!['/api/world-connect/news', '/api/alerts', '/api/account/config'].includes(url.pathname)) return null;
-  if (request.method !== 'GET') return reply({ error: 'method-not-allowed' }, 405);
+  if (!['/api/world-connect/news', '/api/world-connect/news-question', '/api/alerts', '/api/account/config'].includes(url.pathname)) return null;
+  const questionRoute = url.pathname.endsWith('/news-question');
+  if (request.method !== (questionRoute ? 'POST' : 'GET')) return reply({ error: 'method-not-allowed' }, 405);
   if (url.pathname === '/api/account/config') {
-    const valid = /^https:\/\/[a-z0-9]+\.supabase\.co\/?$/.test(env.SUPABASE_URL || '')
-      && /^sb_publishable_[A-Za-z0-9_-]+$/.test(env.SUPABASE_PUBLISHABLE_KEY || '');
-    return reply({ configured: valid, url: valid ? env.SUPABASE_URL : null,
-      publishableKey: valid ? env.SUPABASE_PUBLISHABLE_KEY : null });
+    return reply(publicAccountConfig(env));
   }
-  if (url.pathname.endsWith('/news')) return cachedProvider('economy-rss', '한국경제 RSS', 300000, async () => {
+  const loadNews = () => cachedProvider('economy-rss', '한국경제 RSS', 300000, async () => {
     const r = await upstream(NEWS, { headers: { accept: 'application/xml,text/xml', 'user-agent': 'GODsEyeView/1.0' } });
     if (!r.ok) return failure('한국경제 RSS', r.status, `경제 뉴스 HTTP ${r.status}`, 300);
     return reply({ articles: newsFromRss(await r.text()), checkedAt: Date.now(), sourceUrl: NEWS });
   });
+  if (url.pathname.endsWith('/news')) return loadNews();
+  if (questionRoute) {
+    if (!request.headers.get('content-type')?.startsWith('application/json')) return reply({ error: 'json-required' }, 415);
+    let body;
+    try {
+      const bytes = await request.arrayBuffer(); if (bytes.byteLength > 4096) return reply({ error: 'request-too-large' }, 413);
+      body = JSON.parse(new TextDecoder().decode(bytes));
+    } catch { return reply({ error: 'invalid-json' }, 400); }
+    if (!/^\d{1,24}$/.test(String(body?.id || '')) || typeof body?.question !== 'string' || !body.question.trim() || body.question.length > 1000) return reply({ error: 'invalid-question' }, 400);
+    const feed = await loadNews(); if (!feed.ok) return feed;
+    const article = (await feed.json()).articles.find(row => row.id === body.id);
+    if (!article) return reply({ error: '현재 피드에서 이 기사를 확인할 수 없습니다.' }, 404);
+    return reply(newsAnswer(article, body.question));
+  }
   return cachedProvider('alerts-feed', 'USGS / KMA', 60000, async () => {
     const r = await upstream(USGS); if (!r.ok) return failure('USGS', r.status, `지진 피드 HTTP ${r.status}`);
     const alerts = currentEarthquakes(await r.json());

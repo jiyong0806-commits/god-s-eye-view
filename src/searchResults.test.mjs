@@ -30,3 +30,7 @@ test('failed geocode reports the real HTTP status', async () => {
   try { await assert.rejects(searchPlaces({}, '서울'), /HTTP 429/); }
   finally { globalThis.fetch = oldFetch; globalThis.window = oldWindow; }
 });
+test('unverified named searches cannot silently fly and fictional coordinates are excluded', async () => {
+  await assert.rejects(searchAndFlyTo({}, '아틀란티스'), /가상·미확인/);
+  assert.deepEqual(normalizeSearchResults([{ ...place('Backrooms', 40, -73), locationStatus: 'fictional' }]), []);
+});

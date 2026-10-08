@@ -42,7 +42,7 @@
     "build:pages": "npm run build && node scripts/prepare-pages-build.mjs",
     "build:flow": "node scripts/build-flow.mjs",
     "build:event": "node scripts/build-event.mjs",
-    "deploy:pages": "npx wrangler@4.136.3 pages deploy dist/pages --config wrangler.pages.jsonc --project-name godseyeview --branch main",
+    "deploy:pages": "node scripts/deploy-pages.mjs",
     "package:sites": "node scripts/package-sites-clean.mjs",
     "preview": "vite preview",
     "test": "node scripts/run-unit-tests.mjs",

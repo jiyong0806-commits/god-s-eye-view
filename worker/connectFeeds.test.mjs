@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { newsFromRss, currentEarthquakes, connectFeeds } from './connectFeeds.js';
+import { clearProviderCache } from './providerRuntime.js';
 
 const now = Date.parse('2026-09-27T03:00:00Z');
 test('economic headlines require official links and current publication dates', () => {
@@ -23,4 +24,23 @@ test('account configuration never publishes secret-format values', async () => {
   assert.deepEqual(invalid, { configured: false, url: null, publishableKey: null });
   const valid = await (await connectFeeds(request, { SUPABASE_URL: 'https://project.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_example' }, url)).json();
   assert.equal(valid.configured, true);
+});
+
+test('news questions resolve IDs from the official cached feed and reject caller-controlled sources', async () => {
+  clearProviderCache(); const original = globalThis.fetch; let calls = 0;
+  globalThis.fetch = async url => {
+    calls++; assert.equal(String(url), 'https://www.hankyung.com/feed/economy');
+    return new Response(`<rss><channel><item><title>서울 경제</title><link>https://www.hankyung.com/article/123</link><pubDate>${new Date().toUTCString()}</pubDate></item></channel></rss>`);
+  };
+  const url = new URL('https://site.test/api/world-connect/news-question');
+  const request = body => new Request(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  try {
+    const good = await connectFeeds(request({ id: '123', question: '출처?', url: 'http://localhost/secret' }), {}, url);
+    assert.equal(good.status, 200); assert.equal((await good.json()).generatedByAI, false);
+    assert.equal((await connectFeeds(request({ id: '123', question: '왜?' }), {}, url)).status, 200);
+    assert.equal(calls, 1);
+    assert.equal((await connectFeeds(request({ id: 'other', question: '내용?' }), {}, url)).status, 400);
+    assert.equal((await connectFeeds(request({ id: '456', question: '내용?' }), {}, url)).status, 404);
+    assert.equal((await connectFeeds(request({ id: '123', question: 'a'.repeat(5000) }), {}, url)).status, 413);
+  } finally { globalThis.fetch = original; clearProviderCache(); }
 });

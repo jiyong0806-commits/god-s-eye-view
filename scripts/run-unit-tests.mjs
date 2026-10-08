@@ -1,5 +1,6 @@
 import { readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { availableParallelism } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -72,7 +73,9 @@ function runTests(args) {
 
 export function runUnitTests() {
   const plan = buildUnitTestPlan(discoverUnitTestFiles());
-  const parallelStatus = runTests(['--test', ...plan.parallel]);
+  const requested = Number(process.env.GEV_TEST_CONCURRENCY || Math.min(4, availableParallelism()));
+  if (!Number.isInteger(requested) || requested < 1 || requested > 16) throw new Error('GEV_TEST_CONCURRENCY must be an integer from 1 to 16');
+  const parallelStatus = runTests(['--test', `--test-concurrency=${requested}`, ...plan.parallel]);
   if (parallelStatus !== 0) return parallelStatus;
 
   // The GC-bracketed budgets are calibrated on Node 24 and are meaningless on

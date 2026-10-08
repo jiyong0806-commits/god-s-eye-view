@@ -57,6 +57,18 @@ test('unconfigured AIS route reports its missing stream backend', async () => {
   assert.match(body.error, /persistent backend/);
 });
 
+test('shared aircraft cooldown preserves the active provider on failure', async () => {
+  const { default: isolatedWorker } = await import('./index.js?shared-flight-source-test');
+  globalThis.fetch = async () => { throw new Error('cooldown must not call upstream'); };
+  const env = { ASSETS: assets, PROVIDER_DB: { prepare: () => ({ bind: () => ({
+    first: async () => ({ retry_at: Date.now() + 90000 }),
+  }) }) } };
+  const response = await isolatedWorker.fetch(new Request('https://example.test/api/opensky?lat=10&lon=20'), env);
+  assert.equal(response.status, 429);
+  assert.equal(response.headers.get('x-flight-source'), 'adsb.lol');
+  assert.equal((await response.json()).provider, 'adsb.lol');
+});
+
 test('AIS service binding serves real collector response without exposing credentials', async () => {
   const env = { ASSETS: assets, AIS_BACKEND: { fetch: async request => {
     assert.equal(new URL(request.url).pathname, '/api/ais-live');
@@ -133,6 +145,15 @@ test('Korean geocode request returns a usable camera destination', async () => {
   const body = await response.json();
   assert.equal(body.status, 'OK');
   assert.equal(body.results[0].geometry.location.lat, 37.5665);
+});
+test('fictional place searches do not turn Wikidata coordinates into real destinations', async () => {
+  const calls = [];
+  globalThis.fetch = async input => { calls.push(String(input)); return Response.json([]); };
+  const response = await worker.fetch(new Request('https://example.test/api/geocode?q=backrooms'), { ASSETS: assets });
+  const data = await response.json();
+  assert.equal(data.status, 'ZERO_RESULTS');
+  assert.equal(data.queryAssessment.kind, 'fictional');
+  assert.equal(calls.some(url => url.includes('wikidata.org')), false);
 });
 
 test('Korean place with spaces resolves an exact Wikidata coordinate when Nominatim misses', async () => {

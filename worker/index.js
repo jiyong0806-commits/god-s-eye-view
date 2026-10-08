@@ -4,7 +4,10 @@ import { flowRoutes } from './flowRoutes.js';
 import { worldConnectRoutes } from './worldConnectRoutes.js';
 import { mapSourceStatus } from './mapSourceStatus.js';
 import { dailyImagery } from './dailyImagery.js';
+import { satelliteRoutes } from './satelliteRoutes.js';
+import { searchPolicy } from '../src/searchPolicy.js';
 import { withSharedCooldown } from './sharedCooldown.js';
+import { aircraftCell, edgeAircraftSnapshot } from './aircraftSnapshot.js';
 import { connectFeeds } from './connectFeeds.js';
 import { roadRoutes } from './roadRoutes.js';
 import { voiceRoutes } from './voiceRoutes.js';
@@ -104,21 +107,24 @@ async function openSkyToken(env) {
   return tokenCache.value;
 }
 
-function adsbLolToOpenSky(payload) {
+export function adsbLolToOpenSky(payload) {
   const sourceTime = Number(payload?.now);
+  if (!Array.isArray(payload?.ac) || !Number.isFinite(sourceTime) || sourceTime <= 0) throw new Error('Invalid aircraft snapshot');
   const nowSeconds = Number.isFinite(sourceTime) && sourceTime > 0
     ? Math.floor(sourceTime > 10_000_000_000 ? sourceTime / 1000 : sourceTime)
     : Math.floor(Date.now() / 1000);
   const states = (Array.isArray(payload?.ac) ? payload.ac : []).flatMap((aircraft) => {
+    if (aircraft?.lat == null || aircraft.lon == null || !/^[a-f0-9]{6}$/i.test(String(aircraft.hex || ''))) return [];
     const lat = Number(aircraft.lat);
     const lon = Number(aircraft.lon);
-    if (!Number.isFinite(lat) || !Number.isFinite(lon) || !aircraft.hex) return [];
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return [];
     const finite = (value) => value === null || value === undefined || value === '' ? null : (Number.isFinite(Number(value)) ? Number(value) : null);
     const feetToMetres = (value) => finite(value) === null ? null : finite(value) * 0.3048;
     const knotsToMps = (value) => finite(value) === null ? null : finite(value) * 0.514444;
     const feetMinuteToMps = (value) => finite(value) === null ? null : finite(value) * 0.00508;
     const category = { A1: 2, A2: 3, A3: 4, A4: 5, A5: 6, A6: 7, A7: 8, B1: 9, B2: 10, B3: 11, B4: 12, B6: 14, B7: 15 }[String(aircraft.category || '').toUpperCase()] || 0;
-    const seenPosition = Math.max(0, finite(aircraft.seen_pos) ?? finite(aircraft.seen) ?? 0);
+    const seenPosition = finite(aircraft.seen_pos) ?? finite(aircraft.seen);
+    if (seenPosition == null || seenPosition < 0 || seenPosition > 120) return [];
     const seen = Math.max(0, finite(aircraft.seen) ?? seenPosition);
     return [[
       String(aircraft.hex).toLowerCase(), String(aircraft.flight || aircraft.r || '').trim(),
@@ -161,13 +167,14 @@ async function handleOpenSky(url, env) {
     const key = `${lat.toFixed(1)},${lon.toFixed(1)}`;
     const now = Date.now();
     let entry = regionalFlightCache.get(key);
-    if (!entry || (entry.expires <= now && entry.retryAt <= now && !entry.pending)) {
+    if (!entry) {
       entry = { payload: null, expires: 0, retryAt: 0, pending: null };
       regionalFlightCache.set(key, entry);
       if (regionalFlightCache.size > 64) regionalFlightCache.delete(regionalFlightCache.keys().next().value);
     }
-    if (!entry.payload && entry.retryAt > now) {
-      return json({ error: 'Regional aircraft feed rate limited' }, 429, {
+    if (entry.retryAt > now) {
+      return json({ error: 'Regional aircraft feed rate limited', provider: 'adsb.lol', httpStatus: 429,
+        retryAt: entry.retryAt, retryInSec: Math.ceil((entry.retryAt - now) / 1000) }, 429, {
         'retry-after': String(Math.ceil((entry.retryAt - now) / 1000)),
         'x-flight-source': 'adsb.lol',
       });
@@ -176,13 +183,16 @@ async function handleOpenSky(url, env) {
       entry.pending = (async () => {
         const fallback = await fetchWithTimeout(`https://api.adsb.lol/v2/lat/${lat}/lon/${lon}/dist/250`, {
           headers: { accept: 'application/json', 'user-agent': 'GODsEyeView/1.0 (+https://godseyeview.jiyong0806.chatgpt.site/)' },
-          cf: { cacheTtl: 8, cacheEverything: true },
+          cf: { cacheTtl: 30, cacheEverything: true },
         }).catch(() => null);
         if (fallback?.ok) {
-          entry.payload = adsbLolToOpenSky(await fallback.json());
-          entry.expires = Date.now() + 15000;
+          try { entry.payload = adsbLolToOpenSky(await fallback.json()); }
+          catch { entry.lastStatus = 502; return; }
+          entry.expires = Date.now() + 30000;
+          entry.retryAt = 0; entry.lastStatus = 200;
           return;
         }
+        entry.lastStatus = fallback?.status || 502;
         if (fallback?.status === 429) {
           entry.retryAt = Date.now() + retrySeconds(fallback.headers.get('retry-after')) * 1000;
         }
@@ -190,20 +200,23 @@ async function handleOpenSky(url, env) {
       })().finally(() => { entry.pending = null; });
     }
     if (entry.pending) await entry.pending;
-    if (entry.payload) {
+    if (entry.payload && entry.expires > Date.now()) {
       return json(entry.payload, 200, {
-        'cache-control': 'public, max-age=5, s-maxage=8',
+        'cache-control': 'public, max-age=15, s-maxage=30',
         'x-flight-source': 'adsb.lol',
         'x-flight-coverage': '250nm regional live fallback',
         'x-opensky-auth-mode-used': licensed ? (token ? 'oauth-failed' : 'anon-failed') : 'license-not-configured',
       });
     }
     if (entry.retryAt > Date.now()) {
-      return json({ error: 'Regional aircraft feed rate limited' }, 429, {
+      return json({ error: 'Regional aircraft feed rate limited', provider: 'adsb.lol', httpStatus: 429,
+        retryAt: entry.retryAt, retryInSec: Math.ceil((entry.retryAt - Date.now()) / 1000) }, 429, {
         'retry-after': String(Math.ceil((entry.retryAt - Date.now()) / 1000)),
         'x-flight-source': 'adsb.lol',
       });
     }
+    return json({ error: `Regional aircraft feed HTTP ${entry.lastStatus || 502}`, provider: 'adsb.lol' },
+      entry.lastStatus >= 400 && entry.lastStatus < 600 ? entry.lastStatus : 502, { 'x-flight-source': 'adsb.lol' });
   }
   return json({ time: Math.floor(Date.now() / 1000), states: [], error: 'Live aircraft feeds unavailable' }, 503);
 }
@@ -362,7 +375,7 @@ async function handleGeocode(url, env = {}) {
         .map(row => ({ formatted_address: row.poi?.name ? `${row.poi.name} · ${row.address?.freeformAddress || ''}` : row.address?.freeformAddress || query,
           types: row.type === 'Geography' ? ['locality', 'political'] : ['point_of_interest', 'establishment'],
           geometry: { location: { lat: row.position.lat, lng: row.position.lon }, viewport: null, bounds: null }, source: 'TomTom' }));
-      return json({ status: results.length ? 'OK' : 'ZERO_RESULTS', results }, 200, { 'x-geocoder-source': 'TomTom' });
+      return json({ status: results.length ? 'OK' : 'ZERO_RESULTS', results, queryAssessment: searchPolicy(query) }, 200, { 'x-geocoder-source': 'TomTom' });
     });
     if (fromTomTom.ok && (await fromTomTom.clone().json()).results?.length) return fromTomTom;
   }
@@ -394,13 +407,13 @@ async function handleGeocode(url, env = {}) {
       source: 'OpenStreetMap Nominatim',
     };
   });
-  if (!results.length) {
+  if (!results.length && searchPolicy(query).allowEntityFallback) {
     const matched = await wikidataPlace(query).catch(() => null);
     if (matched) results.push(matched);
   }
   if (!response?.ok && !results.length) return json({ status: 'ERROR', results: [], providerStatus: response?.status || 502 }, response?.status || 502);
   const source = results[0]?.source || 'OpenStreetMap Nominatim';
-  return json({ status: results.length ? 'OK' : 'ZERO_RESULTS', results }, 200, {
+  return json({ status: results.length ? 'OK' : 'ZERO_RESULTS', results, queryAssessment: searchPolicy(query) }, 200, {
     'cache-control': 'public, max-age=3600, s-maxage=86400',
     'x-geocoder-source': source,
   });
@@ -442,6 +455,7 @@ async function handleGbfs(request, url) {
 }
 
 async function handleApi(request, env, url) {
+  const satellite = await satelliteRoutes(request); if (satellite) return satellite;
   const feeds = await connectFeeds(request, env, url); if (feeds) return feeds;
   const roads = await roadRoutes(request, url); if (roads) return roads;
   const voice = await voiceRoutes(request, env, url); if (voice) return voice;
@@ -466,8 +480,19 @@ async function handleApi(request, env, url) {
       rows: [], count: 0 }, 503, { 'retry-after': '900' });
   }
   if (url.pathname === '/api/firms' || url.pathname === '/api/firms/status') return handleFirms(env, url.pathname);
-  if (url.pathname === '/api/opensky') return cachedProvider(`flights:${url.search}`, 'adsb.lol', 15000, () => withSharedCooldown(env, 'adsb.lol', () => handleOpenSky(url, env)));
-  if (url.pathname === '/api/adsblol/mil') return cachedProvider('military', 'adsb.lol', 15000, () => withSharedCooldown(env, 'adsb.lol', () => handleMilitaryFlights()));
+  if (url.pathname === '/api/opensky') {
+    const cell = aircraftCell(url);
+    if (!cell) return json({ error: 'Aircraft queries require valid latitude and longitude' }, 400);
+    const normalized = new URL(url); normalized.search = new URLSearchParams(cell).toString();
+    const source = env.GEV_OPENSKY_LICENSED === '1' ? 'OpenSky Network' : 'adsb.lol';
+    const response = await edgeAircraftSnapshot(`${source}:${normalized.search}`, () => cachedProvider(`flights:${source}:${normalized.search}`, source, 30000,
+      () => source === 'adsb.lol' ? withSharedCooldown(env, source, () => handleOpenSky(normalized, env)) : handleOpenSky(normalized, env)));
+    const headers = new Headers(response.headers);
+    headers.set('x-flight-source', source);
+    return new Response(response.body, { status: response.status, headers });
+  }
+  if (url.pathname === '/api/adsblol/mil') return edgeAircraftSnapshot('military', () => cachedProvider('military', 'adsb.lol', 30000,
+    () => withSharedCooldown(env, 'adsb.lol', () => handleMilitaryFlights())));
   if (url.pathname.startsWith('/api/celestrak/')) return handleCelesTrak(url.pathname);
   if (url.pathname === '/api/geocode') return handleGeocode(url, env);
   if (url.pathname.startsWith('/api/gbfs/')) return handleGbfs(request, url);

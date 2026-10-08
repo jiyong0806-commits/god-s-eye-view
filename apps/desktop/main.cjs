@@ -82,10 +82,11 @@ async function createWindow() {
     let state;
     do {
       state = await window.webContents.executeJavaScript(`({title:document.title,canvas:[...document.querySelectorAll('canvas')].map(c=>({width:c.width,height:c.height})),body:document.body.innerText.slice(0,500)})`);
-      if (state.canvas.some(canvas => canvas.width > 100 && canvas.height > 100)) break;
+      state.login = await window.webContents.executeJavaScript(`Boolean(document.getElementById('account-form'))`);
+      if (state.login || state.canvas.some(canvas => canvas.width > 100 && canvas.height > 100)) break;
       await new Promise(resolve => setTimeout(resolve, 500));
     } while (Date.now() < deadline);
-    await new Promise(resolve => setTimeout(resolve, 20000));
+    await new Promise(resolve => setTimeout(resolve, state.login ? 3000 : 20000));
     const rendering = await window.webContents.executeJavaScript(`(() => {
       const api = window.__godsEyeView;
       const v = api?.viewer;
@@ -102,7 +103,7 @@ async function createWindow() {
     writeFileSync(path.join(qaDir, 'desktop.png'), (await window.webContents.capturePage()).toPNG());
     writeFileSync(path.join(qaDir, 'desktop-smoke.json'), JSON.stringify({ ...state, rendering, errors, packaged: app.isPackaged,
       version: app.getVersion(), nodeIntegration: window.webContents.getLastWebPreferences().nodeIntegration }, null, 2));
-    app.exit(state.canvas.some(canvas => canvas.width > 100 && canvas.height > 100) ? 0 : 1);
+    app.exit(state.login || state.canvas.some(canvas => canvas.width > 100 && canvas.height > 100) ? 0 : 1);
   }
 }
 

@@ -3,7 +3,25 @@
 This folder includes the frontend and API backend. Do not drag the entire source
 folder into a static-site upload dialog: that does not build or deploy the Worker.
 
-## Git-Connected Workers Build
+## Verified Pages Deployment
+
+The current public deployment is https://godseyeview-c6q.pages.dev . The October 8
+build was published with its API Worker, not by uploading the source as static files.
+
+- Install: `npm ci` (Node.js 22 or newer).
+- Build: `npm run build:pages`.
+- Deploy: `npm run deploy:pages` after authorizing the intended Cloudflare account.
+- Source configuration: `wrangler.pages.jsonc`.
+- The deployment script generates a standard `wrangler.jsonc` in an isolated output
+  directory because Pages does not accept a custom configuration filename.
+- Output: `dist/pages`, including `_worker.js` and the built static assets.
+- The desktop API origin already points to the verified public Pages hostname.
+
+Provider credentials belong in Cloudflare Secrets. Successful deployment does not
+remove provider rate limits or grant data-use permissions. See
+`docs/VERIFICATION-2026-10-08.md` for observed responses and remaining limitations.
+
+## Alternative Standalone Workers Build
 
 - Connect your own `jiyong0806-commits/god-s-eye-view` repository.
 - Project root: repository root (`.`).
@@ -45,9 +63,9 @@ After deployment, check `/map/`, `/home/`, `/api/flow/status` and the enabled pr
 routes on the actual public hostname. Confirm failure codes and retry state as well
 as successful data. The current standalone configuration has passed a dry-run only.
 
-The current app wrappers still point to the previous public backend. After a real
-Cloudflare URL is verified, update `apps/desktop/policy.cjs` and `apps/mobile/App.jsx`
-to that exact hostname and rebuild. Do not label the current wrappers migrated yet.
+The desktop wrapper uses the verified Pages backend. If choosing a different
+standalone Worker hostname, update the wrapper origins and rebuild explicitly.
+Native mobile/store builds have not been validated by the Pages deployment.
 
 ## Included Integrations
 

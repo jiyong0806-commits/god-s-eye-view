@@ -33,6 +33,7 @@
 
 let _viewer = null;
 let _installed = false;
+let _baseFrameRate = null;
 const _holds = new Set();
 
 /** Debug trail of the most recent one-shot render requests (idle mode only). */
@@ -43,6 +44,7 @@ function applyMode() {
   if (!_installed || !_viewer?.scene) return;
   const continuous = _holds.size > 0;
   const scene = _viewer.scene;
+  if (_baseFrameRate !== null) _viewer.targetFrameRate = _holds.size >= 3 ? Math.min(_baseFrameRate, 30) : _baseFrameRate;
   if (scene.requestRenderMode === !continuous) return;
   scene.requestRenderMode = !continuous;
   if (!continuous) {
@@ -64,6 +66,7 @@ export function installRenderGovernor(viewer) {
   if (!viewer?.scene) throw new TypeError('installRenderGovernor requires a Cesium viewer');
   _viewer = viewer;
   _installed = true;
+  _baseFrameRate = Number.isFinite(viewer.targetFrameRate) && viewer.targetFrameRate > 0 ? viewer.targetFrameRate : null;
   // Never let Cesium re-render on simulation-time deltas behind our back —
   // idle means idle. All re-renders are camera/tiles (Cesium-native) or
   // explicit requests.
@@ -125,6 +128,7 @@ export function getRenderGovernorDiagnostics() {
     mode: _holds.size > 0 ? 'continuous' : 'idle',
     holds: [..._holds].sort(),
     recentRequests: [..._recentRequests],
+    frameRateLimit: _viewer?.targetFrameRate ?? null,
   };
 }
 
@@ -132,6 +136,7 @@ export function getRenderGovernorDiagnostics() {
 export function _resetRenderGovernorForTest() {
   _viewer = null;
   _installed = false;
+  _baseFrameRate = null;
   _holds.clear();
   _recentRequests.length = 0;
 }

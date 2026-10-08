@@ -4081,6 +4081,8 @@ const flightsLayer = {
       _lastStatus = response.status;
       const responseSource = response.headers.get('x-flight-source');
       const responseCoverage = response.headers.get('x-flight-coverage');
+      if (responseSource) _lastSource = responseSource;
+      if (responseCoverage) _lastCoverage = responseCoverage;
       const authMode = _toLowerText(
         response.headers.get('x-opensky-auth-mode-used') || response.headers.get('x-opensky-auth')
       );

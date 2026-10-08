@@ -51,7 +51,10 @@ export async function upstream(url, options = {}, timeoutMs = 12000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
+    const response = await fetch(url, { ...options, redirect: options.redirect === 'error' ? 'manual' : options.redirect, signal: controller.signal });
+    if (options.redirect === 'error' && response.status >= 300 && response.status < 400) {
+      await response.body?.cancel(); throw new Error('provider-redirect-blocked');
+    }
     return new Response(await readBounded(response), { status: response.status, headers: response.headers });
   }
   finally { clearTimeout(timer); }

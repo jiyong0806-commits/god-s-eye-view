@@ -28,7 +28,6 @@ import { initAdaptiveMapStack } from './adaptiveMapStack.js';
 import { initAnnotations } from './annotations/index.js';
 import { initLogoGaze } from './logoGaze.js';
 import { initStreetPhotoPanel } from './streetPhotoPanel.js';
-import { initPlasmaBgm } from './plasmaBgm.js';
 import { initPlasmaControls } from './plasmaControls.js';
 import { initWorldConnect } from './worldConnect.js';
 import { initPlasmaWorkspace } from './plasmaWorkspace.js';
@@ -47,7 +46,6 @@ import { cleanCredential, loadPhotorealisticTileset } from './mapStartup.js';
 
 installProviderHealth();
 initLogoGaze();
-initPlasmaBgm();
 initPlasmaControls();
 
 if ('serviceWorker' in navigator && !import.meta.env.DEV) {
