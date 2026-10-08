@@ -40,6 +40,7 @@
 - Browser QA: 1440x900 and 393x852 passed anonymous redirect, no pre-login Cesium download, invalid-login feedback, multiple selectable results, in-app news question, source UI and actual STAC JPEG preview. Both reported no overflow or WebGL context loss.
 - Browser auth/search responses were controlled test fixtures. News, STAC and preview requests used the real public backend. Actual signup email delivery, password reset and production-user login were not tested by creating accounts.
 - Ten-minute public multi-layer test completed: 20 samples, no JavaScript page errors, browser exit or WebGL context loss; reported JS heap 40-64 MB, final 54 MB. Flights and military remained limited with zero contacts, earthquakes rendered 37 and satellite propagation rendered 815 in the final sample. Auth/search were controlled fixtures; provider requests were real. This is not a device temperature measurement, global availability guarantee or 60 FPS benchmark.
+- After the final provider-label fix, both desktop/mobile functional browser checks passed again on the public hostname. A public aircraft failure returned HTTP 429 with x-flight-source=adsb.lol and explicit retry metadata. The ten-minute test preceded this small metadata fix.
 - The unrestricted full suite was interrupted when concurrent tests and packaging exhausted practical machine responsiveness. Three existing vessel-label assertions failed in that run. No full-suite-green claim is made. Test concurrency is now bounded and configurable through GEV_TEST_CONCURRENCY=1..16.
 - Known-secret scan: 931 built files and 688 source files checked against 8 known credential values without printing them. This does not prove absence of every unknown credential.
 - git diff --check passed.
@@ -47,8 +48,9 @@
 ## Native and source delivery
 
 - Windows x64 portable 0.3.0 built. Authenticode status: NotSigned. Windows application control blocked the packaged EXE before its smoke test could start. No security protection was disabled to launch it.
+- Final EXE rebuilt after the provider-label change. SHA256: 7E4E72282AE81CDFBC573E4BB0DC7517D507F958028265699AA526CF2E5F5BB3. This rebuilt EXE has not passed a launch smoke test.
 - Editable source export includes frontend, Worker, Cloudflare deployment scripts/configurations, tests and project-owned integration modules. It excludes actual environment files, credentials, Git history, dependencies and generated builds. Assets retain their original licenses.
-- GitHub-ready delivery is not a claim of a new remote commit. macOS/iOS signing and store releases are not completed on this Windows host.
+- Code published to https://github.com/jiyong0806-commits/god-s-eye-view/tree/codex/recovery-2026-10-08 . Code commit 9ec708095f3d5daad289b89c0a22af3943671435 was verified at the remote branch ref. Existing branches were not force-updated; unrelated generated event QR changes were not published. macOS/iOS signing and store releases are not completed on this Windows host.
 - Deploy from source with npm ci, npm run build:pages and npm run deploy:pages. The deploy wrapper creates a correctly named Wrangler configuration in its generated deployment directory. Drag-and-drop static source upload does not deploy the API Worker.
 
 ## Briefing repositories
