@@ -7,6 +7,7 @@ import { searchPolicy } from './searchPolicy.js';
 import { accountClient, accountUser, accountProfile, saveProfile, accountRedirect } from './plasmaAccount.js';
 import { initPlasmaAlerts } from './plasmaAlerts.js';
 import { initQuietSfx } from './quietSfx.js';
+import { initCompactPanels } from './compactPanels.js';
 import './plasmaWorkspace.css';
 
 const el = (tag, value) => { const n = document.createElement(tag); if (value) n.textContent = value; return n; };
@@ -194,5 +195,6 @@ export function initPlasmaWorkspace(app) {
   extra.append(button('God Flow', Workflow, () => { location.assign('/home/'); }));
   const more = button('추가 지도 도구', Ellipsis, () => { const expanded = tools.classList.toggle('tools-expanded'); more.setAttribute('aria-expanded', String(expanded)); });
   more.className = 'plasma-more'; more.setAttribute('aria-expanded', 'false'); tools.append(more);
-  return { notify, showAccount, showBookmarks, search: searchLocation, destroy() { searchController?.abort(); cancelSelection?.(); accountButton.remove(); alerts.destroy(); sfx.destroy(); tools.remove(); dialog.remove(); notice.remove(); clearTimeout(noticeTimer); cleanup(); } };
+  const destroyCompactPanels = initCompactPanels();
+  return { notify, showAccount, showBookmarks, search: searchLocation, destroy() { destroyCompactPanels(); searchController?.abort(); cancelSelection?.(); accountButton.remove(); alerts.destroy(); sfx.destroy(); tools.remove(); dialog.remove(); notice.remove(); clearTimeout(noticeTimer); cleanup(); } };
 }

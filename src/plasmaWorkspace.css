@@ -48,31 +48,54 @@ body #top-center-actions svg { display: block; }
   .plasma-tools.tools-expanded .plasma-extra-tools { display: flex; }
   #plasma-notice { top: 124px; }
 }
-@media (max-width: 760px) {
-  body #top-center-actions { left: 12px; bottom: calc(36px + env(safe-area-inset-bottom)); }
-  body #left-panel-stack { top: 128px; bottom: calc(50vh + 8px); }
-  body #command-dock { bottom: calc(156px + env(safe-area-inset-bottom)); }
-  body #key-setup-chip { top: 244px; right: 12px; bottom: auto; }
-  body #title-bar { max-width: calc(100vw - 140px); }
-  body #title-bar .subtitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .plasma-dialog { max-height: calc(100dvh - 100px); }
-  body #left-panel-stack { right: 12px; left: 12px; width: auto; bottom: auto; max-height: none; display: flex; flex-direction: row; gap: 8px; overflow: visible; }
-  body #left-panel-stack > :is(#data-panel, #scene-panel) { flex: 1 1 0; min-width: 0; width: auto; }
-  body #right-context-rail { top: 182px; bottom: auto; left: 12px; right: 12px; width: auto; max-height: none; display: flex; flex-direction: row; gap: 8px; overflow: visible; }
-  body #right-context-rail > :is(#pp-toggles, #cctv-panel, #global-context-panel) { width: auto; min-width: 0; flex: 1 1 0; }
-  body :is(#left-panel-stack, #right-context-rail) > .collapsed { height: 46px; }
-  body :is(#left-panel-stack, #right-context-rail) .panel-header { padding: 10px; }
-  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).panel-collapsible:not(.collapsed) { position: absolute; top: 54px; left: 0; right: 0; width: 100%; height: min(480px, calc(100dvh - 320px)); max-height: calc(100dvh - 320px); z-index: 148; overflow-y: auto; }
-  body:has(#left-panel-stack > :not(.collapsed)) #right-context-rail { visibility: hidden; }
-  body #world-connect-toggle { top: auto; bottom: calc(36px + env(safe-area-inset-bottom)); right: 12px; }
-  body #right-context-rail { top: 190px; }
-  body :is(#left-panel-stack, #right-context-rail) > .collapsed { overflow: hidden; }
-  body :is(#left-panel-stack, #right-context-rail) .panel-title,
-  body #pp-toggles .pp-header-label { font-size: 11px; letter-spacing: 0; color: #cfd9dc; }
-  body :is(#left-panel-stack, #right-context-rail) .panel-divider { flex: 1 1 0; min-width: 0; }
-  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #cctv-panel, #global-context-panel).collapsed > :is(.data-panel-inner, .scene-panel-inner, .cctv-panel-inner, .global-context-panel-inner) { box-sizing: border-box; padding: 0; height: 44px; min-height: 44px; }
-  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #cctv-panel, #global-context-panel).collapsed .panel-header { box-sizing: border-box; height: 42px; min-height: 42px; margin: 0; padding: 0 10px; gap: 6px; }
-  body #right-context-rail #pp-toggles.collapsed .pp-header-row { box-sizing: border-box; height: 44px; min-height: 44px; margin: 0; padding: 0 10px; gap: 6px; }
-  body :is(#left-panel-stack, #right-context-rail) .panel-collapse-btn { width: 28px; height: 28px; min-width: 28px; flex: 0 0 28px; }
+@media (max-width: 760px), (max-width: 950px) and (max-height: 500px) {
+  body { --compact-map-top: env(safe-area-inset-top, 0px); }
+  body #title-bar { top: calc(12px + var(--compact-map-top)); left: 12px; max-width: calc(100vw - 92px); }
+  body #title-bar h1 { font-size: 15px; letter-spacing: 0; gap: 6px; line-height: 24px; }
+  body #title-bar .title-logo { width: 24px; }
+  body #title-bar .subtitle, body #style-indicator .indicator-label { display: none; }
+  body #style-indicator { top: calc(16px + var(--compact-map-top)); right: 12px; }
+  body #style-indicator .indicator-value { font-size: 12px; letter-spacing: 0; }
+  .plasma-tools { top: calc(48px + var(--compact-map-top)); width: calc(100vw - 24px); max-width: none; gap: 4px; padding: 4px; }
+  .plasma-tools form { min-width: 0; }
+  .plasma-tools input { font-size: 16px; padding: 4px; }
+  .plasma-tools button { width: 32px; min-height: 32px; flex-basis: 32px; padding: 4px; }
+  .plasma-tools svg { width: 16px; height: 16px; }
+  .plasma-extra-tools { gap: 4px; padding: 6px; z-index: 151; }
+  #plasma-notice { top: calc(138px + var(--compact-map-top)); padding: 8px 10px; }
+  body #top-center-actions { left: 12px; bottom: calc(36px + env(safe-area-inset-bottom)); gap: 4px; }
+  body #top-center-actions button { width: 36px; height: 36px; flex-basis: 36px; }
+  body #top-center-actions svg { width: 18px; height: 18px; }
+  body #command-dock { bottom: calc(120px + env(safe-area-inset-bottom)); }
+  body #key-setup-chip { top: calc(142px + var(--compact-map-top)); right: 12px; bottom: auto; }
+  body :is(#left-panel-stack, #right-context-rail) { top: calc(96px + var(--compact-map-top)); bottom: auto; height: 36px; max-height: none; display: grid; gap: 6px; overflow: visible; visibility: visible; }
+  body :is(#left-panel-stack, #right-context-rail):is(.layout-focus, .layout-exclusive, .layout-tail) { height: 36px; max-height: none; }
+  body #left-panel-stack { left: 12px; right: auto; width: calc((100vw - 30px) * .4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  body #right-context-rail { left: auto; right: 12px; width: calc((100vw - 30px) * .6); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).panel-collapsible { grid-row: 1; min-width: 0; width: auto; margin-left: 0; }
+  body #left-panel-stack > #data-panel, body #right-context-rail > #pp-toggles { grid-column: 1; }
+  body #left-panel-stack > #scene-panel, body #right-context-rail > #cctv-panel { grid-column: 2; }
+  body #right-context-rail > #global-context-panel { grid-column: 3; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).collapsed { display: block; position: relative; height: 36px; overflow: hidden; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #cctv-panel, #global-context-panel).collapsed > :is(.data-panel-inner, .scene-panel-inner, .cctv-panel-inner, .global-context-panel-inner) { box-sizing: border-box; padding: 0; height: 36px; min-height: 36px; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).collapsed :is(.panel-header, .pp-header-row) { box-sizing: border-box; height: 34px; min-height: 34px; margin: 0; padding: 0 4px; gap: 0; justify-content: center; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).collapsed :is(.panel-title, .pp-header-label) { min-width: 0; font-size: 12px; line-height: 14px; letter-spacing: 0; color: #eef5f5; text-align: center; white-space: normal; word-break: keep-all; margin: 0; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).collapsed :is(.panel-divider, .panel-mini-status) { display: none; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).collapsed .panel-collapse-btn { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).collapsed:focus-within { outline: 2px solid #00f0ff; outline-offset: 2px; }
   body #global-context-panel.collapsed #context-radio-dock { display: none; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel).panel-collapsible:not(.collapsed) { position: fixed; top: calc(142px + var(--compact-map-top)); left: 12px; right: auto; width: min(340px, calc(100vw - 24px)); height: min(390px, calc(100dvh - 228px - var(--compact-map-top) - env(safe-area-inset-bottom))); max-height: min(390px, calc(100dvh - 228px - var(--compact-map-top) - env(safe-area-inset-bottom))); z-index: 148; overflow-y: auto; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #cctv-panel, #global-context-panel):not(.collapsed) > :is(.data-panel-inner, .scene-panel-inner, .cctv-panel-inner, .global-context-panel-inner) { box-sizing: border-box; height: 100%; max-height: 100%; padding: 10px; background: rgba(8,12,21,.88); }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel):not(.collapsed) .panel-header { min-height: 30px; padding: 0; margin-bottom: 8px; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel):not(.collapsed) .panel-title { font-size: 13px; letter-spacing: 0; color: #eef5f5; }
+  body :is(#left-panel-stack, #right-context-rail) > :is(#data-panel, #scene-panel, #pp-toggles, #cctv-panel, #global-context-panel):not(.collapsed) .panel-collapse-btn { width: 28px; height: 28px; min-width: 28px; flex-basis: 28px; }
+  body #data-panel .data-toggle-meta { font-size: 11px; line-height: 1.5; letter-spacing: 0; color: #c1cdd3; }
+  body #world-connect-toggle { top: auto; bottom: calc(36px + env(safe-area-inset-bottom)); right: 12px; width: 36px; height: 36px; }
+  body:has(:is(#left-panel-stack, #right-context-rail) > :not(.collapsed), #world-connect-panel:not([hidden])) #command-dock { display: none; }
+  .plasma-dialog { width: min(360px, calc(100vw - 24px)); max-height: min(480px, calc(100dvh - 80px)); margin: auto; }
+  .plasma-dialog header { padding: 8px 12px; position: sticky; top: 0; z-index: 1; background: rgba(8,12,21,.96); }
+  .plasma-dialog h2 { font-size: 15px; }
+  .plasma-dialog .pd-body { padding: 12px; }
+  .plasma-dialog p { font-size: 13px; }
+  .plasma-dialog input:not([type=checkbox]), .plasma-dialog select { font-size: 16px; padding: 8px; }
 }
